@@ -1,0 +1,1 @@
+-- No fake auth.users or password seeds. Sign up two users through the app, then use scripts/seed-demo.sql with their real UUIDs.

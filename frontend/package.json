@@ -1,0 +1,31 @@
+{
+  "name": "community-web",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "typecheck": "tsc --noEmit",
+    "api:types": "openapi-typescript ../docs/openapi.json -o src/shared/api/generated-api.ts",
+    "api:types:live": "openapi-typescript http://localhost:8080/v3/api-docs -o src/shared/api/generated-api.ts",
+    "test:db": "node scripts/db-test.mjs",
+    "format": "prettier --write app src scripts next.config.ts"
+  },
+  "dependencies": {
+    "next": "16.4.0",
+    "react": "19.2.4",
+    "react-dom": "19.2.4"
+  },
+  "devDependencies": {
+    "@electric-sql/pglite": "0.5.8",
+    "@electric-sql/pglite-pgvector": "0.0.9",
+    "@types/node": "22.19.15",
+    "@types/react": "19.2.14",
+    "@types/react-dom": "19.2.3",
+    "openapi-typescript": "7.13.0",
+    "prettier": "3.8.3",
+    "typescript": "5.9.3"
+  },
+  "packageManager": "pnpm@12.5.1"
+}

@@ -1,0 +1,23 @@
+export async function authenticate(
+  fields: Record<string, string>,
+  action: "login" | "signup",
+): Promise<{ confirmationRequired?: boolean }> {
+  const response = await fetch("/api/auth", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ ...fields, action }),
+  });
+  const result = await response.json();
+  if (!response.ok)
+    throw new Error(result.message || "로그인 요청을 처리하지 못했습니다");
+  return result;
+}
+export async function logout() {
+  const response = await fetch("/api/auth", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ action: "logout" }),
+  });
+  if (!response.ok)
+    throw new Error("로그아웃을 처리하지 못했습니다. 다시 시도해 주세요.");
+}

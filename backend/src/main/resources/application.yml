@@ -1,0 +1,27 @@
+server:
+  port: 8080
+  error:
+    include-message: never
+spring:
+  jackson:
+    deserialization:
+      fail-on-unknown-properties: true
+  flyway:
+    enabled: ${FLYWAY_ENABLED:false}
+  datasource:
+    url: ${DATABASE_URL}
+    username: ${DATABASE_USER}
+    password: ${DATABASE_PASSWORD}
+  servlet:
+    multipart:
+      max-file-size: 20MB
+      max-request-size: 20MB
+app:
+  issuer: ${SUPABASE_URL}/auth/v1
+  audience: authenticated
+  jwt-secret: ${SUPABASE_JWT_SECRET:}
+  cors: ${CORS_ORIGINS:http://localhost:3000}
+  supabase: ${SUPABASE_URL}
+  storage-key: ${SUPABASE_SERVICE_ROLE_KEY}
+  rag-url: ${RAG_URL:http://localhost:8000}
+  rag-token: ${RAG_INTERNAL_TOKEN}
