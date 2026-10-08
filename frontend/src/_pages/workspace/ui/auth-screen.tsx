@@ -1,10 +1,12 @@
 "use client";
+import { useState } from "react";
 import { authenticate, signInWithGoogle } from "@/features/auth";
 import { values } from "@/shared/lib/form";
 import {
   BrandLogo,
   Button,
   ErrorState,
+  Dialog,
   Icon,
   Tabs,
   TextField,
@@ -14,6 +16,7 @@ import {
 } from "@/shared/ui";
 import type { WorkspaceModel } from "../model/use-workspace";
 export function AuthScreen({ model: m }: { model: WorkspaceModel }) {
+  const [confirmationOpen, setConfirmationOpen] = useState(false);
   return (
     <main className="auth-layout">
       <section className="auth-story">
@@ -111,17 +114,15 @@ export function AuthScreen({ model: m }: { model: WorkspaceModel }) {
           {m.error && <ErrorState message={m.error} />}
           <form
             onSubmit={async (e) => {
+              const form = e.currentTarget;
               const b = values(e);
+              const action = m.authTab === "로그인" ? "login" : "signup";
               await m.run(async () => {
-                const d = await authenticate(
-                  b,
-                  m.authTab === "로그인" ? "login" : "signup",
-                );
-                if (d.confirmationRequired)
-                  m.notify(
-                    "메일의 가입 확인 링크를 눌러 주세요. 확인 후 로그인할 수 있습니다.",
-                  );
-                else await m.loadGroups();
+                const d = await authenticate(b, action);
+                if (action === "signup") form.reset();
+                if (d.confirmationRequired) {
+                  setConfirmationOpen(true);
+                } else await m.loadGroups();
               });
             }}
           >
@@ -155,6 +156,31 @@ export function AuthScreen({ model: m }: { model: WorkspaceModel }) {
           </p>
         </div>
       </section>
+      {confirmationOpen && (
+        <Dialog
+          title="이메일 인증을 확인해 주세요"
+          icon={<MoaAiIcon size={28} />}
+          className="signup-confirmation-dialog"
+          onClose={() => setConfirmationOpen(false)}
+        >
+          <p>가입한 이메일로 받은 확인 메일에서 인증 버튼을 눌러 주세요.</p>
+          <p className="signup-mail-hint">
+            메일이 보이지 않으면 스팸 메일함도 확인해 주세요.
+          </p>
+          <p className="muted">
+            인증을 완료한 후 이메일과 비밀번호로 로그인할 수 있습니다.
+          </p>
+          <Button
+            type="button"
+            onClick={() => {
+              setConfirmationOpen(false);
+              m.setAuthTab("로그인");
+            }}
+          >
+            확인
+          </Button>
+        </Dialog>
+      )}
       <Toast message={m.toast} />
     </main>
   );
