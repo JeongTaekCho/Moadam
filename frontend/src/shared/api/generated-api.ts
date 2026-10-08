@@ -4,2096 +4,2096 @@
  */
 
 export interface paths {
-  "/api/v1/groups/{g}/events/{id}/attendance": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/api/v1/groups/{g}/events/{id}/attendance": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["attendance"];
+        put: operations["attend"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    get: operations["attendance"];
-    put: operations["attend"];
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/me/avatar": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/api/v1/me/avatar": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["upload"];
+        delete: operations["clearAvatar"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    get?: never;
-    put?: never;
-    post: operations["upload"];
-    delete: operations["clearAvatar"];
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/invites/join": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/api/v1/invites/join": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["join"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    get?: never;
-    put?: never;
-    post: operations["join"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/groups": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/api/v1/groups": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["groups"];
+        put?: never;
+        post: operations["createGroup"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    get: operations["groups"];
-    put?: never;
-    post: operations["createGroup"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/groups/{g}/posts": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/api/v1/groups/{g}/posts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["posts"];
+        put?: never;
+        post: operations["createPost"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    get: operations["posts"];
-    put?: never;
-    post: operations["createPost"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/groups/{g}/posts/{p}/comments": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/api/v1/groups/{g}/posts/{p}/comments": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["comments"];
+        put?: never;
+        post: operations["comment"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    get: operations["comments"];
-    put?: never;
-    post: operations["comment"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/groups/{g}/invites": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/api/v1/groups/{g}/invites": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["invites"];
+        put?: never;
+        post: operations["invite"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    get: operations["invites"];
-    put?: never;
-    post: operations["invite"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/groups/{g}/events": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/api/v1/groups/{g}/events": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["events"];
+        put?: never;
+        post: operations["createEvent"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    get: operations["events"];
-    put?: never;
-    post: operations["createEvent"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/groups/{g}/documents": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/api/v1/groups/{g}/documents": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["documents"];
+        put?: never;
+        post: operations["memo"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    get: operations["documents"];
-    put?: never;
-    post: operations["memo"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/groups/{g}/documents/{id}/complete": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/api/v1/groups/{g}/documents/{id}/complete": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["index"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    get?: never;
-    put?: never;
-    post: operations["index"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/groups/{g}/documents/{id}/index": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/api/v1/groups/{g}/documents/{id}/index": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["index_1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    get?: never;
-    put?: never;
-    post: operations["index_1"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/groups/{g}/documents/uploads": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/api/v1/groups/{g}/documents/uploads": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["upload_1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    get?: never;
-    put?: never;
-    post: operations["upload_1"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/groups/{g}/chat/sessions": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/api/v1/groups/{g}/chat/sessions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["sessions"];
+        put?: never;
+        post: operations["createSession"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    get: operations["sessions"];
-    put?: never;
-    post: operations["createSession"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/groups/{g}/chat/sessions/{id}/messages": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/api/v1/groups/{g}/chat/sessions/{id}/messages": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["messages"];
+        put?: never;
+        post: operations["ask"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    get: operations["messages"];
-    put?: never;
-    post: operations["ask"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/groups/{g}/chat/sessions/{id}/messages/stream": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/api/v1/groups/{g}/chat/sessions/{id}/messages/stream": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["askStream"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    get?: never;
-    put?: never;
-    post: operations["ask_1"];
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/me": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/api/v1/me": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["me"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch: operations["update"];
+        trace?: never;
     };
-    get: operations["me"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch: operations["update"];
-    trace?: never;
-  };
-  "/api/v1/groups/{g}": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/api/v1/groups/{g}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["group"];
+        put?: never;
+        post?: never;
+        delete: operations["deleteGroup"];
+        options?: never;
+        head?: never;
+        patch: operations["updateGroup"];
+        trace?: never;
     };
-    get: operations["group"];
-    put?: never;
-    post?: never;
-    delete: operations["deleteGroup"];
-    options?: never;
-    head?: never;
-    patch: operations["updateGroup"];
-    trace?: never;
-  };
-  "/api/v1/groups/{g}/posts/{p}/comments/{id}": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/api/v1/groups/{g}/posts/{p}/comments/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete: operations["deleteComment"];
+        options?: never;
+        head?: never;
+        patch: operations["updateComment"];
+        trace?: never;
     };
-    get?: never;
-    put?: never;
-    post?: never;
-    delete: operations["deleteComment"];
-    options?: never;
-    head?: never;
-    patch: operations["updateComment"];
-    trace?: never;
-  };
-  "/api/v1/groups/{g}/posts/{id}": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/api/v1/groups/{g}/posts/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["post"];
+        put?: never;
+        post?: never;
+        delete: operations["deletePost"];
+        options?: never;
+        head?: never;
+        patch: operations["updatePost"];
+        trace?: never;
     };
-    get: operations["post"];
-    put?: never;
-    post?: never;
-    delete: operations["deletePost"];
-    options?: never;
-    head?: never;
-    patch: operations["updatePost"];
-    trace?: never;
-  };
-  "/api/v1/groups/{g}/members/{id}": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/api/v1/groups/{g}/members/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete: operations["remove"];
+        options?: never;
+        head?: never;
+        patch: operations["role"];
+        trace?: never;
     };
-    get?: never;
-    put?: never;
-    post?: never;
-    delete: operations["remove"];
-    options?: never;
-    head?: never;
-    patch: operations["role"];
-    trace?: never;
-  };
-  "/api/v1/groups/{g}/events/{id}": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/api/v1/groups/{g}/events/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["event"];
+        put?: never;
+        post?: never;
+        delete: operations["deleteEvent"];
+        options?: never;
+        head?: never;
+        patch: operations["updateEvent"];
+        trace?: never;
     };
-    get: operations["event"];
-    put?: never;
-    post?: never;
-    delete: operations["deleteEvent"];
-    options?: never;
-    head?: never;
-    patch: operations["updateEvent"];
-    trace?: never;
-  };
-  "/api/v1/groups/{g}/documents/{id}": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/api/v1/groups/{g}/documents/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["document"];
+        put?: never;
+        post?: never;
+        delete: operations["deleteDocument"];
+        options?: never;
+        head?: never;
+        patch: operations["updateDocument"];
+        trace?: never;
     };
-    get: operations["document"];
-    put?: never;
-    post?: never;
-    delete: operations["deleteDocument"];
-    options?: never;
-    head?: never;
-    patch: operations["updateDocument"];
-    trace?: never;
-  };
-  "/api/v1/profiles/{id}/avatar": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/api/v1/profiles/{id}/avatar": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["avatar"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    get: operations["avatar"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/me/activity": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/api/v1/me/activity": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["activity"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    get: operations["activity"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/groups/{g}/members": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/api/v1/groups/{g}/members": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["members"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    get: operations["members"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/groups/{g}/documents/{id}/download": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/api/v1/groups/{g}/documents/{id}/download": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["download"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    get: operations["download"];
-    put?: never;
-    post?: never;
-    delete?: never;
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/groups/{g}/chat/sessions/{id}": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/api/v1/groups/{g}/chat/sessions/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["session"];
+        put?: never;
+        post?: never;
+        delete: operations["deleteSession"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    get: operations["session"];
-    put?: never;
-    post?: never;
-    delete: operations["deleteSession"];
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/groups/{g}/membership": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/api/v1/groups/{g}/membership": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete: operations["leave"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    get?: never;
-    put?: never;
-    post?: never;
-    delete: operations["leave"];
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
-  "/api/v1/groups/{g}/invites/{id}": {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
+    "/api/v1/groups/{g}/invites/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete: operations["revoke"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
     };
-    get?: never;
-    put?: never;
-    post?: never;
-    delete: operations["revoke"];
-    options?: never;
-    head?: never;
-    patch?: never;
-    trace?: never;
-  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
-  schemas: {
-    AttendanceInput: {
-      status: string;
+    schemas: {
+        AttendanceInput: {
+            status: string;
+        };
+        MyProfile: {
+            /** Format: uuid */
+            id: string;
+            email: string;
+            display_name: string;
+            avatar_url: string | null;
+            /** Format: date-time */
+            created_at: string;
+            /** Format: date-time */
+            updated_at: string;
+        };
+        JoinInput: {
+            token: string;
+        };
+        Group: {
+            /** Format: uuid */
+            id: string;
+            name: string;
+            timezone: string;
+            /** @enum {string} */
+            role: "owner" | "admin" | "member";
+            /** Format: date-time */
+            created_at: string;
+            /** Format: date-time */
+            updated_at: string;
+        };
+        GroupInput: {
+            name: string;
+            timezone: string;
+        };
+        PostInput: {
+            title: string;
+            body: string;
+            kind: string;
+        };
+        Post: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            group_id: string;
+            /** Format: uuid */
+            author_id: string;
+            author: components["schemas"]["PublicProfile"];
+            title: string;
+            body: string;
+            /** @enum {string} */
+            kind: "general" | "question" | "notice";
+            /** Format: date-time */
+            created_at: string;
+            /** Format: date-time */
+            updated_at: string;
+        };
+        PublicProfile: {
+            /** Format: uuid */
+            id: string;
+            display_name: string;
+            avatar_url: string | null;
+        };
+        CommentInput: {
+            body: string;
+        };
+        Comment: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            group_id: string;
+            /** Format: uuid */
+            post_id: string;
+            /** Format: uuid */
+            author_id: string;
+            author: components["schemas"]["PublicProfile"];
+            body: string;
+            /** Format: date-time */
+            created_at: string;
+            /** Format: date-time */
+            updated_at: string;
+        };
+        EventInput: {
+            title: string;
+            description?: string;
+            location?: string;
+            /** Format: date-time */
+            starts_at: string;
+            /** Format: date-time */
+            ends_at: string;
+        };
+        Event: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            group_id: string;
+            /** Format: uuid */
+            author_id: string;
+            author: components["schemas"]["PublicProfile"];
+            title: string;
+            description: string;
+            location: string;
+            /** Format: date-time */
+            starts_at: string;
+            /** Format: date-time */
+            ends_at: string;
+            /** Format: date-time */
+            created_at: string;
+            /** Format: date-time */
+            updated_at: string;
+        };
+        MemoInput: {
+            title: string;
+            kind: string;
+            text: string;
+        };
+        Document: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            group_id: string;
+            /** Format: uuid */
+            author_id: string;
+            author: components["schemas"]["PublicProfile"];
+            title: string;
+            /** @enum {string} */
+            kind: "pdf" | "memo";
+            text_content: string | null;
+            /** @enum {string} */
+            status: "pending" | "processing" | "ready" | "failed";
+            error_code: string | null;
+            /** Format: int32 */
+            version: number;
+            /** Format: int64 */
+            size_bytes: number | null;
+            /** Format: date-time */
+            created_at: string;
+            /** Format: date-time */
+            updated_at: string;
+        };
+        UploadInput: {
+            title: string;
+            filename: string;
+            mime: string;
+            /** Format: int64 */
+            size?: number;
+        };
+        Upload: {
+            document: components["schemas"]["Document"];
+            upload_url: string;
+            /** Format: int32 */
+            expires_in: number;
+        };
+        SessionInput: {
+            title: string;
+        };
+        Session: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            group_id: string;
+            /** Format: uuid */
+            user_id: string;
+            title: string;
+            /** Format: date-time */
+            created_at: string;
+        };
+        QuestionInput: {
+            question: string;
+        };
+        Answer: {
+            answer: string;
+            citations: components["schemas"]["Citation"][];
+            grounded: boolean;
+            /** Format: double */
+            confidence: number;
+            provider: string;
+            retrieval: {
+                [key: string]: unknown;
+            };
+            /** Format: uuid */
+            request_id: string;
+        };
+        Citation: {
+            /** Format: uuid */
+            document_id: string;
+            title: string;
+            /** Format: int32 */
+            page: number | null;
+            /** Format: uuid */
+            chunk_id: string;
+        };
+        StreamingResponseBody: unknown;
+        ProfileInput: {
+            display_name: string;
+        };
+        RoleInput: {
+            role: string;
+        };
+        DocumentInput: {
+            title: string;
+            text?: string;
+        };
+        MyActivity: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            group_id: string;
+            group_name: string;
+            title: string;
+            kind: string;
+            /** Format: date-time */
+            created_at: string;
+        };
+        PageMyActivity: {
+            items?: components["schemas"]["MyActivity"][];
+            /** Format: int32 */
+            page?: number;
+            /** Format: int32 */
+            size?: number;
+            /** Format: int64 */
+            total?: number;
+        };
+        PageGroup: {
+            items?: components["schemas"]["Group"][];
+            /** Format: int32 */
+            page?: number;
+            /** Format: int32 */
+            size?: number;
+            /** Format: int64 */
+            total?: number;
+        };
+        PagePost: {
+            items?: components["schemas"]["Post"][];
+            /** Format: int32 */
+            page?: number;
+            /** Format: int32 */
+            size?: number;
+            /** Format: int64 */
+            total?: number;
+        };
+        PageComment: {
+            items?: components["schemas"]["Comment"][];
+            /** Format: int32 */
+            page?: number;
+            /** Format: int32 */
+            size?: number;
+            /** Format: int64 */
+            total?: number;
+        };
+        Member: {
+            /** Format: uuid */
+            group_id: string;
+            /** Format: uuid */
+            user_id: string;
+            profile: components["schemas"]["PublicProfile"];
+            /** @enum {string} */
+            role: "owner" | "admin" | "member";
+            /** Format: date-time */
+            created_at: string;
+        };
+        PageMember: {
+            items?: components["schemas"]["Member"][];
+            /** Format: int32 */
+            page?: number;
+            /** Format: int32 */
+            size?: number;
+            /** Format: int64 */
+            total?: number;
+        };
+        Invite: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            group_id: string;
+            /** Format: date-time */
+            expires_at: string;
+            /** Format: date-time */
+            used_at: string | null;
+            /** Format: date-time */
+            revoked_at: string | null;
+            /** Format: date-time */
+            created_at: string;
+        };
+        PageInvite: {
+            items?: components["schemas"]["Invite"][];
+            /** Format: int32 */
+            page?: number;
+            /** Format: int32 */
+            size?: number;
+            /** Format: int64 */
+            total?: number;
+        };
+        PageEvent: {
+            items?: components["schemas"]["Event"][];
+            /** Format: int32 */
+            page?: number;
+            /** Format: int32 */
+            size?: number;
+            /** Format: int64 */
+            total?: number;
+        };
+        PageDocument: {
+            items?: components["schemas"]["Document"][];
+            /** Format: int32 */
+            page?: number;
+            /** Format: int32 */
+            size?: number;
+            /** Format: int64 */
+            total?: number;
+        };
+        PageSession: {
+            items?: components["schemas"]["Session"][];
+            /** Format: int32 */
+            page?: number;
+            /** Format: int32 */
+            size?: number;
+            /** Format: int64 */
+            total?: number;
+        };
+        Message: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            group_id: string;
+            /** Format: uuid */
+            session_id: string;
+            /** @enum {string} */
+            role: "user" | "assistant";
+            content: string;
+            citations: components["schemas"]["Citation"][];
+            grounded: boolean;
+            /** Format: date-time */
+            created_at: string;
+        };
+        PageMessage: {
+            items?: components["schemas"]["Message"][];
+            /** Format: int32 */
+            page?: number;
+            /** Format: int32 */
+            size?: number;
+            /** Format: int64 */
+            total?: number;
+        };
     };
-    MyProfile: {
-      /** Format: uuid */
-      id: string;
-      email: string;
-      display_name: string;
-      avatar_url: string | null;
-      /** Format: date-time */
-      created_at: string;
-      /** Format: date-time */
-      updated_at: string;
-    };
-    JoinInput: {
-      token: string;
-    };
-    Group: {
-      /** Format: uuid */
-      id: string;
-      name: string;
-      timezone: string;
-      /** @enum {string} */
-      role: "owner" | "admin" | "member";
-      /** Format: date-time */
-      created_at: string;
-      /** Format: date-time */
-      updated_at: string;
-    };
-    GroupInput: {
-      name: string;
-      timezone: string;
-    };
-    PostInput: {
-      title: string;
-      body: string;
-      kind: string;
-    };
-    Post: {
-      /** Format: uuid */
-      id: string;
-      /** Format: uuid */
-      group_id: string;
-      /** Format: uuid */
-      author_id: string;
-      author: components["schemas"]["PublicProfile"];
-      title: string;
-      body: string;
-      /** @enum {string} */
-      kind: "general" | "question" | "notice";
-      /** Format: date-time */
-      created_at: string;
-      /** Format: date-time */
-      updated_at: string;
-    };
-    PublicProfile: {
-      /** Format: uuid */
-      id: string;
-      display_name: string;
-      avatar_url: string | null;
-    };
-    CommentInput: {
-      body: string;
-    };
-    Comment: {
-      /** Format: uuid */
-      id: string;
-      /** Format: uuid */
-      group_id: string;
-      /** Format: uuid */
-      post_id: string;
-      /** Format: uuid */
-      author_id: string;
-      author: components["schemas"]["PublicProfile"];
-      body: string;
-      /** Format: date-time */
-      created_at: string;
-      /** Format: date-time */
-      updated_at: string;
-    };
-    EventInput: {
-      title: string;
-      description?: string;
-      location?: string;
-      /** Format: date-time */
-      starts_at: string;
-      /** Format: date-time */
-      ends_at: string;
-    };
-    Event: {
-      /** Format: uuid */
-      id: string;
-      /** Format: uuid */
-      group_id: string;
-      /** Format: uuid */
-      author_id: string;
-      author: components["schemas"]["PublicProfile"];
-      title: string;
-      description: string;
-      location: string;
-      /** Format: date-time */
-      starts_at: string;
-      /** Format: date-time */
-      ends_at: string;
-      /** Format: date-time */
-      created_at: string;
-      /** Format: date-time */
-      updated_at: string;
-    };
-    MemoInput: {
-      title: string;
-      kind: string;
-      text: string;
-    };
-    Document: {
-      /** Format: uuid */
-      id: string;
-      /** Format: uuid */
-      group_id: string;
-      /** Format: uuid */
-      author_id: string;
-      author: components["schemas"]["PublicProfile"];
-      title: string;
-      /** @enum {string} */
-      kind: "pdf" | "memo";
-      text_content: string | null;
-      /** @enum {string} */
-      status: "pending" | "processing" | "ready" | "failed";
-      error_code: string | null;
-      /** Format: int32 */
-      version: number;
-      /** Format: int64 */
-      size_bytes: number | null;
-      /** Format: date-time */
-      created_at: string;
-      /** Format: date-time */
-      updated_at: string;
-    };
-    UploadInput: {
-      title: string;
-      filename: string;
-      mime: string;
-      /** Format: int64 */
-      size?: number;
-    };
-    Upload: {
-      document: components["schemas"]["Document"];
-      upload_url: string;
-      /** Format: int32 */
-      expires_in: number;
-    };
-    SessionInput: {
-      title: string;
-    };
-    Session: {
-      /** Format: uuid */
-      id: string;
-      /** Format: uuid */
-      group_id: string;
-      /** Format: uuid */
-      user_id: string;
-      title: string;
-      /** Format: date-time */
-      created_at: string;
-    };
-    QuestionInput: {
-      question: string;
-    };
-    Answer: {
-      answer: string;
-      citations: components["schemas"]["Citation"][];
-      grounded: boolean;
-      /** Format: double */
-      confidence: number;
-      provider: string;
-      retrieval: {
-        [key: string]: unknown;
-      };
-      /** Format: uuid */
-      request_id: string;
-    };
-    Citation: {
-      /** Format: uuid */
-      document_id: string;
-      title: string;
-      /** Format: int32 */
-      page: number | null;
-      /** Format: uuid */
-      chunk_id: string;
-    };
-    StreamingResponseBody: unknown;
-    ProfileInput: {
-      display_name: string;
-    };
-    RoleInput: {
-      role: string;
-    };
-    DocumentInput: {
-      title: string;
-      text?: string;
-    };
-    MyActivity: {
-      /** Format: uuid */
-      id: string;
-      /** Format: uuid */
-      group_id: string;
-      group_name: string;
-      title: string;
-      kind: string;
-      /** Format: date-time */
-      created_at: string;
-    };
-    PageMyActivity: {
-      items?: components["schemas"]["MyActivity"][];
-      /** Format: int32 */
-      page?: number;
-      /** Format: int32 */
-      size?: number;
-      /** Format: int64 */
-      total?: number;
-    };
-    PageGroup: {
-      items?: components["schemas"]["Group"][];
-      /** Format: int32 */
-      page?: number;
-      /** Format: int32 */
-      size?: number;
-      /** Format: int64 */
-      total?: number;
-    };
-    PagePost: {
-      items?: components["schemas"]["Post"][];
-      /** Format: int32 */
-      page?: number;
-      /** Format: int32 */
-      size?: number;
-      /** Format: int64 */
-      total?: number;
-    };
-    PageComment: {
-      items?: components["schemas"]["Comment"][];
-      /** Format: int32 */
-      page?: number;
-      /** Format: int32 */
-      size?: number;
-      /** Format: int64 */
-      total?: number;
-    };
-    Member: {
-      /** Format: uuid */
-      group_id: string;
-      /** Format: uuid */
-      user_id: string;
-      profile: components["schemas"]["PublicProfile"];
-      /** @enum {string} */
-      role: "owner" | "admin" | "member";
-      /** Format: date-time */
-      created_at: string;
-    };
-    PageMember: {
-      items?: components["schemas"]["Member"][];
-      /** Format: int32 */
-      page?: number;
-      /** Format: int32 */
-      size?: number;
-      /** Format: int64 */
-      total?: number;
-    };
-    Invite: {
-      /** Format: uuid */
-      id: string;
-      /** Format: uuid */
-      group_id: string;
-      /** Format: date-time */
-      expires_at: string;
-      /** Format: date-time */
-      used_at: string | null;
-      /** Format: date-time */
-      revoked_at: string | null;
-      /** Format: date-time */
-      created_at: string;
-    };
-    PageInvite: {
-      items?: components["schemas"]["Invite"][];
-      /** Format: int32 */
-      page?: number;
-      /** Format: int32 */
-      size?: number;
-      /** Format: int64 */
-      total?: number;
-    };
-    PageEvent: {
-      items?: components["schemas"]["Event"][];
-      /** Format: int32 */
-      page?: number;
-      /** Format: int32 */
-      size?: number;
-      /** Format: int64 */
-      total?: number;
-    };
-    PageDocument: {
-      items?: components["schemas"]["Document"][];
-      /** Format: int32 */
-      page?: number;
-      /** Format: int32 */
-      size?: number;
-      /** Format: int64 */
-      total?: number;
-    };
-    PageSession: {
-      items?: components["schemas"]["Session"][];
-      /** Format: int32 */
-      page?: number;
-      /** Format: int32 */
-      size?: number;
-      /** Format: int64 */
-      total?: number;
-    };
-    Message: {
-      /** Format: uuid */
-      id: string;
-      /** Format: uuid */
-      group_id: string;
-      /** Format: uuid */
-      session_id: string;
-      /** @enum {string} */
-      role: "user" | "assistant";
-      content: string;
-      citations: components["schemas"]["Citation"][];
-      grounded: boolean;
-      /** Format: date-time */
-      created_at: string;
-    };
-    PageMessage: {
-      items?: components["schemas"]["Message"][];
-      /** Format: int32 */
-      page?: number;
-      /** Format: int32 */
-      size?: number;
-      /** Format: int64 */
-      total?: number;
-    };
-  };
-  responses: never;
-  parameters: never;
-  requestBodies: never;
-  headers: never;
-  pathItems: never;
+    responses: never;
+    parameters: never;
+    requestBodies: never;
+    headers: never;
+    pathItems: never;
 }
 export type $defs = Record<string, never>;
 export interface operations {
-  attendance: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        g: string;
-        id: string;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description OK */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "*/*": {
-            [key: string]: unknown;
-          }[];
-        };
-      };
-    };
-  };
-  attend: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        g: string;
-        id: string;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["AttendanceInput"];
-      };
-    };
-    responses: {
-      /** @description OK */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "*/*": {
-            [key: string]: boolean;
-          };
-        };
-      };
-    };
-  };
-  upload: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: {
-      content: {
-        "multipart/form-data": {
-          /** Format: binary */
-          file: string;
-        };
-      };
-    };
-    responses: {
-      /** @description OK */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "*/*": components["schemas"]["MyProfile"];
-        };
-      };
-    };
-  };
-  clearAvatar: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description OK */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "*/*": components["schemas"]["MyProfile"];
-        };
-      };
-    };
-  };
-  join: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["JoinInput"];
-      };
-    };
-    responses: {
-      /** @description OK */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "*/*": components["schemas"]["Group"];
-        };
-      };
-    };
-  };
-  groups: {
-    parameters: {
-      query?: {
-        page?: number;
-        size?: number;
-      };
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description OK */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "*/*": components["schemas"]["PageGroup"];
-        };
-      };
-    };
-  };
-  createGroup: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["GroupInput"];
-      };
-    };
-    responses: {
-      /** @description OK */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "*/*": components["schemas"]["Group"];
-        };
-      };
-    };
-  };
-  posts: {
-    parameters: {
-      query?: {
-        page?: number;
-        size?: number;
-      };
-      header?: never;
-      path: {
-        g: string;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description OK */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "*/*": components["schemas"]["PagePost"];
-        };
-      };
-    };
-  };
-  createPost: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        g: string;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["PostInput"];
-      };
-    };
-    responses: {
-      /** @description OK */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "*/*": components["schemas"]["Post"];
-        };
-      };
-    };
-  };
-  comments: {
-    parameters: {
-      query?: {
-        page?: number;
-        size?: number;
-      };
-      header?: never;
-      path: {
-        g: string;
-        p: string;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description OK */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "*/*": components["schemas"]["PageComment"];
-        };
-      };
-    };
-  };
-  comment: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        g: string;
-        p: string;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["CommentInput"];
-      };
-    };
-    responses: {
-      /** @description OK */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "*/*": components["schemas"]["Comment"];
-        };
-      };
-    };
-  };
-  invites: {
-    parameters: {
-      query?: {
-        page?: number;
-        size?: number;
-      };
-      header?: never;
-      path: {
-        g: string;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description OK */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "*/*": components["schemas"]["PageInvite"];
-        };
-      };
-    };
-  };
-  invite: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        g: string;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description OK */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "*/*": {
-            [key: string]: unknown;
-          };
-        };
-      };
-    };
-  };
-  events: {
-    parameters: {
-      query?: {
-        page?: number;
-        size?: number;
-        from?: string;
-      };
-      header?: never;
-      path: {
-        g: string;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description OK */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "*/*": components["schemas"]["PageEvent"];
-        };
-      };
-    };
-  };
-  createEvent: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        g: string;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["EventInput"];
-      };
-    };
-    responses: {
-      /** @description OK */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "*/*": components["schemas"]["Event"];
-        };
-      };
-    };
-  };
-  documents: {
-    parameters: {
-      query?: {
-        page?: number;
-        size?: number;
-      };
-      header?: never;
-      path: {
-        g: string;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description OK */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "*/*": components["schemas"]["PageDocument"];
-        };
-      };
-    };
-  };
-  memo: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        g: string;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["MemoInput"];
-      };
-    };
-    responses: {
-      /** @description OK */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "*/*": components["schemas"]["Document"];
-        };
-      };
-    };
-  };
-  index: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        g: string;
-        id: string;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description OK */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "*/*": components["schemas"]["Document"];
-        };
-      };
-    };
-  };
-  index_1: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        g: string;
-        id: string;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description OK */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "*/*": components["schemas"]["Document"];
-        };
-      };
-    };
-  };
-  upload_1: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        g: string;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["UploadInput"];
-      };
-    };
-    responses: {
-      /** @description OK */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "*/*": components["schemas"]["Upload"];
-        };
-      };
-    };
-  };
-  sessions: {
-    parameters: {
-      query?: {
-        page?: number;
-        size?: number;
-      };
-      header?: never;
-      path: {
-        g: string;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description OK */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "*/*": components["schemas"]["PageSession"];
-        };
-      };
-    };
-  };
-  createSession: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        g: string;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["SessionInput"];
-      };
-    };
-    responses: {
-      /** @description OK */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "*/*": components["schemas"]["Session"];
-        };
-      };
-    };
-  };
-  messages: {
-    parameters: {
-      query?: {
-        page?: number;
-        size?: number;
-      };
-      header?: never;
-      path: {
-        g: string;
-        id: string;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description OK */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "*/*": components["schemas"]["PageMessage"];
-        };
-      };
-    };
-  };
-  ask: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        g: string;
-        id: string;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["QuestionInput"];
-      };
-    };
-    responses: {
-      /** @description OK */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "*/*": components["schemas"]["Answer"];
-        };
-      };
-    };
-  };
-  ask_1: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        g: string;
-        id: string;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["QuestionInput"];
-      };
-    };
-    responses: {
-      /** @description OK */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "application/x-ndjson": components["schemas"]["StreamingResponseBody"];
-        };
-      };
-    };
-  };
-  me: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description OK */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "*/*": components["schemas"]["MyProfile"];
-        };
-      };
-    };
-  };
-  update: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["ProfileInput"];
-      };
-    };
-    responses: {
-      /** @description OK */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "*/*": components["schemas"]["MyProfile"];
-        };
-      };
-    };
-  };
-  group: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        g: string;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description OK */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "*/*": components["schemas"]["Group"];
-        };
-      };
-    };
-  };
-  deleteGroup: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        g: string;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description OK */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "*/*": {
-            [key: string]: boolean;
-          };
-        };
-      };
-    };
-  };
-  updateGroup: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        g: string;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["GroupInput"];
-      };
-    };
-    responses: {
-      /** @description OK */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "*/*": components["schemas"]["Group"];
-        };
-      };
-    };
-  };
-  deleteComment: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        g: string;
-        p: string;
-        id: string;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description OK */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "*/*": {
-            [key: string]: boolean;
-          };
-        };
-      };
-    };
-  };
-  updateComment: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        g: string;
-        p: string;
-        id: string;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["CommentInput"];
-      };
-    };
-    responses: {
-      /** @description OK */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "*/*": components["schemas"]["Comment"];
-        };
-      };
-    };
-  };
-  post: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        g: string;
-        id: string;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description OK */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "*/*": components["schemas"]["Post"];
-        };
-      };
-    };
-  };
-  deletePost: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        g: string;
-        id: string;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description OK */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "*/*": {
-            [key: string]: boolean;
-          };
-        };
-      };
-    };
-  };
-  updatePost: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        g: string;
-        id: string;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["PostInput"];
-      };
-    };
-    responses: {
-      /** @description OK */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "*/*": components["schemas"]["Post"];
-        };
-      };
-    };
-  };
-  remove: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        g: string;
-        id: string;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description OK */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "*/*": {
-            [key: string]: boolean;
-          };
-        };
-      };
-    };
-  };
-  role: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        g: string;
-        id: string;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["RoleInput"];
-      };
-    };
-    responses: {
-      /** @description OK */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "*/*": {
-            [key: string]: boolean;
-          };
-        };
-      };
-    };
-  };
-  event: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        g: string;
-        id: string;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description OK */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "*/*": components["schemas"]["Event"];
-        };
-      };
-    };
-  };
-  deleteEvent: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        g: string;
-        id: string;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description OK */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "*/*": {
-            [key: string]: boolean;
-          };
-        };
-      };
-    };
-  };
-  updateEvent: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        g: string;
-        id: string;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["EventInput"];
-      };
-    };
-    responses: {
-      /** @description OK */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "*/*": components["schemas"]["Event"];
-        };
-      };
-    };
-  };
-  document: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        g: string;
-        id: string;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description OK */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "*/*": components["schemas"]["Document"];
-        };
-      };
-    };
-  };
-  deleteDocument: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        g: string;
-        id: string;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description OK */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "*/*": {
-            [key: string]: boolean;
-          };
-        };
-      };
-    };
-  };
-  updateDocument: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        g: string;
-        id: string;
-      };
-      cookie?: never;
-    };
-    requestBody: {
-      content: {
-        "application/json": components["schemas"]["DocumentInput"];
-      };
-    };
-    responses: {
-      /** @description OK */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "*/*": components["schemas"]["Document"];
-        };
-      };
-    };
-  };
-  avatar: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        id: string;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description OK */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "*/*": string;
-        };
-      };
-    };
-  };
-  activity: {
-    parameters: {
-      query?: {
-        type?: string;
-        page?: number;
-        size?: number;
-      };
-      header?: never;
-      path?: never;
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description OK */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "*/*": components["schemas"]["PageMyActivity"];
-        };
-      };
-    };
-  };
-  members: {
-    parameters: {
-      query?: {
-        page?: number;
-        size?: number;
-      };
-      header?: never;
-      path: {
-        g: string;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description OK */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "*/*": components["schemas"]["PageMember"];
-        };
-      };
-    };
-  };
-  download: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        g: string;
-        id: string;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description OK */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "*/*": {
-            [key: string]: string;
-          };
-        };
-      };
-    };
-  };
-  session: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        g: string;
-        id: string;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description OK */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "*/*": components["schemas"]["Session"];
-        };
-      };
-    };
-  };
-  deleteSession: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        g: string;
-        id: string;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description OK */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "*/*": {
-            [key: string]: boolean;
-          };
-        };
-      };
-    };
-  };
-  leave: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        g: string;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description OK */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "*/*": {
-            [key: string]: boolean;
-          };
-        };
-      };
-    };
-  };
-  revoke: {
-    parameters: {
-      query?: never;
-      header?: never;
-      path: {
-        g: string;
-        id: string;
-      };
-      cookie?: never;
-    };
-    requestBody?: never;
-    responses: {
-      /** @description OK */
-      200: {
-        headers: {
-          [name: string]: unknown;
-        };
-        content: {
-          "*/*": {
-            [key: string]: boolean;
-          };
-        };
-      };
-    };
-  };
+    attendance: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                g: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": {
+                        [key: string]: unknown;
+                    }[];
+                };
+            };
+        };
+    };
+    attend: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                g: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AttendanceInput"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": {
+                        [key: string]: boolean;
+                    };
+                };
+            };
+        };
+    };
+    upload: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "multipart/form-data": {
+                    /** Format: binary */
+                    file: string;
+                };
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["MyProfile"];
+                };
+            };
+        };
+    };
+    clearAvatar: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["MyProfile"];
+                };
+            };
+        };
+    };
+    join: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["JoinInput"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["Group"];
+                };
+            };
+        };
+    };
+    groups: {
+        parameters: {
+            query?: {
+                page?: number;
+                size?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PageGroup"];
+                };
+            };
+        };
+    };
+    createGroup: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["GroupInput"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["Group"];
+                };
+            };
+        };
+    };
+    posts: {
+        parameters: {
+            query?: {
+                page?: number;
+                size?: number;
+            };
+            header?: never;
+            path: {
+                g: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PagePost"];
+                };
+            };
+        };
+    };
+    createPost: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                g: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PostInput"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["Post"];
+                };
+            };
+        };
+    };
+    comments: {
+        parameters: {
+            query?: {
+                page?: number;
+                size?: number;
+            };
+            header?: never;
+            path: {
+                g: string;
+                p: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PageComment"];
+                };
+            };
+        };
+    };
+    comment: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                g: string;
+                p: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CommentInput"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["Comment"];
+                };
+            };
+        };
+    };
+    invites: {
+        parameters: {
+            query?: {
+                page?: number;
+                size?: number;
+            };
+            header?: never;
+            path: {
+                g: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PageInvite"];
+                };
+            };
+        };
+    };
+    invite: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                g: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    events: {
+        parameters: {
+            query?: {
+                page?: number;
+                size?: number;
+                from?: string;
+            };
+            header?: never;
+            path: {
+                g: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PageEvent"];
+                };
+            };
+        };
+    };
+    createEvent: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                g: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EventInput"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["Event"];
+                };
+            };
+        };
+    };
+    documents: {
+        parameters: {
+            query?: {
+                page?: number;
+                size?: number;
+            };
+            header?: never;
+            path: {
+                g: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PageDocument"];
+                };
+            };
+        };
+    };
+    memo: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                g: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MemoInput"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["Document"];
+                };
+            };
+        };
+    };
+    index: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                g: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["Document"];
+                };
+            };
+        };
+    };
+    index_1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                g: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["Document"];
+                };
+            };
+        };
+    };
+    upload_1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                g: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UploadInput"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["Upload"];
+                };
+            };
+        };
+    };
+    sessions: {
+        parameters: {
+            query?: {
+                page?: number;
+                size?: number;
+            };
+            header?: never;
+            path: {
+                g: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PageSession"];
+                };
+            };
+        };
+    };
+    createSession: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                g: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SessionInput"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["Session"];
+                };
+            };
+        };
+    };
+    messages: {
+        parameters: {
+            query?: {
+                page?: number;
+                size?: number;
+            };
+            header?: never;
+            path: {
+                g: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PageMessage"];
+                };
+            };
+        };
+    };
+    ask: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                g: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["QuestionInput"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["Answer"];
+                };
+            };
+        };
+    };
+    askStream: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                g: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["QuestionInput"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/x-ndjson": components["schemas"]["StreamingResponseBody"];
+                };
+            };
+        };
+    };
+    me: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["MyProfile"];
+                };
+            };
+        };
+    };
+    update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ProfileInput"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["MyProfile"];
+                };
+            };
+        };
+    };
+    group: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                g: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["Group"];
+                };
+            };
+        };
+    };
+    deleteGroup: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                g: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": {
+                        [key: string]: boolean;
+                    };
+                };
+            };
+        };
+    };
+    updateGroup: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                g: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["GroupInput"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["Group"];
+                };
+            };
+        };
+    };
+    deleteComment: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                g: string;
+                p: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": {
+                        [key: string]: boolean;
+                    };
+                };
+            };
+        };
+    };
+    updateComment: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                g: string;
+                p: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CommentInput"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["Comment"];
+                };
+            };
+        };
+    };
+    post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                g: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["Post"];
+                };
+            };
+        };
+    };
+    deletePost: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                g: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": {
+                        [key: string]: boolean;
+                    };
+                };
+            };
+        };
+    };
+    updatePost: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                g: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PostInput"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["Post"];
+                };
+            };
+        };
+    };
+    remove: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                g: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": {
+                        [key: string]: boolean;
+                    };
+                };
+            };
+        };
+    };
+    role: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                g: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RoleInput"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": {
+                        [key: string]: boolean;
+                    };
+                };
+            };
+        };
+    };
+    event: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                g: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["Event"];
+                };
+            };
+        };
+    };
+    deleteEvent: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                g: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": {
+                        [key: string]: boolean;
+                    };
+                };
+            };
+        };
+    };
+    updateEvent: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                g: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EventInput"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["Event"];
+                };
+            };
+        };
+    };
+    document: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                g: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["Document"];
+                };
+            };
+        };
+    };
+    deleteDocument: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                g: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": {
+                        [key: string]: boolean;
+                    };
+                };
+            };
+        };
+    };
+    updateDocument: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                g: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["DocumentInput"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["Document"];
+                };
+            };
+        };
+    };
+    avatar: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": string;
+                };
+            };
+        };
+    };
+    activity: {
+        parameters: {
+            query?: {
+                type?: string;
+                page?: number;
+                size?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PageMyActivity"];
+                };
+            };
+        };
+    };
+    members: {
+        parameters: {
+            query?: {
+                page?: number;
+                size?: number;
+            };
+            header?: never;
+            path: {
+                g: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PageMember"];
+                };
+            };
+        };
+    };
+    download: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                g: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": {
+                        [key: string]: string;
+                    };
+                };
+            };
+        };
+    };
+    session: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                g: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["Session"];
+                };
+            };
+        };
+    };
+    deleteSession: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                g: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": {
+                        [key: string]: boolean;
+                    };
+                };
+            };
+        };
+    };
+    leave: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                g: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": {
+                        [key: string]: boolean;
+                    };
+                };
+            };
+        };
+    };
+    revoke: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                g: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": {
+                        [key: string]: boolean;
+                    };
+                };
+            };
+        };
+    };
 }

@@ -1,7 +1,8 @@
 package com.moadam.ai.retrieval;
 
 import com.moadam.note.repository.NoteRepository;
-import java.util.*;
+import java.util.List;
+import java.util.UUID;
 import org.springframework.stereotype.Component;
 
 /** Selects the allowed document scope; Python RAG performs actual vector retrieval. */

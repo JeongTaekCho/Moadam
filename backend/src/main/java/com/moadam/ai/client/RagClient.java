@@ -3,10 +3,14 @@ package com.moadam.ai.client;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.moadam.ai.retrieval.NoteRetriever;
 import com.moadam.note.repository.NoteRepository;
-import java.net.*;
-import java.net.http.*;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.time.Duration;
-import java.util.*;
+import java.util.Map;
+import java.util.Objects;
+import java.util.UUID;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
@@ -36,11 +40,11 @@ public class RagClient {
     this.token = token;
   }
 
-  Map<String, Object> request(String url, String method, Object body, boolean internal) {
+  Map<String, Object> request(String url, String method, Object body) {
     try {
       var r =
           HttpRequest.newBuilder(URI.create(url))
-              .timeout(Duration.ofSeconds(internal ? 90 : 20))
+              .timeout(Duration.ofSeconds(90))
               .header("Content-Type", "application/json")
               .header("Authorization", "Bearer " + token);
 
@@ -94,8 +98,7 @@ public class RagClient {
               "version",
               d.get("version"),
               "request_id",
-              UUID.randomUUID()),
-          true);
+              UUID.randomUUID()));
     } catch (ResponseStatusException e) {
       notes.markIndexUnavailable(g, id);
       throw e;
@@ -119,8 +122,7 @@ public class RagClient {
             "allowed_document_ids",
             ids,
             "request_id",
-            UUID.randomUUID()),
-        true);
+            UUID.randomUUID()));
   }
 
   @FunctionalInterface

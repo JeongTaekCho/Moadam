@@ -1,6 +1,6 @@
 package com.moadam.post.repository;
 
-import java.util.*;
+import java.util.UUID;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 

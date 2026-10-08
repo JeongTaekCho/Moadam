@@ -2,7 +2,9 @@ package com.moadam.note.entity;
 
 import java.sql.Timestamp;
 import java.time.Instant;
-import java.util.*;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.UUID;
 
 /**
  * Full persistence row, including private Storage path. Never returned directly by a controller.

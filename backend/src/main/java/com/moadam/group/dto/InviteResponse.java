@@ -3,7 +3,7 @@ package com.moadam.group.dto;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.Instant;
-import java.util.*;
+import java.util.UUID;
 
 @Schema(name = "Invite")
 @JsonIgnoreProperties(ignoreUnknown = true)

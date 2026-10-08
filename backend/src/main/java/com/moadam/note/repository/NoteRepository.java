@@ -1,6 +1,7 @@
 package com.moadam.note.repository;
 
-import java.util.*;
+import java.util.List;
+import java.util.UUID;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 

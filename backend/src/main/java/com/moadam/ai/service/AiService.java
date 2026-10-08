@@ -1,7 +1,7 @@
 package com.moadam.ai.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.moadam.ai.client.*;
+import com.moadam.ai.client.OpenAiClient;
 import com.moadam.ai.dto.AiAnswerResponse;
 import com.moadam.ai.dto.AiMessageResponse;
 import com.moadam.ai.dto.AiQuestionRequest;
@@ -13,17 +13,16 @@ import com.moadam.common.dto.DtoMapper;
 import com.moadam.common.dto.Page;
 import com.moadam.common.repository.ResourceRepository;
 import com.moadam.common.service.DomainService;
-import jakarta.validation.constraints.*;
-import java.io.*;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
-import java.security.*;
-import java.time.*;
-import java.util.*;
-import org.springframework.http.*;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 

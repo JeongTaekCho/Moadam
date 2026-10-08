@@ -1,10 +1,14 @@
 package com.moadam.common.storage;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.net.*;
-import java.net.http.*;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.time.Duration;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
@@ -26,14 +30,14 @@ public class SupabaseStorageClient {
     this.key = key;
   }
 
-  Map<String, Object> request(String url, String method, Object body, boolean internal) {
+  Map<String, Object> request(String url, String method, Object body) {
     try {
       var r =
           HttpRequest.newBuilder(URI.create(url))
-              .timeout(Duration.ofSeconds(internal ? 90 : 20))
+              .timeout(Duration.ofSeconds(20))
               .header("Content-Type", "application/json")
               .header("Authorization", "Bearer " + key);
-      if (!internal) r.header("apikey", key);
+      r.header("apikey", key);
       r.method(method, HttpRequest.BodyPublishers.ofString(json.writeValueAsString(body)));
       var response = http.send(r.build(), HttpResponse.BodyHandlers.ofString());
       if (response.statusCode() < 200 || response.statusCode() >= 300)
@@ -107,8 +111,7 @@ public class SupabaseStorageClient {
       request(
           supabase + "/storage/v1/object/profile-avatars",
           "DELETE",
-          Map.of("prefixes", List.of(avatarPath(path))),
-          false);
+          Map.of("prefixes", List.of(avatarPath(path))));
     } catch (Exception ignored) {
     }
   }
@@ -118,8 +121,7 @@ public class SupabaseStorageClient {
         request(
             supabase + "/storage/v1/object/upload/sign/group-documents/" + safe(path),
             "POST",
-            Map.of(),
-            false);
+            Map.of());
     String url = Objects.toString(r.get("url"), "");
     if (url.isBlank()) throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE);
     return supabase + "/storage/v1" + url;
@@ -130,8 +132,7 @@ public class SupabaseStorageClient {
         request(
             supabase + "/storage/v1/object/sign/group-documents/" + safe(path),
             "POST",
-            Map.of("expiresIn", 60),
-            false);
+            Map.of("expiresIn", 60));
     return supabase + "/storage/v1" + r.get("signedURL");
   }
 
@@ -139,7 +140,6 @@ public class SupabaseStorageClient {
     request(
         supabase + "/storage/v1/object/group-documents",
         "DELETE",
-        Map.of("prefixes", List.of(safe(path))),
-        false);
+        Map.of("prefixes", List.of(safe(path))));
   }
 }

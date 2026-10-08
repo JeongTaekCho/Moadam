@@ -1,7 +1,8 @@
 package com.moadam.ai.client;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.Map;
+import java.util.UUID;
 import org.springframework.stereotype.Component;
 
 /**

@@ -2,7 +2,9 @@ package com.moadam.ai.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import io.swagger.v3.oas.annotations.media.Schema;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 @Schema(name = "Answer")
 @JsonIgnoreProperties(ignoreUnknown = true)

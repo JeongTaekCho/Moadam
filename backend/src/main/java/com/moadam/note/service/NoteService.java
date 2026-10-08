@@ -1,7 +1,7 @@
 package com.moadam.note.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.moadam.ai.client.*;
+import com.moadam.ai.client.RagClient;
 import com.moadam.auth.MembershipPolicy;
 import com.moadam.common.dto.DtoMapper;
 import com.moadam.common.dto.Page;
@@ -14,15 +14,12 @@ import com.moadam.note.dto.NoteUpdateRequest;
 import com.moadam.note.dto.NoteUploadRequest;
 import com.moadam.note.dto.NoteUploadResponse;
 import com.moadam.note.repository.NoteRepository;
-import jakarta.validation.constraints.*;
-import java.security.*;
-import java.time.*;
-import java.util.*;
-import org.springframework.http.*;
+import java.util.Locale;
+import java.util.Map;
+import java.util.UUID;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.*;
 
 @Service
 public class NoteService extends DomainService {

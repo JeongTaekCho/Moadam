@@ -1,7 +1,6 @@
 package com.moadam.event.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.moadam.ai.client.*;
 import com.moadam.auth.MembershipPolicy;
 import com.moadam.common.dto.DtoMapper;
 import com.moadam.common.dto.Page;
@@ -11,15 +10,14 @@ import com.moadam.event.dto.AttendanceRequest;
 import com.moadam.event.dto.EventCreateRequest;
 import com.moadam.event.dto.EventResponse;
 import com.moadam.event.repository.EventRepository;
-import jakarta.validation.constraints.*;
-import java.security.*;
-import java.time.*;
-import java.util.*;
-import org.springframework.http.*;
+import java.time.Instant;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.UUID;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.*;
 
 @Service
 public class EventService extends DomainService {

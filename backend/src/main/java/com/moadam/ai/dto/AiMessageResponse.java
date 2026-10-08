@@ -3,7 +3,8 @@ package com.moadam.ai.dto;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.Instant;
-import java.util.*;
+import java.util.List;
+import java.util.UUID;
 
 @Schema(name = "Message")
 @JsonIgnoreProperties(ignoreUnknown = true)

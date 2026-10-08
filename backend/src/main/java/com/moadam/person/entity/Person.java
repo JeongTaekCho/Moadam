@@ -2,7 +2,9 @@ package com.moadam.person.entity;
 
 import java.sql.Timestamp;
 import java.time.Instant;
-import java.util.*;
+import java.util.Map;
+import java.util.Objects;
+import java.util.UUID;
 
 public record Person(
     UUID id, String displayName, String avatarPath, Instant accountCreatedAt, Instant updatedAt) {

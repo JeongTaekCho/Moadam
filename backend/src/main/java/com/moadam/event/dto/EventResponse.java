@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.moadam.person.dto.PublicProfile;
 import io.swagger.v3.oas.annotations.media.Schema;
 import java.time.Instant;
-import java.util.*;
+import java.util.UUID;
 
 @Schema(name = "Event")
 @JsonIgnoreProperties(ignoreUnknown = true)

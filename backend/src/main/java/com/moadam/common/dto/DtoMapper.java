@@ -7,7 +7,9 @@ import com.moadam.note.dto.NoteResponse;
 import com.moadam.person.repository.PersonRepository;
 import com.moadam.post.dto.CommentResponse;
 import com.moadam.post.dto.PostResponse;
-import java.util.*;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import org.springframework.stereotype.Component;
 
 @Component
