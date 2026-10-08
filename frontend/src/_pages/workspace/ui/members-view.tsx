@@ -1,6 +1,13 @@
 "use client";
 import { api } from "@/shared/api";
-import { Avatar, Badge, Button, Card, Dropdown, TextField } from "@/shared/ui";
+import {
+  UserIdentity,
+  Badge,
+  Button,
+  Card,
+  Dropdown,
+  TextField,
+} from "@/shared/ui";
 import type { WorkspaceModel } from "../model/use-workspace";
 export function MembersView({ model }: { model: WorkspaceModel }) {
   const {
@@ -28,10 +35,8 @@ export function MembersView({ model }: { model: WorkspaceModel }) {
             {members.map((m) => (
               <div className="row between member-row" key={m.user_id}>
                 <span className="row">
-                  <Avatar name={m.user_id === me ? "나" : m.user_id} />
-                  {m.user_id === me
-                    ? "나"
-                    : "멤버 · " + m.user_id.slice(0, 8)}{" "}
+                  <UserIdentity profile={m.profile} id={m.user_id} />
+                  {m.user_id === me && <Badge>나</Badge>}
                   <Badge>
                     {
                       {

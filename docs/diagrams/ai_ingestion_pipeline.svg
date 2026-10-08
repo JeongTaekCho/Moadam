@@ -1,0 +1,81 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1080" viewBox="0 0 1600 1080" role="img"><title>자료 등록 → 검색 가능한 지식</title><desc>PDF와 메모는 같은 색인 단계로 합쳐지며, 현재 문서 버전의 청크만 검색에 사용합니다.</desc><rect width="1600" height="1080" fill="#FCFAF7"/>
+<text x="40" y="49.94" font-family="Apple SD Gothic Neo,Noto Sans KR,sans-serif" font-size="17" font-weight="700" fill="#E76825">MOADAM / AI ENGINEERING</text>
+<text x="40" y="109.16" font-family="Apple SD Gothic Neo,Noto Sans KR,sans-serif" font-size="38" font-weight="700" fill="#302923">자료 등록 → 검색 가능한 지식</text>
+<text x="40" y="147.4" font-family="Apple SD Gothic Neo,Noto Sans KR,sans-serif" font-size="20" font-weight="400" fill="#73685F">PDF와 메모는 같은 색인 단계로 합쳐지며, 현재 문서 버전의 청크만 검색에 사용합니다.</text>
+<rect x="40" y="200" width="330" height="220" rx="18" fill="#FFFFFF" stroke="#E8DFD5"/>
+<rect x="60" y="220" width="38" height="32" rx="9" fill="#FFF1E6" stroke="#FFF1E6"/>
+<text x="70" y="239.94" font-family="Apple SD Gothic Neo,Noto Sans KR,sans-serif" font-size="17" font-weight="700" fill="#E76825">1</text>
+<text x="60" y="289.5" font-family="Apple SD Gothic Neo,Noto Sans KR,sans-serif" font-size="25" font-weight="700" fill="#302923">등록과 업로드</text>
+<text x="60" y="326.58" font-family="Apple SD Gothic Neo,Noto Sans KR,sans-serif" font-size="19" font-weight="400" fill="#73685F">관리자 / 소유자만 등록</text>
+<text x="60" y="355.58" font-family="Apple SD Gothic Neo,Noto Sans KR,sans-serif" font-size="19" font-weight="400" fill="#73685F">PDF: 서명 URL에 PUT</text>
+<text x="60" y="384.58" font-family="Apple SD Gothic Neo,Noto Sans KR,sans-serif" font-size="19" font-weight="400" fill="#73685F">메모: DB에 본문 저장</text>
+<rect x="425" y="200" width="330" height="220" rx="18" fill="#FFFFFF" stroke="#E8DFD5"/>
+<rect x="445" y="220" width="38" height="32" rx="9" fill="#FFF1E6" stroke="#FFF1E6"/>
+<text x="455" y="239.94" font-family="Apple SD Gothic Neo,Noto Sans KR,sans-serif" font-size="17" font-weight="700" fill="#E76825">2</text>
+<text x="445" y="289.5" font-family="Apple SD Gothic Neo,Noto Sans KR,sans-serif" font-size="25" font-weight="700" fill="#302923">원본 읽기</text>
+<text x="445" y="326.58" font-family="Apple SD Gothic Neo,Noto Sans KR,sans-serif" font-size="19" font-weight="400" fill="#73685F">PDF: 비공개 Storage 검증</text>
+<text x="445" y="355.58" font-family="Apple SD Gothic Neo,Noto Sans KR,sans-serif" font-size="19" font-weight="400" fill="#73685F">pypdf로 페이지별 텍스트</text>
+<text x="445" y="384.58" font-family="Apple SD Gothic Neo,Noto Sans KR,sans-serif" font-size="19" font-weight="400" fill="#73685F">메모: text_content 사용</text>
+<rect x="810" y="200" width="330" height="220" rx="18" fill="#FFFFFF" stroke="#E8DFD5"/>
+<rect x="830" y="220" width="38" height="32" rx="9" fill="#FFF1E6" stroke="#FFF1E6"/>
+<text x="840" y="239.94" font-family="Apple SD Gothic Neo,Noto Sans KR,sans-serif" font-size="17" font-weight="700" fill="#E76825">3</text>
+<text x="830" y="289.5" font-family="Apple SD Gothic Neo,Noto Sans KR,sans-serif" font-size="25" font-weight="700" fill="#302923">청크 분할</text>
+<text x="830" y="326.58" font-family="Apple SD Gothic Neo,Noto Sans KR,sans-serif" font-size="19" font-weight="400" fill="#73685F">페이지별 1,000자</text>
+<text x="830" y="355.58" font-family="Apple SD Gothic Neo,Noto Sans KR,sans-serif" font-size="19" font-weight="400" fill="#73685F">겹침 150자 / 간격 850자</text>
+<text x="830" y="384.58" font-family="Apple SD Gothic Neo,Noto Sans KR,sans-serif" font-size="19" font-weight="400" fill="#73685F">빈 청크 제거 · 최대 1,000개</text>
+<rect x="1195" y="200" width="330" height="220" rx="18" fill="#FFFFFF" stroke="#E8DFD5"/>
+<rect x="1215" y="220" width="38" height="32" rx="9" fill="#FFF1E6" stroke="#FFF1E6"/>
+<text x="1225" y="239.94" font-family="Apple SD Gothic Neo,Noto Sans KR,sans-serif" font-size="17" font-weight="700" fill="#E76825">4</text>
+<text x="1215" y="289.5" font-family="Apple SD Gothic Neo,Noto Sans KR,sans-serif" font-size="25" font-weight="700" fill="#302923">임베딩 생성</text>
+<text x="1215" y="326.58" font-family="Apple SD Gothic Neo,Noto Sans KR,sans-serif" font-size="19" font-weight="400" fill="#73685F">32개씩 Embeddings 호출</text>
+<text x="1215" y="355.58" font-family="Apple SD Gothic Neo,Noto Sans KR,sans-serif" font-size="19" font-weight="400" fill="#73685F">text-embedding-3-small</text>
+<text x="1215" y="384.58" font-family="Apple SD Gothic Neo,Noto Sans KR,sans-serif" font-size="19" font-weight="400" fill="#73685F">각 청크 → 1,536차원 벡터</text>
+<polyline points="370,310 425,310" fill="none" stroke="#E76825" stroke-width="2.5" stroke-linejoin="round"/>
+<polygon points="425.00,310.00 414.36,315.54 414.36,304.46" fill="#E76825"/>
+<polyline points="755,310 810,310" fill="none" stroke="#E76825" stroke-width="2.5" stroke-linejoin="round"/>
+<polygon points="810.00,310.00 799.36,315.54 799.36,304.46" fill="#E76825"/>
+<polyline points="1140,310 1195,310" fill="none" stroke="#E76825" stroke-width="2.5" stroke-linejoin="round"/>
+<polygon points="1195.00,310.00 1184.36,315.54 1184.36,304.46" fill="#E76825"/>
+<rect x="40" y="565" width="330" height="220" rx="18" fill="#FFFFFF" stroke="#E8DFD5"/>
+<rect x="60" y="585" width="38" height="32" rx="9" fill="#FFF1E6" stroke="#FFF1E6"/>
+<text x="70" y="604.94" font-family="Apple SD Gothic Neo,Noto Sans KR,sans-serif" font-size="17" font-weight="700" fill="#E76825">8</text>
+<text x="60" y="654.5" font-family="Apple SD Gothic Neo,Noto Sans KR,sans-serif" font-size="25" font-weight="700" fill="#302923">검색 허용</text>
+<text x="60" y="691.58" font-family="Apple SD Gothic Neo,Noto Sans KR,sans-serif" font-size="19" font-weight="400" fill="#73685F">ready 문서만 후보가 됨</text>
+<text x="60" y="720.58" font-family="Apple SD Gothic Neo,Noto Sans KR,sans-serif" font-size="19" font-weight="400" fill="#73685F">문서 version = 청크 version</text>
+<text x="60" y="749.58" font-family="Apple SD Gothic Neo,Noto Sans KR,sans-serif" font-size="19" font-weight="400" fill="#73685F">질문 시 모임 범위 재확인</text>
+<rect x="425" y="565" width="330" height="220" rx="18" fill="#FFFFFF" stroke="#E8DFD5"/>
+<rect x="445" y="585" width="38" height="32" rx="9" fill="#FFF1E6" stroke="#FFF1E6"/>
+<text x="455" y="604.94" font-family="Apple SD Gothic Neo,Noto Sans KR,sans-serif" font-size="17" font-weight="700" fill="#E76825">7</text>
+<text x="445" y="654.5" font-family="Apple SD Gothic Neo,Noto Sans KR,sans-serif" font-size="25" font-weight="700" fill="#302923">ready 전환</text>
+<text x="445" y="691.58" font-family="Apple SD Gothic Neo,Noto Sans KR,sans-serif" font-size="19" font-weight="400" fill="#73685F">청크 저장과 상태 변경 함께</text>
+<text x="445" y="720.58" font-family="Apple SD Gothic Neo,Noto Sans KR,sans-serif" font-size="19" font-weight="400" fill="#73685F">실패: 같은 버전 청크 유지</text>
+<text x="445" y="749.58" font-family="Apple SD Gothic Neo,Noto Sans KR,sans-serif" font-size="19" font-weight="400" fill="#73685F">새 버전 실패: failed 상태</text>
+<rect x="810" y="565" width="330" height="220" rx="18" fill="#FFFFFF" stroke="#E8DFD5"/>
+<rect x="830" y="585" width="38" height="32" rx="9" fill="#FFF1E6" stroke="#FFF1E6"/>
+<text x="840" y="604.94" font-family="Apple SD Gothic Neo,Noto Sans KR,sans-serif" font-size="17" font-weight="700" fill="#E76825">6</text>
+<text x="830" y="654.5" font-family="Apple SD Gothic Neo,Noto Sans KR,sans-serif" font-size="25" font-weight="700" fill="#302923">버전 잠금과 교체</text>
+<text x="830" y="691.58" font-family="Apple SD Gothic Neo,Noto Sans KR,sans-serif" font-size="19" font-weight="400" fill="#73685F">권한을 다시 검사</text>
+<text x="830" y="720.58" font-family="Apple SD Gothic Neo,Noto Sans KR,sans-serif" font-size="19" font-weight="400" fill="#73685F">문서 행 SELECT FOR UPDATE</text>
+<text x="830" y="749.58" font-family="Apple SD Gothic Neo,Noto Sans KR,sans-serif" font-size="19" font-weight="400" fill="#73685F">같은 트랜잭션에서 청크 교체</text>
+<rect x="1195" y="565" width="330" height="220" rx="18" fill="#FFFFFF" stroke="#E8DFD5"/>
+<rect x="1215" y="585" width="38" height="32" rx="9" fill="#FFF1E6" stroke="#FFF1E6"/>
+<text x="1225" y="604.94" font-family="Apple SD Gothic Neo,Noto Sans KR,sans-serif" font-size="17" font-weight="700" fill="#E76825">5</text>
+<text x="1215" y="654.5" font-family="Apple SD Gothic Neo,Noto Sans KR,sans-serif" font-size="25" font-weight="700" fill="#302923">저장할 청크 준비</text>
+<text x="1215" y="691.58" font-family="Apple SD Gothic Neo,Noto Sans KR,sans-serif" font-size="19" font-weight="400" fill="#73685F">document_chunks에 저장할 행</text>
+<text x="1215" y="720.58" font-family="Apple SD Gothic Neo,Noto Sans KR,sans-serif" font-size="19" font-weight="400" fill="#73685F">문서 / 모임 / 버전 / 페이지</text>
+<text x="1215" y="749.58" font-family="Apple SD Gothic Neo,Noto Sans KR,sans-serif" font-size="19" font-weight="400" fill="#73685F">원문 조각과 vector(1536)</text>
+<polyline points="1360,420 1360,565" fill="none" stroke="#E76825" stroke-width="2.5" stroke-linejoin="round"/>
+<polygon points="1360.00,565.00 1354.46,554.36 1365.54,554.36" fill="#E76825"/>
+<text x="1380" y="499.76" font-family="Apple SD Gothic Neo,Noto Sans KR,sans-serif" font-size="18" font-weight="400" fill="#E76825">색인 완료 검증</text>
+<polyline points="1195,675 1140,675" fill="none" stroke="#E76825" stroke-width="2.5" stroke-linejoin="round"/>
+<polygon points="1140.00,675.00 1150.64,669.46 1150.64,680.54" fill="#E76825"/>
+<polyline points="810,675 755,675" fill="none" stroke="#E76825" stroke-width="2.5" stroke-linejoin="round"/>
+<polygon points="755.00,675.00 765.64,669.46 765.64,680.54" fill="#E76825"/>
+<polyline points="425,675 370,675" fill="none" stroke="#E76825" stroke-width="2.5" stroke-linejoin="round"/>
+<polygon points="370.00,675.00 380.64,669.46 380.64,680.54" fill="#E76825"/>
+<rect x="40" y="835" width="1490" height="125" rx="18" fill="#FFF1E6" stroke="#F4D7C0"/>
+<text x="62" y="871.04" font-family="Apple SD Gothic Neo,Noto Sans KR,sans-serif" font-size="22" font-weight="700" fill="#302923">상태와 버전</text>
+<text x="62" y="905.58" font-family="Apple SD Gothic Neo,Noto Sans KR,sans-serif" font-size="19" font-weight="400" fill="#73685F">pending → processing → ready / failed · 메모 본문 수정 시 version + 1, pending으로 전환됩니다.</text>
+<text x="62" y="935.58" font-family="Apple SD Gothic Neo,Noto Sans KR,sans-serif" font-size="19" font-weight="400" fill="#73685F">등록 시 색인을 동기 호출합니다. 메모 수정 후에는 다시 처리가 필요하며 별도 작업 큐는 없습니다.</text>
+<text x="40" y="1062.3" font-family="Apple SD Gothic Neo,Noto Sans KR,sans-serif" font-size="15" font-weight="400" fill="#73685F">코드 기준: 2026-10-08 · 흐름도는 구현을 설명하며 운영 배포 구성을 보증하지 않습니다.</text>
+</svg>

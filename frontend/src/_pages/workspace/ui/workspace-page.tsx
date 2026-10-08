@@ -20,6 +20,7 @@ import { ChatView } from "./chat-view";
 import { CommunityView } from "./community-view";
 import { DocumentsView } from "./documents-view";
 import { EventsView } from "./events-view";
+import { MyPageView } from "./my-page-view";
 import { HomeView } from "./home-view";
 import { MembersView } from "./members-view";
 import { SettingsView } from "./settings-view";
@@ -75,6 +76,7 @@ export function WorkspacePage({
   return (
     <>
       <WorkspaceShell
+        profile={m.profile}
         groups={m.groups}
         group={m.group}
         groupId={m.groupId}
@@ -91,6 +93,7 @@ export function WorkspacePage({
           void m.run(async () => {
             await logout();
             m.setSigned(false);
+            m.setProfile(null);
             setApiScope("");
             m.setGroups([]);
             m.setGroupId("");
@@ -104,7 +107,7 @@ export function WorkspacePage({
         {m.error && (
           <ErrorState message={m.error} onRetry={() => void m.load()} />
         )}{" "}
-        {!m.groupId ? (
+        {!m.groupId && m.view !== "마이페이지" ? (
           <Card className="no-group">
             <span className="assistant-emblem">
               <Icon name="people" size={28} />
@@ -146,6 +149,7 @@ export function WorkspacePage({
                 aria-label="최신 정보를 불러오고 있어요"
               />
             )}
+            {m.view === "마이페이지" && <MyPageView model={m} />}
             {m.view === "홈" && <HomeView model={assistantModel} />}{" "}
             {m.view === "커뮤니티" && <CommunityView model={m} />}{" "}
             {m.view === "일정" && <EventsView model={m} />}{" "}

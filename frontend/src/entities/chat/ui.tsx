@@ -1,5 +1,6 @@
 "use client";
 import type { Citation, Message } from "./model";
+import { memo } from "react";
 
 import { Icon, Markdown } from "@/shared/ui";
 export function CitationList({
@@ -26,23 +27,32 @@ export function CitationList({
     </div>
   );
 }
-export function ChatMessage({
+export const ChatMessage = memo(function ChatMessage({
   message,
   onSource,
+  streaming = false,
 }: {
   message: Message;
   onSource: (id: string) => void;
+  streaming?: boolean;
 }) {
   return (
-    <div className={`message ${message.role}`}>
+    <div className={`message ${message.role}`} aria-busy={streaming}>
       <small>
         {message.role === "assistant" && <Icon name="spark" size={14} />}{" "}
         {message.role === "user" ? "나" : "모아AI"}
-        {message.role === "assistant" && !message.grounded
-          ? " · 자료에서 확인 필요"
-          : ""}
+        {streaming
+          ? " · 답변 작성 중"
+          : message.role === "assistant" && !message.grounded
+            ? " · 자료에서 확인 필요"
+            : ""}
       </small>
-      {message.role === "assistant" ? (
+      {streaming ? (
+        <p className="streaming-answer">
+          {message.content}
+          <span className="streaming-cursor" aria-hidden="true" />
+        </p>
+      ) : message.role === "assistant" ? (
         <Markdown text={message.content} />
       ) : (
         <p className="body">{message.content}</p>
@@ -50,4 +60,4 @@ export function ChatMessage({
       <CitationList citations={message.citations} onOpen={onSource} />
     </div>
   );
-}
+});

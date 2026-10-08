@@ -1,7 +1,7 @@
 "use client";
 import type { Comment, Post } from "./model";
 
-import { Avatar, Badge, Card } from "@/shared/ui";
+import { UserIdentity, Badge, Card } from "@/shared/ui";
 export function PostCard({ post, onOpen }: { post: Post; onOpen: () => void }) {
   return (
     <Card className="post-card">
@@ -16,8 +16,11 @@ export function PostCard({ post, onOpen }: { post: Post; onOpen: () => void }) {
       </button>
       <p className="muted">{post.body.slice(0, 120)}</p>
       <div className="row">
-        <Avatar name={post.author_id} />
-        <small>멤버 · {post.author_id.slice(0, 8)}</small>
+        <UserIdentity
+          profile={post.author}
+          id={post.author_id}
+          label="작성자"
+        />
       </div>
     </Card>
   );
@@ -32,11 +35,8 @@ export function CommentItem({
   return (
     <div className="card">
       <div className="row">
-        <Avatar name={comment.author_id} />
-        <small>
-          {comment.author_id.slice(0, 8)} ·{" "}
-          {new Date(comment.created_at).toLocaleString("ko-KR")}
-        </small>
+        <UserIdentity profile={comment.author} id={comment.author_id} />
+        <small>{new Date(comment.created_at).toLocaleString("ko-KR")}</small>
         {children}
       </div>
       <p className="body">{comment.body}</p>

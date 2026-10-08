@@ -10,12 +10,18 @@
     "api:types": "openapi-typescript ../docs/openapi.json -o src/shared/api/generated-api.ts",
     "api:types:live": "openapi-typescript http://localhost:8080/v3/api-docs -o src/shared/api/generated-api.ts",
     "test:db": "node scripts/db-test.mjs",
-    "format": "prettier --write app src scripts next.config.ts"
+    "format": "prettier --write app src scripts next.config.ts",
+    "test:oauth": "node scripts/oauth-smoke.mjs",
+    "test:profile": "node --env-file=../.env scripts/profile-smoke.mjs",
+    "test:chat-stream": "node scripts/chat-stream-smoke.mjs",
+    "test:chat-live": "node --env-file=../.env scripts/chat-live-smoke.mjs"
   },
   "dependencies": {
+    "@supabase/supabase-js": "2.117.2",
     "next": "16.4.0",
     "react": "19.2.4",
-    "react-dom": "19.2.4"
+    "react-dom": "19.2.4",
+    "server-only": "0.0.1"
   },
   "devDependencies": {
     "@electric-sql/pglite": "0.5.8",

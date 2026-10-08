@@ -5,14 +5,14 @@ export function failure(status: number, message: string) {
     { status },
   );
 }
-export async function limitedBody(
+export async function limitedBytes(
   req: NextRequest,
   limit = 1048576,
-): Promise<string> {
+): Promise<Uint8Array> {
   if (Number(req.headers.get("content-length") || 0) > limit)
     throw new RangeError("Request too large");
   const reader = req.body?.getReader();
-  if (!reader) return "";
+  if (!reader) return new Uint8Array();
   const parts: Uint8Array[] = [];
   let size = 0;
   for (;;) {
@@ -31,5 +31,14 @@ export async function limitedBody(
     bytes.set(part, offset);
     offset += part.length;
   }
-  return new TextDecoder("utf-8", { fatal: true }).decode(bytes);
+  return bytes;
+}
+
+export async function limitedBody(
+  req: NextRequest,
+  limit = 1048576,
+): Promise<string> {
+  return new TextDecoder("utf-8", { fatal: true }).decode(
+    await limitedBytes(req, limit),
+  );
 }

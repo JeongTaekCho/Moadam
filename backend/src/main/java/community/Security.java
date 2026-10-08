@@ -58,7 +58,8 @@ public class Security {
                     org.springframework.security.config.http.SessionCreationPolicy.STATELESS))
         .authorizeHttpRequests(
             x ->
-                x.requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html")
+                x.dispatcherTypeMatchers(jakarta.servlet.DispatcherType.ASYNC).permitAll()
+                    .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html")
                     .permitAll()
                     .anyRequest()
                     .authenticated())

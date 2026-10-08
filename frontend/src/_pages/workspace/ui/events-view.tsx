@@ -1,7 +1,7 @@
 "use client";
 import { Calendar, EventCard, formatTime } from "@/entities/event";
 import { api } from "@/shared/api";
-import { Button, Card, EmptyState } from "@/shared/ui";
+import { UserIdentity, Button, Card, EmptyState } from "@/shared/ui";
 import { koreaDateParts, shiftKoreaMonth } from "@/shared/lib/form";
 import type { WorkspaceModel } from "../model/use-workspace";
 export function EventsView({ model }: { model: WorkspaceModel }) {
@@ -33,6 +33,11 @@ export function EventsView({ model }: { model: WorkspaceModel }) {
               ← 이전 페이지
             </Button>
             <h1>{event.title}</h1>
+            <UserIdentity
+              profile={event.author}
+              id={event.author_id}
+              label="등록자"
+            />
             <p>
               {formatTime(event.starts_at)} ~ {formatTime(event.ends_at)}
             </p>

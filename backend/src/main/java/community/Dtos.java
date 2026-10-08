@@ -6,6 +6,10 @@ import java.time.Instant;
 import java.util.*;
 
 public final class Dtos {
+  public record PublicProfile(@Schema(requiredMode=Schema.RequiredMode.REQUIRED) UUID id, @Schema(requiredMode=Schema.RequiredMode.REQUIRED) String display_name, @Schema(requiredMode=Schema.RequiredMode.REQUIRED, types={"string","null"}) String avatar_url) {}
+  public record MyProfile(@Schema(requiredMode=Schema.RequiredMode.REQUIRED) UUID id,@Schema(requiredMode=Schema.RequiredMode.REQUIRED) String email,@Schema(requiredMode=Schema.RequiredMode.REQUIRED) String display_name,@Schema(requiredMode=Schema.RequiredMode.REQUIRED,types={"string","null"}) String avatar_url,@Schema(requiredMode=Schema.RequiredMode.REQUIRED) Instant created_at,@Schema(requiredMode=Schema.RequiredMode.REQUIRED) Instant updated_at) {}
+  public record MyActivity(@Schema(requiredMode=Schema.RequiredMode.REQUIRED) UUID id,@Schema(requiredMode=Schema.RequiredMode.REQUIRED) UUID group_id,@Schema(requiredMode=Schema.RequiredMode.REQUIRED) String group_name,@Schema(requiredMode=Schema.RequiredMode.REQUIRED) String title,@Schema(requiredMode=Schema.RequiredMode.REQUIRED) String kind,@Schema(requiredMode=Schema.RequiredMode.REQUIRED) Instant created_at) {}
+
   @JsonIgnoreProperties(ignoreUnknown = true)
   public record Group(
       @Schema(requiredMode = Schema.RequiredMode.REQUIRED) UUID id,
@@ -23,6 +27,7 @@ public final class Dtos {
       @Schema(requiredMode = Schema.RequiredMode.REQUIRED) UUID id,
       @Schema(requiredMode = Schema.RequiredMode.REQUIRED) UUID group_id,
       @Schema(requiredMode = Schema.RequiredMode.REQUIRED) UUID author_id,
+      @Schema(requiredMode = Schema.RequiredMode.REQUIRED) PublicProfile author,
       @Schema(requiredMode = Schema.RequiredMode.REQUIRED) String title,
       @Schema(requiredMode = Schema.RequiredMode.REQUIRED) String body,
       @Schema(
@@ -38,6 +43,7 @@ public final class Dtos {
       @Schema(requiredMode = Schema.RequiredMode.REQUIRED) UUID group_id,
       @Schema(requiredMode = Schema.RequiredMode.REQUIRED) UUID post_id,
       @Schema(requiredMode = Schema.RequiredMode.REQUIRED) UUID author_id,
+      @Schema(requiredMode = Schema.RequiredMode.REQUIRED) PublicProfile author,
       @Schema(requiredMode = Schema.RequiredMode.REQUIRED) String body,
       @Schema(requiredMode = Schema.RequiredMode.REQUIRED) Instant created_at,
       @Schema(requiredMode = Schema.RequiredMode.REQUIRED) Instant updated_at) {}
@@ -47,6 +53,7 @@ public final class Dtos {
       @Schema(requiredMode = Schema.RequiredMode.REQUIRED) UUID id,
       @Schema(requiredMode = Schema.RequiredMode.REQUIRED) UUID group_id,
       @Schema(requiredMode = Schema.RequiredMode.REQUIRED) UUID author_id,
+      @Schema(requiredMode = Schema.RequiredMode.REQUIRED) PublicProfile author,
       @Schema(requiredMode = Schema.RequiredMode.REQUIRED) String title,
       @Schema(requiredMode = Schema.RequiredMode.REQUIRED) String description,
       @Schema(requiredMode = Schema.RequiredMode.REQUIRED) String location,
@@ -59,6 +66,7 @@ public final class Dtos {
   public record Member(
       @Schema(requiredMode = Schema.RequiredMode.REQUIRED) UUID group_id,
       @Schema(requiredMode = Schema.RequiredMode.REQUIRED) UUID user_id,
+      @Schema(requiredMode = Schema.RequiredMode.REQUIRED) PublicProfile profile,
       @Schema(
               requiredMode = Schema.RequiredMode.REQUIRED,
               allowableValues = {"owner", "admin", "member"})
@@ -85,6 +93,7 @@ public final class Dtos {
       @Schema(requiredMode = Schema.RequiredMode.REQUIRED) UUID id,
       @Schema(requiredMode = Schema.RequiredMode.REQUIRED) UUID group_id,
       @Schema(requiredMode = Schema.RequiredMode.REQUIRED) UUID author_id,
+      @Schema(requiredMode = Schema.RequiredMode.REQUIRED) PublicProfile author,
       @Schema(requiredMode = Schema.RequiredMode.REQUIRED) String title,
       @Schema(
               requiredMode = Schema.RequiredMode.REQUIRED,

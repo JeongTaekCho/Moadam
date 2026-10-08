@@ -6,6 +6,7 @@ import {
 } from "@/entities/document";
 import { api } from "@/shared/api";
 import {
+  UserIdentity,
   Button,
   Card,
   EmptyState,
@@ -50,6 +51,11 @@ export function DocumentsView({ model }: { model: WorkspaceModel }) {
             </Button>
             <StatusBadge status={document.status} />
             <h1>{document.title}</h1>
+            <UserIdentity
+              profile={document.author}
+              id={document.author_id}
+              label="등록자"
+            />
             {document.error_code && (
               <ErrorState message={documentErrorMessage(document.error_code)} />
             )}

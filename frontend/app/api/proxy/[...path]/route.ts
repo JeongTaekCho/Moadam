@@ -1,4 +1,4 @@
-import { failure, limitedBody } from "@/shared/lib/server";
+import { failure, limitedBody, limitedBytes } from "@/shared/lib/server";
 import { NextRequest, NextResponse } from "next/server";
 async function proxy(
   req: NextRequest,
@@ -9,6 +9,10 @@ async function proxy(
   const { path } = await params;
   if (!path.every((p) => /^[a-zA-Z0-9_-]+$/.test(p)))
     return failure(400, "잘못된 경로입니다");
+  const multipart =
+    req.method === "POST" &&
+    path.join("/") === "me/avatar" &&
+    req.headers.get("content-type")?.startsWith("multipart/form-data;");
   let token = req.cookies.get("access")?.value;
   let refreshed:
     | { access_token: string; refresh_token: string; expires_in: number }
@@ -42,22 +46,34 @@ async function proxy(
         method: req.method,
         headers: {
           Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
+          "Content-Type": multipart
+            ? req.headers.get("content-type")!
+            : "application/json",
         },
         body: ["GET", "HEAD"].includes(req.method)
           ? undefined
-          : await limitedBody(req),
+          : multipart
+            ? Buffer.from(await limitedBytes(req, 2162688))
+            : await limitedBody(req),
         cache: "no-store",
-        signal: AbortSignal.timeout(100000),
+        signal: AbortSignal.any([req.signal, AbortSignal.timeout(120000)]),
       },
     );
-    const res = new NextResponse(await response.text(), {
-      status: response.status,
-      headers: {
-        "Content-Type": "application/json",
-        "Cache-Control": "no-store",
+    const streaming = response.headers
+      .get("content-type")
+      ?.startsWith("application/x-ndjson");
+    const res = new NextResponse(
+      streaming ? response.body : await response.arrayBuffer(),
+      {
+        status: response.status,
+        headers: {
+          "Content-Type":
+            response.headers.get("content-type") || "application/json",
+          "Cache-Control": "no-store",
+          ...(streaming ? { "X-Accel-Buffering": "no" } : {}),
+        },
       },
-    });
+    );
     if (refreshed) {
       const opts = {
         httpOnly: true,

@@ -1,3 +1,4 @@
+import { setAuthSession } from "@/shared/lib/auth-session";
 import { failure, limitedBody } from "@/shared/lib/server";
 import { NextRequest, NextResponse } from "next/server";
 export async function POST(req: NextRequest) {
@@ -67,20 +68,7 @@ export async function POST(req: NextRequest) {
       confirmationRequired: !data.access_token,
     });
     if (data.access_token) {
-      const options = {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "lax" as const,
-        path: "/",
-      };
-      res.cookies.set("access", data.access_token, {
-        ...options,
-        maxAge: data.expires_in,
-      });
-      res.cookies.set("refresh", data.refresh_token, {
-        ...options,
-        maxAge: 604800,
-      });
+      setAuthSession(res, data);
     }
     return res;
   } catch {

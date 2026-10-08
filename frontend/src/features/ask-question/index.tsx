@@ -4,9 +4,11 @@ import { useRef, useState } from "react";
 export function QuestionComposer({
   busy,
   onSend,
+  onStop,
 }: {
   busy: boolean;
   onSend: (question: string) => Promise<boolean>;
+  onStop?: () => void;
 }) {
   const [question, setQuestion] = useState("");
   const form = useRef<HTMLFormElement>(null);
@@ -50,10 +52,16 @@ export function QuestionComposer({
             ? "자료를 찾고 답변을 정리하고 있어요…"
             : "⌘ / Ctrl + Enter로 전송"}
         </span>
-        <Button type="submit" disabled={!question.trim()} loading={busy}>
-          <Icon name="arrow" size={17} />
-          <span>질문 보내기</span>
-        </Button>
+        {onStop ? (
+          <Button type="button" variant="secondary" onClick={onStop}>
+            답변 중지
+          </Button>
+        ) : (
+          <Button type="submit" disabled={!question.trim()} loading={busy}>
+            <Icon name="arrow" size={17} />
+            <span>질문 보내기</span>
+          </Button>
+        )}
       </div>
     </form>
   );

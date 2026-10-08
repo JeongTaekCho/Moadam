@@ -27,4 +27,4 @@ Tailwind CSS 4 / PostCSS / Pretendard Variable. 토큰의 원본은 `src/shared/
 
 ## 날짜·시간 입력
 
-`DatePicker`, `TimePicker`, `DateTimePicker`는 `shared/ui/date-time-picker.tsx`의 공통 컴포넌트입니다. 날짜·시간 피커는 controlled value/onChange를 지원하고 통합 피커는 defaultValue와 name으로 폼에 `YYYY-MM-DDTHH:mm`을 전달합니다. 필수값·실제 날짜·24시간 형식 검사를 유지합니다. 날짜 달력은 방향키 이동, 월 전환, 오늘 선택을 지원하고 시간은 1분 단위 선택이 가능합니다. 팝오버는 Escape/바깥 클릭으로 닫히고 선택 후 트리거에 포커스를 돌려줍니다. 모든 textarea는 `resize: none`입니다.
+`DatePicker`, `TimePicker`, `DateTimePicker`는 `shared/ui/date-time-picker.tsx`의 공통 컴포넌트입니다. 날짜·시간 피커는 controlled value/onChange를 지원하고 통합 피커는 defaultValue와 name으로 폼에 `YYYY-MM-DDTHH:mm`을 전달합니다. 입력란 전체 클릭 또는 Enter·Space·아래 방향키로 피커를 열며 직접 타이핑은 허용하지 않습니다. 별도 검증 필드로 필수값·실제 날짜·24시간 형식 검사를 유지합니다. 날짜 달력은 방향키 이동, 월 전환, 오늘 선택을 지원하고 시간은 1분 단위 선택이 가능합니다. 팝오버는 Escape/바깥 클릭으로 닫히고 선택 후 트리거에 포커스를 돌려줍니다. 모든 textarea는 `resize: none`입니다.

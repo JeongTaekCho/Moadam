@@ -34,10 +34,15 @@ public class Api {
   public record Page<T>(List<T> items, int page, int size, long total) {}
 
   <T> T dto(Class<T> type, Map<String, Object> row) {
+    row=new LinkedHashMap<>(row);
+    if(List.of(Dtos.Post.class,Dtos.Comment.class,Dtos.Document.class,Dtos.Event.class).contains(type) && !row.containsKey("author")) ProfileSupport.enrich(db,List.of(row),"author_id","author");
+    if(type==Dtos.Member.class && !row.containsKey("profile")) ProfileSupport.enrich(db,List.of(row),"user_id","profile");
     return integration.json.convertValue(row, type);
   }
 
   <T> Page<T> typed(Page<Map<String, Object>> page, Class<T> type) {
+    if(List.of(Dtos.Post.class,Dtos.Comment.class,Dtos.Document.class,Dtos.Event.class).contains(type)) ProfileSupport.enrich(db,page.items(),"author_id","author");
+    if(type==Dtos.Member.class) ProfileSupport.enrich(db,page.items(),"user_id","profile");
     return new Page<>(
         page.items().stream().map(r -> dto(type, r)).toList(),
         page.page(),
@@ -142,11 +147,6 @@ public class Api {
     var row = one(table, g, id);
     policy.author(g, u, row.get("author_id"));
     if (table.equals("posts") && row.get("kind").equals("notice")) policy.admin(g, u);
-  }
-
-  @GetMapping("/me")
-  public Map<String, Object> me(@AuthenticationPrincipal Jwt j) {
-    return Map.of("id", user(j), "email", Objects.toString(j.getClaimAsString("email"), ""));
   }
 
   @GetMapping("/groups")

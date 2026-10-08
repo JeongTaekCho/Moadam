@@ -1,7 +1,7 @@
 "use client";
 import type { Document } from "./model";
 
-import { Badge, Icon } from "@/shared/ui";
+import { Badge, Icon, UserIdentity } from "@/shared/ui";
 export function StatusBadge({ status }: { status: Document["status"] }) {
   return (
     <Badge
@@ -42,6 +42,11 @@ export function DocumentRow({
             {document.title}
           </button>
           <small>{document.kind === "pdf" ? "PDF 문서" : "텍스트 메모"}</small>
+          <UserIdentity
+            profile={document.author}
+            id={document.author_id}
+            label="등록자"
+          />
         </div>
       </div>
       <time className="document-date" dateTime={document.created_at}>

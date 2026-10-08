@@ -5,9 +5,15 @@ import type { Event } from "@/entities/event";
 import type { Group, Invite, Member } from "@/entities/group";
 import type { Comment, Post } from "@/entities/post";
 import { saveEditor, type Modal } from "@/features/content-editor";
-import type { Page } from "@/shared/api";
+import type { Page, MyProfile, MyActivity } from "@/shared/api";
 
-import { api, ApiError, getApiScope, setApiScope } from "@/shared/api";
+import {
+  api,
+  ApiError,
+  getApiScope,
+  setApiScope,
+  streamQuestion,
+} from "@/shared/api";
 import {
   navigateWorkspace,
   viewFromPath,
@@ -26,8 +32,13 @@ import {
 export function useWorkspace(initialView: View = "홈") {
   const pathname = usePathname();
   const loadVersion = useRef(0);
+  const streamAbort = useRef<AbortController | null>(null);
+  const [streamingId, setStreamingId] = useState<string | null>(null);
+  const [streamStage, setStreamStage] = useState("retrieving");
+  useEffect(() => () => streamAbort.current?.abort(), []);
   const [loadedKey, setLoadedKey] = useState("");
   const busyRef = useRef(false);
+  const activityVersion = useRef(0);
   const detailOrigin = useRef<{ view: View; page: number } | null>(null);
   const [commentPage, setCommentPage] = useState(0),
     [commentTotal, setCommentTotal] = useState(0),
@@ -38,6 +49,7 @@ export function useWorkspace(initialView: View = "홈") {
     [groupId, setGroupId] = useState(""),
     [me, setMe] = useState(""),
     [view, setView] = useState<View>(initialView);
+  const [profile, setProfile] = useState<MyProfile | null>(null);
   const [posts, setPosts] = useState<Post[]>([]),
     [events, setEvents] = useState<Event[]>([]),
     [documents, setDocuments] = useState<Document[]>([]),
@@ -83,11 +95,21 @@ export function useWorkspace(initialView: View = "홈") {
   }, []);
   const loadGroups = useCallback(async () => {
     const [g, u] = await Promise.all([
-      api<Page<Group>>("groups?size=100"),
-      api<{ id: string }>("me"),
+      (async () => {
+        const first = await api<Page<Group>>("groups?size=100");
+        const items = [...first.items];
+        for (let page = 1; items.length < first.total; page++) {
+          const next = await api<Page<Group>>(`groups?size=100&page=${page}`);
+          if (!next.items.length) break;
+          items.push(...next.items);
+        }
+        return { ...first, items };
+      })(),
+      api<MyProfile>("me"),
     ]);
     setGroups(g.items);
     setMe(u.id);
+    setProfile(u);
     const requested =
       getApiScope() ||
       new URLSearchParams(window.location.search).get("group") ||
@@ -118,6 +140,24 @@ export function useWorkspace(initialView: View = "홈") {
   }, []);
   useEffect(() => {
     setView(viewFromPath(window.location.pathname) || initialView);
+    const authError = new URLSearchParams(window.location.search).get(
+      "auth_error",
+    );
+    const authMessages: Record<string, string> = {
+      google_cancelled:
+        "Google 로그인을 취소했거나 동의하지 않았습니다. 다시 시도해 주세요.",
+      google_expired:
+        "Google 로그인 요청이 만료되었습니다. 같은 브라우저에서 다시 시작해 주세요.",
+      google_failed:
+        "Google 로그인을 완료하지 못했습니다. 다시 시도하거나 이메일로 로그인해 주세요.",
+    };
+    if (authError && authMessages[authError]) {
+      setError(authMessages[authError]);
+      const url = new URL(window.location.href);
+      url.searchParams.delete("auth_error");
+      window.history.replaceState(null, "", url.pathname + url.search);
+    }
+
     loadGroups()
       .catch((e) => {
         if (!(e instanceof ApiError && e.status === 401)) fail(e);
@@ -125,7 +165,7 @@ export function useWorkspace(initialView: View = "홈") {
       .finally(() => setBoot(false));
   }, [loadGroups, fail]);
   const load = useCallback(async () => {
-    if (!groupId) return;
+    if (!signed || (!groupId && view !== "마이페이지")) return;
     const requestId = ++loadVersion.current;
     setLoading(true);
     setError("");
@@ -193,7 +233,7 @@ export function useWorkspace(initialView: View = "홈") {
     } finally {
       if (requestId === loadVersion.current) setLoading(false);
     }
-  }, [groupId, base, view, page, admin, fail]);
+  }, [groupId, base, view, page, admin, signed, fail]);
   useEffect(() => {
     void load();
     return () => {
@@ -201,6 +241,8 @@ export function useWorkspace(initialView: View = "홈") {
     };
   }, [load]);
   const changeGroup = (id: string) => {
+    streamAbort.current?.abort();
+    activityVersion.current++;
     detailOrigin.current = null;
     navigateWorkspace("홈", id);
     setApiScope(id);
@@ -223,6 +265,7 @@ export function useWorkspace(initialView: View = "홈") {
     setInviteToken("");
   };
   const changeView = (next: View) => {
+    activityVersion.current++;
     detailOrigin.current = null;
     navigateWorkspace(next, groupId);
     setView(next);
@@ -257,6 +300,48 @@ export function useWorkspace(initialView: View = "홈") {
       setBusy(false);
     }
   };
+  async function openActivity(item: MyActivity, kind: "posts" | "documents") {
+    if (!groups.some((group) => group.id === item.group_id)) {
+      setError("참여 중인 모임의 기록만 열 수 있습니다");
+      return;
+    }
+    changeGroup(item.group_id);
+    const version = ++activityVersion.current;
+    const next = kind === "posts" ? "커뮤니티" : "자료";
+    navigateWorkspace(next, item.group_id);
+    setView(next);
+    try {
+      if (kind === "posts") {
+        const [post, comments] = await Promise.all([
+          api<Post>(`groups/${item.group_id}/posts/${item.id}`),
+          api<Page<Comment>>(
+            `groups/${item.group_id}/posts/${item.id}/comments`,
+          ),
+        ]);
+        if (
+          version !== activityVersion.current ||
+          getApiScope() !== item.group_id
+        )
+          return;
+        setPost(post);
+        setComments(comments.items);
+        setCommentPage(0);
+        setCommentTotal(comments.total);
+      } else {
+        const document = await api<Document>(
+          `groups/${item.group_id}/documents/${item.id}`,
+        );
+        if (
+          version !== activityVersion.current ||
+          getApiScope() !== item.group_id
+        )
+          return;
+        setDocument(document);
+      }
+    } catch (error) {
+      if (version === activityVersion.current) fail(error);
+    }
+  }
   const canEdit = (author: string) => admin || author === me;
   async function openPost(p: Post) {
     setLoading(true);
@@ -383,6 +468,8 @@ export function useWorkspace(initialView: View = "홈") {
 
   useEffect(() => {
     const onBack = () => {
+      streamAbort.current?.abort();
+      activityVersion.current++;
       const next = viewFromPath(window.location.pathname) || "홈";
       detailOrigin.current = null;
       const requested = new URLSearchParams(window.location.search).get(
@@ -418,31 +505,148 @@ export function useWorkspace(initialView: View = "홈") {
   async function sendQuestion(question: string): Promise<boolean> {
     if (busyRef.current || !question.trim()) return false;
     let succeeded = false;
-    await run(async () => {
-      let id = sessionId;
-      if (!id) {
-        const s = await api<Session>(`${base}/chat/sessions`, "POST", {
-          title: question.trim().slice(0, 60),
-        });
-        id = s.id;
-        setSessionId(id);
-        setMessages([]);
-        setMessagePage(0);
-      }
-      await api(`${base}/chat/sessions/${id}/messages`, "POST", {
-        question: question.trim(),
-      });
-      await openSession(id);
-      const sessions = await api<Page<Session>>(
-        `${base}/chat/sessions?page=${page}`,
+    const controller = new AbortController();
+    streamAbort.current = controller;
+    const scope = groupId;
+    const userId = crypto.randomUUID(),
+      answerId = crypto.randomUUID();
+    let frame = 0;
+    let chars: string[] = [],
+      shown = 0,
+      text = "",
+      previous = 0;
+    let finalMessages: { user: Message; assistant: Message } | null = null;
+    const current = () => !controller.signal.aborted && getApiScope() === scope;
+    function publish() {
+      if (current())
+        setMessages((old) =>
+          old.map((message) =>
+            message.id === answerId ? { ...message, content: text } : message,
+          ),
+        );
+    }
+    function finish() {
+      if (!current() || !finalMessages) return;
+      const saved = finalMessages;
+      setMessages((old) =>
+        old.map((message) =>
+          message.id === userId
+            ? saved.user
+            : message.id === answerId
+              ? saved.assistant
+              : message,
+        ),
       );
-      setSessions(sessions.items);
-      setTotal(sessions.total);
+      setStreamingId(null);
       succeeded = true;
+    }
+    let resolveAnimation: (() => void) | undefined;
+    function animate(now: number) {
+      frame = 0;
+      if (!current()) {
+        resolveAnimation?.();
+        return;
+      }
+      // Fast character reveal, at most one React update per display frame.
+      // Catch up large bursts rather than adding seconds of artificial latency.
+      const count = Math.max(
+        1,
+        Math.floor((now - (previous || now)) / 4),
+        Math.ceil((chars.length - shown) / 40),
+      );
+      previous = now;
+      const next = Math.min(chars.length, shown + count);
+      text += chars.slice(shown, next).join("");
+      shown = next;
+      publish();
+      if (shown < chars.length) frame = requestAnimationFrame(animate);
+      else {
+        previous = 0;
+        resolveAnimation?.();
+      }
+    }
+    await run(async () => {
+      try {
+        let id = sessionId;
+        if (!id) {
+          const session = await api<Session>(`${base}/chat/sessions`, "POST", {
+            title: question.trim().slice(0, 60),
+          });
+          if (!current()) throw new DOMException("Cancelled", "AbortError");
+          id = session.id;
+          setSessionId(id);
+          setMessages([]);
+          setMessagePage(0);
+          setSessions((old) => [session, ...old]);
+        }
+        const draft = {
+          group_id: scope,
+          session_id: id,
+          citations: [],
+          grounded: false,
+          created_at: new Date().toISOString(),
+        };
+        setMessages((old) => [
+          ...old,
+          { ...draft, id: userId, role: "user", content: question.trim() },
+          { ...draft, id: answerId, role: "assistant", content: "" },
+        ]);
+        setStreamingId(answerId);
+        setStreamStage("retrieving");
+        await streamQuestion(
+          `${base}/chat/sessions/${id}/messages/stream`,
+          question.trim(),
+          (event) => {
+            if (event.type === "status") setStreamStage(event.stage);
+            if (event.type === "delta") {
+              chars.push(...Array.from(event.text));
+              if (!frame) frame = requestAnimationFrame(animate);
+            }
+            if (event.type === "done") {
+              finalMessages = { user: event.user, assistant: event.assistant };
+              // Replace provisional text with the authoritative validated answer.
+              if (chars.join("") !== event.assistant.content) {
+                cancelAnimationFrame(frame);
+                frame = 0;
+                chars = Array.from(event.assistant.content);
+                shown = 0;
+                text = "";
+                frame = requestAnimationFrame(animate);
+              }
+            }
+          },
+          controller.signal,
+        );
+        if (globalThis.document.visibilityState === "hidden")
+          shown = chars.length;
+        if (shown < chars.length)
+          await new Promise<void>((resolve) => {
+            resolveAnimation = resolve;
+            controller.signal.addEventListener("abort", () => resolve(), {
+              once: true,
+            });
+          });
+        finish();
+      } finally {
+        cancelAnimationFrame(frame);
+        if (!succeeded && getApiScope() === scope)
+          setMessages((old) =>
+            old.filter(
+              (message) => message.id !== userId && message.id !== answerId,
+            ),
+          );
+        if (streamAbort.current === controller) {
+          streamAbort.current = null;
+          setStreamingId(null);
+        }
+      }
     });
     return succeeded;
   }
   return {
+    streamingId,
+    streamStage,
+    cancelAnswer: () => streamAbort.current?.abort(),
     loadAssistant: async () => {
       if (!groupId) return;
       try {
@@ -474,6 +678,8 @@ export function useWorkspace(initialView: View = "홈") {
     groupId,
     setGroupId,
     me,
+    profile,
+    setProfile,
     setMe,
     view,
     setView,
@@ -538,6 +744,7 @@ export function useWorkspace(initialView: View = "홈") {
     changeView,
     run,
     canEdit,
+    openActivity,
     openPost,
     openEvent,
     openDocument,

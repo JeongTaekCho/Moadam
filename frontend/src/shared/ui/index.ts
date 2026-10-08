@@ -5,3 +5,4 @@ export { Markdown } from "./markdown";
 export * from "./primitives";
 
 export { DatePicker, TimePicker, DateTimePicker } from "./date-time-picker";
+export { CustomSelect, type SelectOption } from "./custom-select";

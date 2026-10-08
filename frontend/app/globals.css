@@ -2681,3 +2681,380 @@
     }
   }
 }
+
+@layer components {
+  .picker-control input[readonly] {
+    cursor: pointer;
+    caret-color: transparent;
+  }
+}
+
+@layer components {
+  .google-signin {
+    width: 100%;
+    margin-top: 20px;
+    gap: 10px;
+    min-height: 48px;
+  }
+  .auth-divider {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 24px 0 0;
+    font-size: 11px;
+    color: var(--muted);
+  }
+  .auth-divider::before,
+  .auth-divider::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+}
+
+@layer components {
+  .avatar {
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+  .avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .user-identity {
+    display: inline-flex;
+    gap: 7px;
+    align-items: center;
+    font-size: 12px;
+    color: var(--text);
+    vertical-align: middle;
+  }
+  .user-identity > span:last-child {
+    overflow-wrap: anywhere;
+  }
+  .user-identity small {
+    font-size: 11px;
+  }
+  .document-primary .user-identity {
+    margin-top: 7px;
+  }
+  .document-primary .user-identity .avatar {
+    width: 22px;
+    height: 22px;
+    font-size: 9px;
+  }
+  .event-card .user-identity {
+    display: flex;
+    margin-top: 8px;
+  }
+  .account-logout {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    border: 0;
+    background: transparent;
+    color: var(--muted);
+    padding: 10px;
+    font-size: 11px;
+  }
+  .account-logout:hover {
+    color: var(--brand);
+  }
+  .mypage-layout {
+    display: grid;
+    grid-template-columns: minmax(280px, 0.9fr) minmax(0, 1.4fr);
+    gap: 24px;
+    align-items: start;
+  }
+  .profile-heading {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  .profile-heading h2 {
+    margin: 7px 0 4px;
+    font-size: 21px;
+    overflow-wrap: anywhere;
+  }
+  .profile-heading p {
+    font-size: 12px;
+    margin: 0;
+  }
+  .avatar-large {
+    width: 80px;
+    height: 80px;
+    font-size: 24px;
+    border: 3px solid var(--surface);
+    box-shadow: 0 0 0 1px var(--brand-border);
+  }
+  .profile-card form {
+    padding-top: 20px;
+    margin-top: 24px;
+    border-top: 1px solid var(--border);
+  }
+  .profile-account-info {
+    margin-top: 28px;
+    padding-top: 22px;
+    border-top: 1px solid var(--border);
+  }
+  .profile-account-info dl {
+    display: grid;
+    grid-template-columns: 78px minmax(0, 1fr);
+    gap: 12px;
+    font-size: 12px;
+  }
+  .profile-account-info dt {
+    color: var(--muted);
+  }
+  .profile-account-info dd {
+    margin: 0;
+    overflow-wrap: anywhere;
+  }
+  .my-activity-card .filter-chips {
+    margin: 16px 0 10px;
+  }
+  .my-activity-item {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    width: 100%;
+    padding: 17px 0;
+    border: 0;
+    border-bottom: 1px solid var(--border);
+    background: transparent;
+    text-align: left;
+  }
+  .my-activity-item:hover strong {
+    color: var(--brand);
+  }
+  .my-activity-item > span:nth-child(2) {
+    flex: 1;
+    min-width: 0;
+  }
+  .my-activity-item strong {
+    display: block;
+    font-size: 14px;
+    margin: 4px 0;
+    overflow-wrap: anywhere;
+  }
+  .my-activity-item small,
+  .my-activity-item time {
+    color: var(--muted);
+    font-size: 11px;
+  }
+  .my-activity-icon {
+    display: grid;
+    place-items: center;
+    width: 38px;
+    height: 42px;
+    border-radius: 10px;
+    background: var(--brand-soft);
+    color: var(--brand);
+    flex-shrink: 0;
+  }
+  .my-activity-item > svg {
+    color: var(--muted);
+  }
+  @media (max-width: 1100px) {
+    .mypage-layout {
+      grid-template-columns: 1fr;
+    }
+  }
+  @media (max-width: 650px) {
+    .profile-heading {
+      gap: 12px;
+    }
+    .avatar-large {
+      width: 64px;
+      height: 64px;
+      font-size: 20px;
+    }
+  }
+}
+
+@layer components {
+  .profile-photo-button {
+    position: relative;
+    flex-shrink: 0;
+    display: inline-flex;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    cursor: pointer;
+  }
+  .profile-photo-button:focus-visible {
+    outline: 3px solid var(--brand);
+    outline-offset: 5px;
+  }
+  .profile-photo-button:disabled {
+    opacity: 0.6;
+    cursor: wait;
+  }
+  .profile-photo-edit {
+    position: absolute;
+    right: -1px;
+    bottom: -1px;
+    display: grid;
+    place-items: center;
+    width: 27px;
+    height: 27px;
+    border: 3px solid var(--surface);
+    border-radius: 50%;
+    color: white;
+    background: var(--brand);
+    box-shadow: 0 2px 6px rgb(41 33 29 / 0.15);
+    transition:
+      background 150ms ease,
+      transform 150ms ease;
+  }
+  .profile-photo-button:hover .profile-photo-edit {
+    background: var(--brand-hover);
+    transform: scale(1.08);
+  }
+  .custom-select-trigger {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    min-height: 44px;
+    padding: 9px 11px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--surface);
+    color: var(--text);
+    text-align: left;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition:
+      border-color 150ms ease,
+      box-shadow 150ms ease;
+  }
+  .custom-select-trigger:hover,
+  .custom-select-trigger[aria-expanded="true"] {
+    border-color: var(--brand-border);
+  }
+  .custom-select-trigger:focus-visible {
+    outline: 2px solid var(--brand);
+    outline-offset: 2px;
+  }
+  .custom-select-trigger:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  .custom-select-icon {
+    display: grid;
+    place-items: center;
+    width: 30px;
+    height: 30px;
+    flex-shrink: 0;
+    border-radius: 9px;
+    background: var(--brand-soft);
+    color: var(--brand);
+  }
+  .custom-select-value {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+  .custom-select-chevron {
+    flex-shrink: 0;
+    color: var(--muted);
+    transition: transform 150ms ease;
+  }
+  .custom-select-trigger[aria-expanded="true"] .custom-select-chevron {
+    transform: rotate(180deg);
+  }
+  .custom-select-popover {
+    position: fixed;
+    inset: auto;
+    margin: 0;
+    padding: 6px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    border: 1px solid var(--brand-border);
+    border-radius: 14px;
+    background: var(--surface);
+    color: var(--text);
+    box-shadow: var(--shadow-dialog);
+  }
+  .custom-select-option {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    width: 100%;
+    min-height: 42px;
+    padding: 10px;
+    border: 0;
+    border-radius: 9px;
+    text-align: left;
+    font-size: 13px;
+    background: transparent;
+    color: var(--text);
+    cursor: pointer;
+  }
+  .custom-select-option > span {
+    min-width: 0;
+  }
+  .custom-select-option-label {
+    display: block;
+    overflow-wrap: anywhere;
+  }
+  .custom-select-option small {
+    display: block;
+    margin-top: 3px;
+    color: var(--muted);
+    font-size: 11px;
+  }
+  .custom-select-option > svg {
+    flex-shrink: 0;
+  }
+  .custom-select-option:hover,
+  .custom-select-option:focus-visible {
+    background: var(--brand-soft);
+    outline: none;
+  }
+  .custom-select-option:focus-visible {
+    box-shadow: inset 0 0 0 2px var(--brand-border);
+  }
+  .custom-select-option[aria-selected="true"] {
+    background: var(--brand-soft);
+    color: var(--brand);
+    font-weight: 650;
+  }
+}
+
+@layer components {
+  .streaming-answer {
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    line-height: 1.8;
+  }
+  .streaming-cursor {
+    display: inline-block;
+    width: 3px;
+    height: 1em;
+    margin-left: 3px;
+    vertical-align: -0.1em;
+    background: var(--brand);
+    border-radius: 2px;
+    animation: stream-caret 800ms ease-in-out infinite;
+  }
+}
+@keyframes stream-caret {
+  50% {
+    opacity: 0.25;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .streaming-cursor {
+    animation: none;
+  }
+}

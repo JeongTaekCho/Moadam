@@ -21,3 +21,11 @@ export async function logout() {
   if (!response.ok)
     throw new Error("로그아웃을 처리하지 못했습니다. 다시 시도해 주세요.");
 }
+
+export async function signInWithGoogle() {
+  const response = await fetch("/api/auth/google", { method: "POST" });
+  const data = await response.json();
+  if (!response.ok || typeof data.url !== "string")
+    throw new Error(data.message || "Google 로그인을 시작하지 못했습니다");
+  window.location.assign(data.url);
+}

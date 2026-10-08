@@ -5,6 +5,7 @@ import type { Page } from "@/shared/api";
 
 import { api } from "@/shared/api";
 import {
+  UserIdentity,
   Badge,
   Button,
   Card,
@@ -59,8 +60,12 @@ export function CommunityView({ model }: { model: WorkspaceModel }) {
             <h1>{post.title}</h1>
             <p className="body">{post.body}</p>
             <small>
-              {post.author_id.slice(0, 8)} ·{" "}
-              {new Date(post.created_at).toLocaleString("ko-KR")}
+              <UserIdentity
+                profile={post.author}
+                id={post.author_id}
+                label="작성자"
+              />{" "}
+              · {new Date(post.created_at).toLocaleString("ko-KR")}
             </small>
             {canEdit(post.author_id) && (post.kind !== "notice" || admin) && (
               <div className="row">

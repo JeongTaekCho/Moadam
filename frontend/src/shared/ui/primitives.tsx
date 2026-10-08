@@ -1,8 +1,10 @@
 "use client";
+import Image from "next/image";
 import {
   useEffect,
   useId,
   useRef,
+  useState,
   type ButtonHTMLAttributes,
   type InputHTMLAttributes,
   type ReactNode,
@@ -116,10 +118,55 @@ export function Badge({
 }) {
   return <span className={`badge ${tone}`}>{children}</span>;
 }
-export function Avatar({ name }: { name: string }) {
+export function Avatar({
+  name,
+  src,
+  className = "",
+}: {
+  name: string;
+  src?: string | null;
+  className?: string;
+}) {
+  const [failedSrc, setFailedSrc] = useState<string | null>(null);
   return (
-    <span className="avatar" aria-label={name}>
-      {name.slice(0, 2).toUpperCase()}
+    <span className={`avatar ${className}`} aria-label={name}>
+      {src && src !== failedSrc ? (
+        <Image
+          unoptimized
+          src={src}
+          width={64}
+          height={64}
+          alt=""
+          onError={() => setFailedSrc(src)}
+        />
+      ) : (
+        name.slice(0, 2).toUpperCase()
+      )}
+    </span>
+  );
+}
+export function UserIdentity({
+  profile,
+  id,
+  label,
+}: {
+  profile?: {
+    id: string;
+    display_name: string;
+    avatar_url?: string | null;
+  } | null;
+  id?: string;
+  label?: string;
+}) {
+  const name =
+    profile?.display_name || (id ? `멤버 ${id.slice(0, 8)}` : "멤버");
+  return (
+    <span className="user-identity">
+      <Avatar name={name} src={profile?.avatar_url} />
+      <span>
+        {label && <small>{label} </small>}
+        {name}
+      </span>
     </span>
   );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useId, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState, type RefObject } from "react";
 import { Icon } from "./icon";
 import { localInput } from "../lib/form";
 
@@ -21,6 +21,58 @@ function parseDate(value: string) {
   return !Number.isNaN(date.getTime()) && dateKey(date) === value ? date : null;
 }
 
+function PickerValidation({
+  value,
+  name,
+  required,
+  disabled,
+  valid,
+  trigger,
+  errorId,
+}: {
+  value: string;
+  name?: string;
+  required?: boolean;
+  disabled?: boolean;
+  valid: boolean;
+  trigger: RefObject<HTMLButtonElement | null>;
+  errorId: string;
+}) {
+  const ref = useRef<HTMLInputElement>(null);
+  const [error, setError] = useState(false);
+  useEffect(() => {
+    ref.current?.setCustomValidity(
+      value && !valid ? "올바른 값을 선택해 주세요." : "",
+    );
+    setError(false);
+  }, [value, valid]);
+  return (
+    <>
+      <input
+        ref={ref}
+        className="sr-only"
+        tabIndex={-1}
+        aria-hidden="true"
+        name={name}
+        value={value}
+        required={required}
+        disabled={disabled}
+        onChange={() => {}}
+        onInvalid={(event) => {
+          event.preventDefault();
+          setError(true);
+          trigger.current?.focus();
+        }}
+      />
+      {error && (
+        <small id={errorId} role="alert" className="text-negative">
+          {value ? "올바른 값을 선택해 주세요." : "필수 항목을 선택해 주세요."}
+        </small>
+      )}
+    </>
+  );
+}
+
 export function DatePicker({
   label,
   value,
@@ -38,7 +90,6 @@ export function DatePicker({
   const [focusDay, setFocusDay] = useState("");
   const popover = useRef<HTMLDivElement>(null);
   const trigger = useRef<HTMLButtonElement>(null);
-  const input = useRef<HTMLInputElement>(null);
   const first = new Date(month + "-01T12:00:00Z");
   const start = new Date(first);
   start.setUTCDate(1 - first.getUTCDay());
@@ -51,13 +102,6 @@ export function DatePicker({
   const tabbableDay = days.some((day) => dateKey(day) === preferredDay)
     ? preferredDay
     : `${month}-01`;
-  useEffect(() => {
-    input.current?.setCustomValidity(
-      value && !parseDate(value)
-        ? "올바른 날짜를 입력해 주세요 (예: 2026-10-08)."
-        : "",
-    );
-  }, [value]);
   useEffect(() => {
     if (focusDay)
       popover.current
@@ -88,14 +132,22 @@ export function DatePicker({
       <div className="picker-control">
         <input
           id={id}
-          ref={input}
-          name={name}
           value={value}
-          onChange={(event) => onChange(event.target.value)}
+          readOnly
+          onClick={() => trigger.current?.click()}
+          onKeyDown={(event) => {
+            if (["Enter", " ", "ArrowDown"].includes(event.key)) {
+              event.preventDefault();
+              trigger.current?.click();
+            }
+          }}
+          aria-haspopup="dialog"
+          aria-controls={popoverId}
+          aria-describedby={`${id}-error`}
+          aria-required={required}
           placeholder="YYYY-MM-DD"
           pattern={datePattern}
           maxLength={10}
-          required={required}
           disabled={disabled}
           autoComplete="off"
           aria-label={`${label} (년-월-일)`}
@@ -116,6 +168,15 @@ export function DatePicker({
           <Icon name="calendar" size={19} />
         </button>
       </div>
+      <PickerValidation
+        value={value}
+        name={name}
+        required={required}
+        disabled={disabled}
+        valid={!!parseDate(value)}
+        trigger={trigger}
+        errorId={`${id}-error`}
+      />
       <div
         id={popoverId}
         ref={popover}
@@ -225,13 +286,22 @@ export function TimePicker({
       <div className="picker-control">
         <input
           id={id}
-          name={name}
           value={value}
-          onChange={(event) => onChange(event.target.value)}
+          readOnly
+          onClick={() => trigger.current?.click()}
+          onKeyDown={(event) => {
+            if (["Enter", " ", "ArrowDown"].includes(event.key)) {
+              event.preventDefault();
+              trigger.current?.click();
+            }
+          }}
+          aria-haspopup="dialog"
+          aria-controls={popoverId}
+          aria-describedby={`${id}-error`}
+          aria-required={required}
           placeholder="HH:MM"
           pattern={timePattern}
           maxLength={5}
-          required={required}
           disabled={disabled}
           autoComplete="off"
           aria-label={`${label} (24시간 시:분)`}
@@ -248,6 +318,15 @@ export function TimePicker({
           <Icon name="clock" size={19} />
         </button>
       </div>
+      <PickerValidation
+        value={value}
+        name={name}
+        required={required}
+        disabled={disabled}
+        valid={/^(?:[01]\d|2[0-3]):[0-5]\d$/.test(value)}
+        trigger={trigger}
+        errorId={`${id}-error`}
+      />
       <div
         id={popoverId}
         ref={popover}

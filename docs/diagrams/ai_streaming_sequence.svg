@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1350" viewBox="0 0 1600 1350" role="img"><title>실제 생성 스트리밍과 화면의 글자 표시</title><desc>OpenAI SSE는 내부 NDJSON으로 변환됩니다. 화면의 글자 애니메이션은 전송과 별개입니다.</desc><rect width="1600" height="1350" fill="#FCFAF7"/>
+<text x="40" y="49.94" font-family="Apple SD Gothic Neo,Noto Sans KR,sans-serif" font-size="17" font-weight="700" fill="#E76825">MOADAM / AI ENGINEERING</text>
+<text x="40" y="109.16" font-family="Apple SD Gothic Neo,Noto Sans KR,sans-serif" font-size="38" font-weight="700" fill="#302923">실제 생성 스트리밍과 화면의 글자 표시</text>
+<text x="40" y="147.4" font-family="Apple SD Gothic Neo,Noto Sans KR,sans-serif" font-size="20" font-weight="400" fill="#73685F">OpenAI SSE는 내부 NDJSON으로 변환됩니다. 화면의 글자 애니메이션은 전송과 별개입니다.</text>
+<rect x="40" y="190" width="240" height="88" rx="18" fill="#FFFFFF" stroke="#E8DFD5"/>
+<text x="60" y="226.86" font-family="Apple SD Gothic Neo,Noto Sans KR,sans-serif" font-size="23" font-weight="700" fill="#302923">브라우저</text>
+<text x="60" y="258.94" font-family="Apple SD Gothic Neo,Noto Sans KR,sans-serif" font-size="17" font-weight="400" fill="#73685F">React / RAF</text>
+<polyline points="160,295 160,1150" fill="none" stroke="#D3C8BD" stroke-width="2.5" stroke-linejoin="round" stroke-dasharray="7 9"/>
+<rect x="345" y="190" width="240" height="88" rx="18" fill="#FFFFFF" stroke="#E8DFD5"/>
+<text x="365" y="226.86" font-family="Apple SD Gothic Neo,Noto Sans KR,sans-serif" font-size="23" font-weight="700" fill="#302923">Next BFF</text>
+<text x="365" y="258.94" font-family="Apple SD Gothic Neo,Noto Sans KR,sans-serif" font-size="17" font-weight="400" fill="#73685F">ReadableStream</text>
+<polyline points="465,295 465,1150" fill="none" stroke="#D3C8BD" stroke-width="2.5" stroke-linejoin="round" stroke-dasharray="7 9"/>
+<rect x="650" y="190" width="240" height="88" rx="18" fill="#FFFFFF" stroke="#E8DFD5"/>
+<text x="670" y="226.86" font-family="Apple SD Gothic Neo,Noto Sans KR,sans-serif" font-size="23" font-weight="700" fill="#302923">Spring API</text>
+<text x="670" y="258.94" font-family="Apple SD Gothic Neo,Noto Sans KR,sans-serif" font-size="17" font-weight="400" fill="#73685F">flush / DB 저장</text>
+<polyline points="770,295 770,1150" fill="none" stroke="#D3C8BD" stroke-width="2.5" stroke-linejoin="round" stroke-dasharray="7 9"/>
+<rect x="955" y="190" width="240" height="88" rx="18" fill="#FFFFFF" stroke="#E8DFD5"/>
+<text x="975" y="226.86" font-family="Apple SD Gothic Neo,Noto Sans KR,sans-serif" font-size="23" font-weight="700" fill="#302923">FastAPI RAG</text>
+<text x="975" y="258.94" font-family="Apple SD Gothic Neo,Noto Sans KR,sans-serif" font-size="17" font-weight="400" fill="#73685F">AnswerDecoder</text>
+<polyline points="1075,295 1075,1150" fill="none" stroke="#D3C8BD" stroke-width="2.5" stroke-linejoin="round" stroke-dasharray="7 9"/>
+<rect x="1260" y="190" width="240" height="88" rx="18" fill="#FFFFFF" stroke="#E8DFD5"/>
+<text x="1280" y="226.86" font-family="Apple SD Gothic Neo,Noto Sans KR,sans-serif" font-size="23" font-weight="700" fill="#302923">OpenAI</text>
+<text x="1280" y="258.94" font-family="Apple SD Gothic Neo,Noto Sans KR,sans-serif" font-size="17" font-weight="400" fill="#73685F">SSE delta</text>
+<polyline points="1380,295 1380,1150" fill="none" stroke="#D3C8BD" stroke-width="2.5" stroke-linejoin="round" stroke-dasharray="7 9"/>
+<polyline points="160,335 465,335" fill="none" stroke="#E76825" stroke-width="2.5" stroke-linejoin="round"/>
+<polygon points="465.00,335.00 454.36,340.54 454.36,329.46" fill="#E76825"/>
+<text x="172" y="321.94" font-family="Apple SD Gothic Neo,Noto Sans KR,sans-serif" font-size="17" font-weight="700" fill="#E76825">질문 POST + 쿠키</text>
+<polyline points="465,397 770,397" fill="none" stroke="#E76825" stroke-width="2.5" stroke-linejoin="round"/>
+<polygon points="770.00,397.00 759.36,402.54 759.36,391.46" fill="#E76825"/>
+<text x="477" y="383.94" font-family="Apple SD Gothic Neo,Noto Sans KR,sans-serif" font-size="17" font-weight="700" fill="#E76825">Bearer JWT + 질문</text>
+<polyline points="770,459 1075,459" fill="none" stroke="#E76825" stroke-width="2.5" stroke-linejoin="round"/>
+<polygon points="1075.00,459.00 1064.36,464.54 1064.36,453.46" fill="#E76825"/>
+<text x="782" y="445.94" font-family="Apple SD Gothic Neo,Noto Sans KR,sans-serif" font-size="17" font-weight="700" fill="#E76825">내부 토큰 + 허용 문서 ID</text>
+<polyline points="1075,535 1380,535" fill="none" stroke="#E76825" stroke-width="2.5" stroke-linejoin="round"/>
+<polygon points="1380.00,535.00 1369.36,540.54 1369.36,529.46" fill="#E76825"/>
+<text x="1087" y="521.94" font-family="Apple SD Gothic Neo,Noto Sans KR,sans-serif" font-size="17" font-weight="700" fill="#E76825">질문 + 발췌 / stream=true</text>
+<polyline points="1380,616 1075,616" fill="none" stroke="#357A9A" stroke-width="2.5" stroke-linejoin="round"/>
+<polygon points="1075.00,616.00 1085.64,610.46 1085.64,621.54" fill="#357A9A"/>
+<text x="1087" y="602.94" font-family="Apple SD Gothic Neo,Noto Sans KR,sans-serif" font-size="17" font-weight="700" fill="#357A9A">SSE: JSON 문자열 조각</text>
+<polyline points="1075,695 770,695" fill="none" stroke="#357A9A" stroke-width="2.5" stroke-linejoin="round"/>
+<polygon points="770.00,695.00 780.64,689.46 780.64,700.54" fill="#357A9A"/>
+<text x="782" y="681.94" font-family="Apple SD Gothic Neo,Noto Sans KR,sans-serif" font-size="17" font-weight="700" fill="#357A9A">NDJSON: delta(text)</text>
+<polyline points="770,774 465,774" fill="none" stroke="#357A9A" stroke-width="2.5" stroke-linejoin="round"/>
+<polygon points="465.00,774.00 475.64,768.46 475.64,779.54" fill="#357A9A"/>
+<text x="477" y="760.94" font-family="Apple SD Gothic Neo,Noto Sans KR,sans-serif" font-size="17" font-weight="700" fill="#357A9A">이벤트마다 flush</text>
+<polyline points="465,853 160,853" fill="none" stroke="#357A9A" stroke-width="2.5" stroke-linejoin="round"/>
+<polygon points="160.00,853.00 170.64,847.46 170.64,858.54" fill="#357A9A"/>
+<text x="172" y="839.94" font-family="Apple SD Gothic Neo,Noto Sans KR,sans-serif" font-size="17" font-weight="700" fill="#357A9A">body를 버퍼링 없이 전달</text>
+<polyline points="1380,965 1075,965" fill="none" stroke="#357A9A" stroke-width="2.5" stroke-linejoin="round"/>
+<polygon points="1075.00,965.00 1085.64,959.46 1085.64,970.54" fill="#357A9A"/>
+<text x="1087" y="951.94" font-family="Apple SD Gothic Neo,Noto Sans KR,sans-serif" font-size="17" font-weight="700" fill="#357A9A">[DONE] → JSON · 인용 검증</text>
+<polyline points="1075,1044 770,1044" fill="none" stroke="#357A9A" stroke-width="2.5" stroke-linejoin="round"/>
+<polygon points="770.00,1044.00 780.64,1038.46 780.64,1049.54" fill="#357A9A"/>
+<text x="782" y="1030.94" font-family="Apple SD Gothic Neo,Noto Sans KR,sans-serif" font-size="17" font-weight="700" fill="#357A9A">검증된 최종 결과</text>
+<polyline points="770,1130 160,1130" fill="none" stroke="#357A9A" stroke-width="2.5" stroke-linejoin="round"/>
+<polygon points="160.00,1130.00 170.64,1124.46 170.64,1135.54" fill="#357A9A"/>
+<text x="172" y="1116.94" font-family="Apple SD Gothic Neo,Noto Sans KR,sans-serif" font-size="17" font-weight="700" fill="#357A9A">DB 저장 후 done(user, assistant)</text>
+<rect x="40" y="885" width="260" height="48" rx="10" fill="#FFF1E6" stroke="#F4D7C0"/>
+<text x="55" y="913.12" font-family="Apple SD Gothic Neo,Noto Sans KR,sans-serif" font-size="16" font-weight="700" fill="#E76825">UTF-8 복원 → 프레임별 표시</text>
+<rect x="658" y="1065" width="225" height="44" rx="10" fill="#EAF3F6" stroke="#DAE7ED"/>
+<text x="674" y="1091.12" font-family="Apple SD Gothic Neo,Noto Sans KR,sans-serif" font-size="16" font-weight="700" fill="#357A9A">권한 확인 + 원자적 저장</text>
+<rect x="40" y="1180" width="1490" height="125" rx="18" fill="#FFF1E6" stroke="#F4D7C0"/>
+<text x="62" y="1216.04" font-family="Apple SD Gothic Neo,Noto Sans KR,sans-serif" font-size="22" font-weight="700" fill="#302923">초안과 확정 답변</text>
+<text x="62" y="1250.58" font-family="Apple SD Gothic Neo,Noto Sans KR,sans-serif" font-size="19" font-weight="400" fill="#73685F">delta는 생성 중 초안입니다. 최종 인용·권한을 검증하고 저장한 뒤 done으로 확정합니다.</text>
+<text x="62" y="1280.58" font-family="Apple SD Gothic Neo,Noto Sans KR,sans-serif" font-size="19" font-weight="400" fill="#73685F">중지·오류 시 초안을 제거합니다. DB 커밋 직후 연결이 끊기면 저장됐을 수 있으므로 기록을 확인해야 합니다.</text>
+<text x="40" y="1332.3" font-family="Apple SD Gothic Neo,Noto Sans KR,sans-serif" font-size="15" font-weight="400" fill="#73685F">코드 기준: 2026-10-08 · 흐름도는 구현을 설명하며 운영 배포 구성을 보증하지 않습니다.</text>
+</svg>

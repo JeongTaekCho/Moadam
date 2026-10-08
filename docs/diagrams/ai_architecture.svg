@@ -1,0 +1,87 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1060" viewBox="0 0 1600 1060" role="img"><title>모아AI 전체 구성</title><desc>브라우저는 인증된 BFF를 호출하고, 검색과 모델 호출은 내부 RAG 서비스가 담당합니다.</desc><rect width="1600" height="1060" fill="#FCFAF7"/>
+<text x="40" y="49.94" font-family="Apple SD Gothic Neo,Noto Sans KR,sans-serif" font-size="17" font-weight="700" fill="#E76825">MOADAM / AI ENGINEERING</text>
+<text x="40" y="109.16" font-family="Apple SD Gothic Neo,Noto Sans KR,sans-serif" font-size="38" font-weight="700" fill="#302923">모아AI 전체 구성</text>
+<text x="40" y="147.4" font-family="Apple SD Gothic Neo,Noto Sans KR,sans-serif" font-size="20" font-weight="400" fill="#73685F">브라우저는 인증된 BFF를 호출하고, 검색과 모델 호출은 내부 RAG 서비스가 담당합니다.</text>
+<rect x="40" y="200" width="330" height="220" rx="18" fill="#FFFFFF" stroke="#E8DFD5"/>
+<rect x="60" y="220" width="38" height="32" rx="9" fill="#FFF1E6" stroke="#FFF1E6"/>
+<text x="70" y="239.94" font-family="Apple SD Gothic Neo,Noto Sans KR,sans-serif" font-size="17" font-weight="700" fill="#E76825">1</text>
+<text x="60" y="289.5" font-family="Apple SD Gothic Neo,Noto Sans KR,sans-serif" font-size="25" font-weight="700" fill="#302923">브라우저</text>
+<text x="60" y="326.58" font-family="Apple SD Gothic Neo,Noto Sans KR,sans-serif" font-size="19" font-weight="400" fill="#73685F">Next.js · React 채팅 UI</text>
+<text x="60" y="355.58" font-family="Apple SD Gothic Neo,Noto Sans KR,sans-serif" font-size="19" font-weight="400" fill="#73685F">질문 / 출처 / 대화 목록</text>
+<text x="60" y="384.58" font-family="Apple SD Gothic Neo,Noto Sans KR,sans-serif" font-size="19" font-weight="400" fill="#73685F">빠른 글자 표시와 취소</text>
+<rect x="425" y="200" width="330" height="220" rx="18" fill="#FFFFFF" stroke="#E8DFD5"/>
+<rect x="445" y="220" width="38" height="32" rx="9" fill="#FFF1E6" stroke="#FFF1E6"/>
+<text x="455" y="239.94" font-family="Apple SD Gothic Neo,Noto Sans KR,sans-serif" font-size="17" font-weight="700" fill="#E76825">2</text>
+<text x="445" y="289.5" font-family="Apple SD Gothic Neo,Noto Sans KR,sans-serif" font-size="25" font-weight="700" fill="#302923">Next BFF</text>
+<text x="445" y="326.58" font-family="Apple SD Gothic Neo,Noto Sans KR,sans-serif" font-size="19" font-weight="400" fill="#73685F">HttpOnly 쿠키 → Bearer</text>
+<text x="445" y="355.58" font-family="Apple SD Gothic Neo,Noto Sans KR,sans-serif" font-size="19" font-weight="400" fill="#73685F">Origin 검증 / 세션 갱신</text>
+<text x="445" y="384.58" font-family="Apple SD Gothic Neo,Noto Sans KR,sans-serif" font-size="19" font-weight="400" fill="#73685F">응답 body를 직접 전달</text>
+<rect x="810" y="200" width="330" height="220" rx="18" fill="#FFFFFF" stroke="#E8DFD5"/>
+<rect x="830" y="220" width="38" height="32" rx="9" fill="#FFF1E6" stroke="#FFF1E6"/>
+<text x="840" y="239.94" font-family="Apple SD Gothic Neo,Noto Sans KR,sans-serif" font-size="17" font-weight="700" fill="#E76825">3</text>
+<text x="830" y="289.5" font-family="Apple SD Gothic Neo,Noto Sans KR,sans-serif" font-size="25" font-weight="700" fill="#302923">Spring API</text>
+<text x="830" y="326.58" font-family="Apple SD Gothic Neo,Noto Sans KR,sans-serif" font-size="19" font-weight="400" fill="#73685F">JWT · 모임 · 개인 대화 검증</text>
+<text x="830" y="355.58" font-family="Apple SD Gothic Neo,Noto Sans KR,sans-serif" font-size="19" font-weight="400" fill="#73685F">허용 문서 목록 / 원자적 저장</text>
+<text x="830" y="384.58" font-family="Apple SD Gothic Neo,Noto Sans KR,sans-serif" font-size="19" font-weight="400" fill="#73685F">내부 RAG 호출과 flush</text>
+<rect x="1195" y="200" width="330" height="220" rx="18" fill="#FFFFFF" stroke="#E8DFD5"/>
+<rect x="1215" y="220" width="38" height="32" rx="9" fill="#FFF1E6" stroke="#FFF1E6"/>
+<text x="1225" y="239.94" font-family="Apple SD Gothic Neo,Noto Sans KR,sans-serif" font-size="17" font-weight="700" fill="#E76825">4</text>
+<text x="1215" y="289.5" font-family="Apple SD Gothic Neo,Noto Sans KR,sans-serif" font-size="25" font-weight="700" fill="#302923">FastAPI RAG</text>
+<text x="1215" y="326.58" font-family="Apple SD Gothic Neo,Noto Sans KR,sans-serif" font-size="19" font-weight="400" fill="#73685F">문서 처리 / 벡터 검색</text>
+<text x="1215" y="355.58" font-family="Apple SD Gothic Neo,Noto Sans KR,sans-serif" font-size="19" font-weight="400" fill="#73685F">프롬프트 / 인용 재검증</text>
+<text x="1215" y="384.58" font-family="Apple SD Gothic Neo,Noto Sans KR,sans-serif" font-size="19" font-weight="400" fill="#73685F">SSE → NDJSON 변환</text>
+<polyline points="370,310 425,310" fill="none" stroke="#E76825" stroke-width="2.5" stroke-linejoin="round"/>
+<polygon points="425.00,310.00 414.36,315.54 414.36,304.46" fill="#E76825"/>
+<polyline points="755,310 810,310" fill="none" stroke="#E76825" stroke-width="2.5" stroke-linejoin="round"/>
+<polygon points="810.00,310.00 799.36,315.54 799.36,304.46" fill="#E76825"/>
+<polyline points="1140,310 1195,310" fill="none" stroke="#E76825" stroke-width="2.5" stroke-linejoin="round"/>
+<polygon points="1195.00,310.00 1184.36,315.54 1184.36,304.46" fill="#E76825"/>
+<rect x="40" y="580" width="330" height="220" rx="18" fill="#FFFFFF" stroke="#E8DFD5"/>
+<rect x="60" y="600" width="38" height="32" rx="9" fill="#FFF1E6" stroke="#FFF1E6"/>
+<text x="70" y="619.94" font-family="Apple SD Gothic Neo,Noto Sans KR,sans-serif" font-size="17" font-weight="700" fill="#357A9A">●</text>
+<text x="60" y="669.5" font-family="Apple SD Gothic Neo,Noto Sans KR,sans-serif" font-size="25" font-weight="700" fill="#302923">비공개 Storage</text>
+<text x="60" y="706.58" font-family="Apple SD Gothic Neo,Noto Sans KR,sans-serif" font-size="19" font-weight="400" fill="#73685F">group-documents</text>
+<text x="60" y="735.58" font-family="Apple SD Gothic Neo,Noto Sans KR,sans-serif" font-size="19" font-weight="400" fill="#73685F">PDF 원본 저장</text>
+<text x="60" y="764.58" font-family="Apple SD Gothic Neo,Noto Sans KR,sans-serif" font-size="19" font-weight="400" fill="#73685F">권한 확인 후 서명 URL</text>
+<rect x="425" y="580" width="330" height="220" rx="18" fill="#FFFFFF" stroke="#E8DFD5"/>
+<rect x="445" y="600" width="38" height="32" rx="9" fill="#FFF1E6" stroke="#FFF1E6"/>
+<text x="455" y="619.94" font-family="Apple SD Gothic Neo,Noto Sans KR,sans-serif" font-size="17" font-weight="700" fill="#357A9A">●</text>
+<text x="445" y="669.5" font-family="Apple SD Gothic Neo,Noto Sans KR,sans-serif" font-size="25" font-weight="700" fill="#302923">Supabase Auth</text>
+<text x="445" y="706.58" font-family="Apple SD Gothic Neo,Noto Sans KR,sans-serif" font-size="19" font-weight="400" fill="#73685F">로그인 / OAuth / 토큰</text>
+<text x="445" y="735.58" font-family="Apple SD Gothic Neo,Noto Sans KR,sans-serif" font-size="19" font-weight="400" fill="#73685F">Spring이 서명 검증</text>
+<text x="445" y="764.58" font-family="Apple SD Gothic Neo,Noto Sans KR,sans-serif" font-size="19" font-weight="400" fill="#73685F">모임 권한은 별도 DB 검사</text>
+<rect x="810" y="580" width="330" height="220" rx="18" fill="#FFFFFF" stroke="#E8DFD5"/>
+<rect x="830" y="600" width="38" height="32" rx="9" fill="#FFF1E6" stroke="#FFF1E6"/>
+<text x="840" y="619.94" font-family="Apple SD Gothic Neo,Noto Sans KR,sans-serif" font-size="17" font-weight="700" fill="#357A9A">●</text>
+<text x="830" y="669.5" font-family="Apple SD Gothic Neo,Noto Sans KR,sans-serif" font-size="25" font-weight="700" fill="#302923">Postgres + pgvector</text>
+<text x="830" y="706.58" font-family="Apple SD Gothic Neo,Noto Sans KR,sans-serif" font-size="19" font-weight="400" fill="#73685F">문서 / vector(1536) 청크</text>
+<text x="830" y="735.58" font-family="Apple SD Gothic Neo,Noto Sans KR,sans-serif" font-size="19" font-weight="400" fill="#73685F">모임 멤버십 / 개인 세션</text>
+<text x="830" y="764.58" font-family="Apple SD Gothic Neo,Noto Sans KR,sans-serif" font-size="19" font-weight="400" fill="#73685F">질문 · 답변 · 출처 저장</text>
+<rect x="1195" y="580" width="330" height="220" rx="18" fill="#FFFFFF" stroke="#E8DFD5"/>
+<rect x="1215" y="600" width="38" height="32" rx="9" fill="#FFF1E6" stroke="#FFF1E6"/>
+<text x="1225" y="619.94" font-family="Apple SD Gothic Neo,Noto Sans KR,sans-serif" font-size="17" font-weight="700" fill="#357A9A">●</text>
+<text x="1215" y="669.5" font-family="Apple SD Gothic Neo,Noto Sans KR,sans-serif" font-size="25" font-weight="700" fill="#302923">OpenAI</text>
+<text x="1215" y="706.58" font-family="Apple SD Gothic Neo,Noto Sans KR,sans-serif" font-size="19" font-weight="400" fill="#73685F">text-embedding-3-small</text>
+<text x="1215" y="735.58" font-family="Apple SD Gothic Neo,Noto Sans KR,sans-serif" font-size="19" font-weight="400" fill="#73685F">gpt-4.1-mini</text>
+<text x="1215" y="764.58" font-family="Apple SD Gothic Neo,Noto Sans KR,sans-serif" font-size="19" font-weight="400" fill="#73685F">질문과 발췌 → JSON 답변</text>
+<polyline points="590,420 590,580" fill="none" stroke="#357A9A" stroke-width="2.5" stroke-linejoin="round"/>
+<polygon points="590.00,580.00 584.46,569.36 595.54,569.36" fill="#357A9A"/>
+<text x="608" y="509.76" font-family="Apple SD Gothic Neo,Noto Sans KR,sans-serif" font-size="18" font-weight="400" fill="#357A9A">토큰</text>
+<polyline points="975,420 975,580" fill="none" stroke="#357A9A" stroke-width="2.5" stroke-linejoin="round"/>
+<polygon points="975.00,580.00 969.46,569.36 980.54,569.36" fill="#357A9A"/>
+<text x="993" y="509.76" font-family="Apple SD Gothic Neo,Noto Sans KR,sans-serif" font-size="18" font-weight="400" fill="#357A9A">SQL</text>
+<polyline points="1360,420 1360,580" fill="none" stroke="#357A9A" stroke-width="2.5" stroke-linejoin="round"/>
+<polygon points="1360.00,580.00 1354.46,569.36 1365.54,569.36" fill="#357A9A"/>
+<text x="1378" y="509.76" font-family="Apple SD Gothic Neo,Noto Sans KR,sans-serif" font-size="18" font-weight="400" fill="#357A9A">모델 호출</text>
+<polyline points="1260,420 1260,452 205,452 205,580" fill="none" stroke="#357A9A" stroke-width="2.5" stroke-linejoin="round"/>
+<polygon points="205.00,580.00 199.46,569.36 210.54,569.36" fill="#357A9A"/>
+<text x="62" y="482.76" font-family="Apple SD Gothic Neo,Noto Sans KR,sans-serif" font-size="18" font-weight="400" fill="#357A9A">PDF 읽기</text>
+<polyline points="1195,382 1173,382 1173,545 1050,545 1050,580" fill="none" stroke="#357A9A" stroke-width="2.5" stroke-linejoin="round"/>
+<polygon points="1050.00,580.00 1044.46,569.36 1055.54,569.36" fill="#357A9A"/>
+<text x="1005" y="531.76" font-family="Apple SD Gothic Neo,Noto Sans KR,sans-serif" font-size="18" font-weight="400" fill="#357A9A">모임 범위 검색</text>
+<rect x="40" y="840" width="1490" height="125" rx="18" fill="#FFF1E6" stroke="#F4D7C0"/>
+<text x="62" y="876.04" font-family="Apple SD Gothic Neo,Noto Sans KR,sans-serif" font-size="22" font-weight="700" fill="#302923">데이터 범위</text>
+<text x="62" y="910.58" font-family="Apple SD Gothic Neo,Noto Sans KR,sans-serif" font-size="19" font-weight="400" fill="#73685F">AI의 검색 대상은 현재 모임의 ready 상태 · 현재 버전 PDF/메모 청크입니다.</text>
+<text x="62" y="940.58" font-family="Apple SD Gothic Neo,Noto Sans KR,sans-serif" font-size="19" font-weight="400" fill="#73685F">커뮤니티 글·댓글·일정은 현재 AI 색인 대상이 아니며, 저장된 이전 대화도 모델 입력에 포함하지 않습니다.</text>
+<text x="40" y="1042.3" font-family="Apple SD Gothic Neo,Noto Sans KR,sans-serif" font-size="15" font-weight="400" fill="#73685F">코드 기준: 2026-10-08 · 흐름도는 구현을 설명하며 운영 배포 구성을 보증하지 않습니다.</text>
+</svg>

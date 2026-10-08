@@ -85,4 +85,16 @@ pnpm api:types:live  # 실행 중인 Spring 계약
 pnpm typecheck
 ```
 
-자동 테스트는 이번 UI 개편에서 추가/실행하지 않았습니다. TypeScript 컴파일과 production build를 확인합니다. 실제 사용자 로그인·모바일 브라우저 사용 전체 검증은 별도 확인이 필요합니다.
+TypeScript 컴파일과 production build를 확인합니다. OAuth와 프로필 API에는 별도 통합 검증 스크립트를 제공합니다. 실제 브라우저 클릭·모바일 시각 검수는 별도 확인이 필요합니다.
+
+## Google 소셜 로그인
+
+Google OAuth 로그인과 `/login/callback`을 구현했습니다. Supabase Google Provider를 활성화하고 Google Cloud Web OAuth 클라이언트를 등록한 뒤 사용할 수 있습니다. [프로젝트별 상세 설정 안내](GOOGLE_LOGIN_SETUP.md)를 참고하세요. Google 콘솔에는 Supabase의 `/auth/v1/callback`, Supabase Redirect URLs에는 앱의 `/login/callback`을 등록합니다.
+
+## 마이페이지
+
+로그인한 회원은 `/mypage`에서 닉네임·프로필 사진을 변경하고 계정 정보 및 작성한 글·등록한 자료를 확인할 수 있습니다. 글·댓글·자료·일정·멤버 목록은 공통 프로필로 작성자를 표시합니다. [설정 및 검증 안내](PROFILE_SETUP.md)를 참고하세요.
+
+## 모아AI 스트리밍
+
+모델 답변이 생성되는 대로 글자를 빠르게 표시하며 완료 후 자료 출처와 대화를 저장합니다. 화면 갱신을 프레임당 한 번으로 묶고 전송 취소를 지원합니다. [구현·운영·검증 안내](STREAMING_AI.md)를 참고하세요.

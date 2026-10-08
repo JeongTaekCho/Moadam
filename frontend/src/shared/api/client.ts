@@ -1,4 +1,7 @@
 import type { components } from "./generated-api";
+export type PublicProfile = components["schemas"]["PublicProfile"];
+export type MyProfile = components["schemas"]["MyProfile"];
+export type MyActivity = components["schemas"]["MyActivity"];
 export type Group = components["schemas"]["Group"];
 export type Post = components["schemas"]["Post"];
 export type Comment = components["schemas"]["Comment"];

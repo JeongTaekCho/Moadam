@@ -5,13 +5,37 @@ import { QuestionComposer } from "@/features/ask-question";
 import { api, type Page } from "@/shared/api";
 
 import { Button, Icon } from "@/shared/ui";
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef } from "react";
 import type { WorkspaceModel } from "../model/use-workspace";
 export function ChatView({ model: m }: { model: WorkspaceModel }) {
-  const end = useRef<HTMLDivElement>(null);
+  const viewport = useRef<HTMLDivElement>(null);
+  const follow = useRef(true);
+  const openDocument = useRef(m.openDocument);
   useEffect(() => {
-    end.current?.scrollIntoView({ behavior: "auto", block: "nearest" });
-  }, [m.messages.length, m.busy]);
+    openDocument.current = m.openDocument;
+  }, [m.openDocument]);
+  const onSource = useCallback((id: string) => {
+    void openDocument.current(id);
+  }, []);
+  const scrollToLatest = useCallback(() => {
+    if (follow.current && viewport.current)
+      viewport.current.scrollTop = viewport.current.scrollHeight;
+  }, []);
+  useLayoutEffect(() => {
+    follow.current = true;
+    scrollToLatest();
+    // The assistant dialog may become visible after this component mounts.
+    const frame = requestAnimationFrame(scrollToLatest);
+    return () => cancelAnimationFrame(frame);
+  }, [m.sessionId, m.groupId, scrollToLatest]);
+  useLayoutEffect(scrollToLatest, [m.messages, m.busy, scrollToLatest]);
+  useEffect(() => {
+    const element = viewport.current;
+    if (!element) return;
+    const observer = new ResizeObserver(scrollToLatest);
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, [scrollToLatest]);
   const ready = m.documents.filter((d) => d.status === "ready").length;
   return (
     <section className="chat-workspace">
@@ -40,7 +64,10 @@ export function ChatView({ model: m }: { model: WorkspaceModel }) {
                 className={m.sessionId === s.id ? "active" : ""}
                 key={s.id}
                 disabled={m.busy}
-                onClick={() => void m.openSession(s.id)}
+                onClick={() => {
+                  follow.current = true;
+                  void m.openSession(s.id);
+                }}
               >
                 <Icon name="chat" size={16} />
                 <span>
@@ -102,7 +129,18 @@ export function ChatView({ model: m }: { model: WorkspaceModel }) {
             )}
           </div>
         </div>
-        <div className="chat-scroll" aria-live="polite" aria-busy={m.busy}>
+        <div
+          className="chat-scroll"
+          aria-live="polite"
+          aria-busy={m.busy}
+          ref={viewport}
+          onScroll={(event) => {
+            const element = event.currentTarget;
+            follow.current =
+              element.scrollHeight - element.scrollTop - element.clientHeight <
+              100;
+          }}
+        >
           {m.messagePage > 0 && (
             <Button
               size="small"
@@ -126,7 +164,8 @@ export function ChatView({ model: m }: { model: WorkspaceModel }) {
               <ChatMessage
                 key={message.id}
                 message={message}
-                onSource={(id) => void m.openDocument(id)}
+                onSource={onSource}
+                streaming={message.id === m.streamingId}
               />
             ))
           ) : (
@@ -183,17 +222,28 @@ export function ChatView({ model: m }: { model: WorkspaceModel }) {
               )}
             </div>
           )}
-          {m.busy && (
-            <div className="thinking-status" role="status">
-              <Icon name="spark" size={18} />
-              <span>모임 자료에서 근거를 찾고 있어요</span>
-              <span className="thinking-dots">•••</span>
-            </div>
-          )}
-          <div ref={end} />
+          {m.busy &&
+            !m.messages.find((message) => message.id === m.streamingId)
+              ?.content && (
+              <div className="thinking-status" role="status">
+                <Icon name="spark" size={18} />
+                <span>
+                  {m.streamStage === "retrieving"
+                    ? "모임 자료에서 근거를 찾고 있어요"
+                    : m.streamStage === "saving"
+                      ? "답변을 마무리하고 있어요"
+                      : "답변을 작성하고 있어요"}
+                </span>
+                <span className="thinking-dots">•••</span>
+              </div>
+            )}
         </div>
         <div className="chat-composer-area">
-          <QuestionComposer busy={m.busy} onSend={m.sendQuestion} />
+          <QuestionComposer
+            busy={m.busy}
+            onSend={m.sendQuestion}
+            onStop={m.streamingId ? m.cancelAnswer : undefined}
+          />
           <p className="chat-disclaimer">
             답변이 정확한지 인용된 자료에서 확인해 주세요. 근거가 부족한 내용은
             안내해드려요.

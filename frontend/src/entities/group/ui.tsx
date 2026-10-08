@@ -1,7 +1,7 @@
 "use client";
 import type { Group } from "./model";
 
-import { Select } from "@/shared/ui";
+import { CustomSelect } from "@/shared/ui";
 export function GroupSwitcher({
   groups,
   current,
@@ -12,16 +12,12 @@ export function GroupSwitcher({
   onChange: (id: string) => void;
 }) {
   return (
-    <Select
+    <CustomSelect
       label="현재 모임"
+      icon="people"
       value={current}
-      onChange={(e) => onChange(e.target.value)}
-    >
-      {groups.map((g) => (
-        <option key={g.id} value={g.id}>
-          {g.name}
-        </option>
-      ))}
-    </Select>
+      onChange={onChange}
+      options={groups.map((g) => ({ value: g.id, label: g.name }))}
+    />
   );
 }

@@ -1,1 +1,1 @@
-export { authenticate, logout } from "./api/session";
+export { authenticate, logout, signInWithGoogle } from "./api/session";

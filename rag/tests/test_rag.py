@@ -106,4 +106,75 @@ class RagTests(unittest.TestCase):
         self.assertEqual(r.json()['retrieval']['reason'],'out_of_scope')
         self.assertFalse(any('from document_chunks' in sql for sql,_ in self.conn.queries))
 
+    def test_stream_decoder_handles_split_korean_escapes_and_emoji(self):
+        import json
+        text='한글\n"인용" 😀 끝'
+        payload=json.dumps({'answer':text,'grounded':True,'chunk_ids':[]},ensure_ascii=True)
+        decoder=rag.AnswerDecoder()
+        self.assertEqual(''.join(decoder.feed(char) for char in payload),text)
+
+    def test_mock_stream_has_deltas_and_authoritative_done(self):
+        with patch.object(rag,'db',return_value=self.conn):
+            r=self.client.post('/query/stream',json=self.body,headers=self.headers)
+        import json
+        events=[json.loads(line) for line in r.text.splitlines()]
+        self.assertEqual(r.headers['content-type'],'application/x-ndjson')
+        self.assertEqual(events[-1]['type'],'done')
+        self.assertEqual(''.join(e['text'] for e in events if e['type']=='delta'),events[-1]['result']['answer'])
+        self.assertTrue(events[-1]['result']['grounded'])
+        self.assertEqual(self.client.post('/query/stream',json=self.body).status_code,401)
+
+    def test_openai_stream_yields_before_generation_finishes(self):
+        import asyncio,json
+        finished=False
+        class Response:
+            def raise_for_status(self): pass
+            async def __aenter__(self): return self
+            async def __aexit__(self,*args): pass
+            async def aiter_lines(inner):
+                nonlocal finished
+                chunk=str(next(row['id'] for row in self.conn.result))
+                yield 'data: '+json.dumps({'choices':[{'delta':{'content':'{"answer":"회의는 금요일'}}]})
+                await asyncio.sleep(0)
+                yield 'data: '+json.dumps({'choices':[{'delta':{'content':'입니다.","grounded":true,"chunk_ids":["'+chunk+'"]}'},'finish_reason':'stop'}]})
+                finished=True
+                yield 'data: [DONE]'
+        class Client:
+            async def __aenter__(self):return self
+            async def __aexit__(self,*args):pass
+            def stream(inner,*args,**kwargs):
+                self.assertTrue(kwargs['json']['stream']); return Response()
+        async def check():
+            req=rag.QueryRequest(**self.body)
+            self.assertTrue(rag.slots.acquire(blocking=False))
+            events=[]
+            async for line in rag.query_events(req):
+                event=json.loads(line);events.append(event)
+                if event['type']=='delta' and len([e for e in events if e['type']=='delta'])==1:
+                    self.assertFalse(finished)
+            self.assertEqual(events[-1]['type'],'done')
+            self.assertEqual(events[-1]['result']['answer'],'회의는 금요일입니다.')
+        with patch.object(rag,'db',return_value=self.conn),patch.object(rag.settings,'rag_provider','openai'),patch.object(rag,'embed',return_value=[[0.0]*1536]),patch.object(rag.httpx,'AsyncClient',return_value=Client()):
+            asyncio.run(check())
+
+    def test_truncated_provider_stream_is_error_not_done(self):
+        import asyncio,json
+        class Response:
+            def raise_for_status(self): pass
+            async def __aenter__(self):return self
+            async def __aexit__(self,*args):pass
+            async def aiter_lines(self):
+                yield 'data: '+json.dumps({'choices':[{'delta':{'content':'{"answer":"미완성'}}]})
+        class Client:
+            async def __aenter__(self):return self
+            async def __aexit__(self,*args):pass
+            def stream(self,*args,**kwargs):return Response()
+        async def check():
+            self.assertTrue(rag.slots.acquire(blocking=False))
+            events=[json.loads(line) async for line in rag.query_events(rag.QueryRequest(**self.body))]
+            self.assertEqual(events[-1]['type'],'error')
+            self.assertFalse(any(e['type']=='done' for e in events))
+        with patch.object(rag,'db',return_value=self.conn),patch.object(rag.settings,'rag_provider','openai'),patch.object(rag,'embed',return_value=[[0.0]*1536]),patch.object(rag.httpx,'AsyncClient',return_value=Client()):
+            asyncio.run(check())
+
 if __name__=='__main__':unittest.main()

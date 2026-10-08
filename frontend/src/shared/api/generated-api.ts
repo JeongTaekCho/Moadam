@@ -20,6 +20,22 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  "/api/v1/me/avatar": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations["upload"];
+    delete: operations["clearAvatar"];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   "/api/v1/invites/join": {
     parameters: {
       query?: never;
@@ -173,7 +189,7 @@ export interface paths {
     };
     get?: never;
     put?: never;
-    post: operations["upload"];
+    post: operations["upload_1"];
     delete?: never;
     options?: never;
     head?: never;
@@ -210,6 +226,38 @@ export interface paths {
     options?: never;
     head?: never;
     patch?: never;
+    trace?: never;
+  };
+  "/api/v1/groups/{g}/chat/sessions/{id}/messages/stream": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post: operations["ask_1"];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/me": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["me"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch: operations["update"];
     trace?: never;
   };
   "/api/v1/groups/{g}": {
@@ -308,14 +356,30 @@ export interface paths {
     patch: operations["updateDocument"];
     trace?: never;
   };
-  "/api/v1/me": {
+  "/api/v1/profiles/{id}/avatar": {
     parameters: {
       query?: never;
       header?: never;
       path?: never;
       cookie?: never;
     };
-    get: operations["me"];
+    get: operations["avatar"];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  "/api/v1/me/activity": {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get: operations["activity"];
     put?: never;
     post?: never;
     delete?: never;
@@ -411,6 +475,17 @@ export interface components {
     AttendanceInput: {
       status: string;
     };
+    MyProfile: {
+      /** Format: uuid */
+      id: string;
+      email: string;
+      display_name: string;
+      avatar_url: string | null;
+      /** Format: date-time */
+      created_at: string;
+      /** Format: date-time */
+      updated_at: string;
+    };
     JoinInput: {
       token: string;
     };
@@ -442,6 +517,7 @@ export interface components {
       group_id: string;
       /** Format: uuid */
       author_id: string;
+      author: components["schemas"]["PublicProfile"];
       title: string;
       body: string;
       /** @enum {string} */
@@ -450,6 +526,12 @@ export interface components {
       created_at: string;
       /** Format: date-time */
       updated_at: string;
+    };
+    PublicProfile: {
+      /** Format: uuid */
+      id: string;
+      display_name: string;
+      avatar_url: string | null;
     };
     CommentInput: {
       body: string;
@@ -463,6 +545,7 @@ export interface components {
       post_id: string;
       /** Format: uuid */
       author_id: string;
+      author: components["schemas"]["PublicProfile"];
       body: string;
       /** Format: date-time */
       created_at: string;
@@ -485,6 +568,7 @@ export interface components {
       group_id: string;
       /** Format: uuid */
       author_id: string;
+      author: components["schemas"]["PublicProfile"];
       title: string;
       description: string;
       location: string;
@@ -509,6 +593,7 @@ export interface components {
       group_id: string;
       /** Format: uuid */
       author_id: string;
+      author: components["schemas"]["PublicProfile"];
       title: string;
       /** @enum {string} */
       kind: "pdf" | "memo";
@@ -577,12 +662,36 @@ export interface components {
       /** Format: uuid */
       chunk_id: string;
     };
+    StreamingResponseBody: unknown;
+    ProfileInput: {
+      display_name: string;
+    };
     RoleInput: {
       role: string;
     };
     DocumentInput: {
       title: string;
       text?: string;
+    };
+    MyActivity: {
+      /** Format: uuid */
+      id: string;
+      /** Format: uuid */
+      group_id: string;
+      group_name: string;
+      title: string;
+      kind: string;
+      /** Format: date-time */
+      created_at: string;
+    };
+    PageMyActivity: {
+      items?: components["schemas"]["MyActivity"][];
+      /** Format: int32 */
+      page?: number;
+      /** Format: int32 */
+      size?: number;
+      /** Format: int64 */
+      total?: number;
     };
     PageGroup: {
       items?: components["schemas"]["Group"][];
@@ -616,6 +725,7 @@ export interface components {
       group_id: string;
       /** Format: uuid */
       user_id: string;
+      profile: components["schemas"]["PublicProfile"];
       /** @enum {string} */
       role: "owner" | "admin" | "member";
       /** Format: date-time */
@@ -763,6 +873,53 @@ export interface operations {
           "*/*": {
             [key: string]: boolean;
           };
+        };
+      };
+    };
+  };
+  upload: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        "multipart/form-data": {
+          /** Format: binary */
+          file: string;
+        };
+      };
+    };
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "*/*": components["schemas"]["MyProfile"];
+        };
+      };
+    };
+  };
+  clearAvatar: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "*/*": components["schemas"]["MyProfile"];
         };
       };
     };
@@ -1140,7 +1297,7 @@ export interface operations {
       };
     };
   };
-  upload: {
+  upload_1: {
     parameters: {
       query?: never;
       header?: never;
@@ -1266,6 +1423,77 @@ export interface operations {
         };
         content: {
           "*/*": components["schemas"]["Answer"];
+        };
+      };
+    };
+  };
+  ask_1: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        g: string;
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["QuestionInput"];
+      };
+    };
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "application/x-ndjson": components["schemas"]["StreamingResponseBody"];
+        };
+      };
+    };
+  };
+  me: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "*/*": components["schemas"]["MyProfile"];
+        };
+      };
+    };
+  };
+  update: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        "application/json": components["schemas"]["ProfileInput"];
+      };
+    };
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "*/*": components["schemas"]["MyProfile"];
         };
       };
     };
@@ -1675,9 +1903,35 @@ export interface operations {
       };
     };
   };
-  me: {
+  avatar: {
     parameters: {
       query?: never;
+      header?: never;
+      path: {
+        id: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description OK */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          "*/*": string;
+        };
+      };
+    };
+  };
+  activity: {
+    parameters: {
+      query?: {
+        type?: string;
+        page?: number;
+        size?: number;
+      };
       header?: never;
       path?: never;
       cookie?: never;
@@ -1690,9 +1944,7 @@ export interface operations {
           [name: string]: unknown;
         };
         content: {
-          "*/*": {
-            [key: string]: unknown;
-          };
+          "*/*": components["schemas"]["PageMyActivity"];
         };
       };
     };

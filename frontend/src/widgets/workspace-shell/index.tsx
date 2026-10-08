@@ -1,10 +1,11 @@
 "use client";
+import type { MyProfile } from "@/shared/api";
 import type { Group } from "@/entities/group";
 import { GroupSwitcher } from "@/entities/group";
 
 import { viewPaths, type View } from "@/shared/config/navigation";
 import Link from "next/link";
-import { Badge, BrandLogo, Dialog, Icon } from "@/shared/ui";
+import { Avatar, Badge, BrandLogo, Dialog, Icon } from "@/shared/ui";
 import type { IconName } from "@/shared/ui/icon";
 import { useState, type ReactNode } from "react";
 const primary: { view: View; label: string; icon: IconName }[] = [
@@ -15,10 +16,15 @@ const primary: { view: View; label: string; icon: IconName }[] = [
   { view: "일정", label: "일정", icon: "calendar" },
 ];
 const secondary: typeof primary = [
+  { view: "마이페이지", label: "마이페이지", icon: "people" },
   { view: "멤버", label: "멤버 · 초대", icon: "people" },
   { view: "설정", label: "모임 설정", icon: "settings" },
 ];
 const titles: Record<View, { title: string; description: string }> = {
+  마이페이지: {
+    title: "나의 모아담",
+    description: "프로필을 꾸미고, 함께 남긴 기록을 살펴보세요.",
+  },
   홈: {
     title: "모임의 오늘, 함께 살펴봐요",
     description: "이야기와 일정, 쌓아온 지식을 한곳에서.",
@@ -49,6 +55,7 @@ const titles: Record<View, { title: string; description: string }> = {
   },
 };
 type Props = {
+  profile: MyProfile | null;
   groups: Group[];
   group?: Group;
   groupId: string;
@@ -91,11 +98,11 @@ export function WorkspaceShell(p: Props) {
             }
             scroll={false}
             aria-current={p.view === x.view ? "page" : undefined}
-            aria-disabled={!p.groupId}
+            aria-disabled={!p.groupId && x.view !== "마이페이지"}
             className={p.view === x.view ? "active" : ""}
             onNavigate={(event) => {
               event.preventDefault();
-              if (p.groupId) navigate(x.view);
+              if (p.groupId || x.view === "마이페이지") navigate(x.view);
             }}
           >
             <Icon name={x.icon} />
@@ -147,15 +154,25 @@ export function WorkspaceShell(p: Props) {
         <button
           className="account-button"
           disabled={p.busy}
+          onClick={() => navigate("마이페이지")}
+        >
+          <Avatar
+            name={p.profile?.display_name || "내 계정"}
+            src={p.profile?.avatar_url}
+          />
+          <span>
+            {p.profile?.display_name || "내 계정"}
+            <small>프로필과 내 활동 보기</small>
+          </span>
+          <Icon name="chevron" size={17} />
+        </button>
+        <button
+          className="account-logout"
+          disabled={p.busy}
           onClick={p.onLogout}
         >
-          <span className="profile-avatar">
-            <Icon name="smile" size={18} />
-          </span>
-          <span>
-            내 계정<small>안전하게 로그아웃</small>
-          </span>
-          <Icon name="logout" size={17} />
+          <Icon name="logout" size={15} />
+          로그아웃
         </button>
       </div>
     </>
@@ -211,7 +228,7 @@ export function WorkspaceShell(p: Props) {
               <h1>{titles[p.view].title}</h1>
               <p className="muted">{titles[p.view].description}</p>
             </div>
-            {p.group?.role === "owner" ? (
+            {p.view !== "마이페이지" && p.group?.role === "owner" ? (
               <span
                 className="inline-flex size-10 shrink-0 items-center justify-center rounded-full border border-brand-200 bg-brand-50 text-brand-600"
                 role="img"
@@ -221,6 +238,7 @@ export function WorkspaceShell(p: Props) {
                 <Icon name="crown" size={22} />
               </span>
             ) : (
+              p.view !== "마이페이지" &&
               p.group && (
                 <Badge tone="brand">
                   <span className="profile-avatar compact">

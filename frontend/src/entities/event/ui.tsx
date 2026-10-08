@@ -1,7 +1,7 @@
 "use client";
 import type { Event } from "./model";
 
-import { Card } from "@/shared/ui";
+import { Card, UserIdentity } from "@/shared/ui";
 import { koreaDateKey, koreaDateParts } from "@/shared/lib/form";
 const KOREA_TIME_ZONE = "Asia/Seoul";
 export function formatTime(value: string) {
@@ -43,6 +43,11 @@ export function EventCard({
         </button>
         <p>{formatTime(event.starts_at)}</p>
         <small>{event.location || "장소 미정"}</small>
+        <UserIdentity
+          profile={event.author}
+          id={event.author_id}
+          label="등록자"
+        />
       </div>
     </Card>
   );
