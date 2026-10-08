@@ -2,51 +2,61 @@
 import { DocumentRow } from "@/entities/document";
 import { EventCard } from "@/entities/event";
 import { PostCard } from "@/entities/post";
-import { Badge, Button, Card, EmptyState, Icon } from "@/shared/ui";
+import {
+  Badge,
+  Button,
+  Card,
+  EmptyState,
+  Icon,
+  MoaAiIcon,
+  PageIllustration,
+} from "@/shared/ui";
 import type { WorkspaceModel } from "../model/use-workspace";
 export function HomeView({ model: m }: { model: WorkspaceModel }) {
   const notices = m.posts.filter((p) => p.kind === "notice");
   const stories = m.posts.filter((p) => p.kind !== "notice");
   return (
     <div className="dashboard">
-      <section className="knowledge-hero">
+      <section className="knowledge-hero illustrated-knowledge-hero">
+        <PageIllustration variant="home" className="knowledge-hero-art" />
         <div className="hero-topline">
           <span className="hero-tag">
-            <Icon name="spark" size={16} />
-            우리 모임의 지식, 바로 찾아보세요
+            <MoaAiIcon size={20} />
+            모임에 대한 궁금증, 모아AI와 함께
           </span>
           <span className="hero-private">
             <Icon name="lock" size={14} />
-            모임 자료 기반
+            개인 대화
           </span>
         </div>
         <h2>
-          궁금한 순간,
+          {m.group?.name ?? "우리"} 모임이 궁금할 때,
           <br />
-          함께 쌓은 지식이 답이 돼요.
+          모아AI에 물어보세요.
         </h2>
-        <p>PDF와 메모에서 필요한 내용을 찾고, 출처까지 확인하세요.</p>
+        <p>모임에 대해 궁금한 점을 모아AI에 질문하세요.</p>
         <button className="hero-question" onClick={() => m.changeView("챗봇")}>
-          <Icon name="search" />
-          <span>우리 모임 자료에 무엇이 궁금하세요?</span>
+          <MoaAiIcon size={24} />
+          <span>{m.group?.name ?? "우리"} 모임에 대해 무엇이 궁금하세요?</span>
           <span className="hero-question-arrow">
             <Icon name="arrow" size={19} />
           </span>
         </button>
         <div className="hero-prompts">
           <span>이렇게 물어보세요</span>
-          {["자료의 핵심 내용을 요약해줘", "다음 모임 준비사항을 알려줘"].map(
-            (q) => (
-              <button
-                key={q}
-                disabled={m.busy}
-                onClick={() => void m.sendQuestion(q)}
-              >
-                {q}
-                <Icon name="arrow" size={13} />
-              </button>
-            ),
-          )}
+          {[
+            "우리 모임의 주요 내용을 정리해줘",
+            "다음 모임 준비사항을 알려줘",
+          ].map((q) => (
+            <button
+              key={q}
+              disabled={m.busy}
+              onClick={() => void m.sendQuestion(q)}
+            >
+              {q}
+              <Icon name="arrow" size={13} />
+            </button>
+          ))}
         </div>
       </section>
       <div className="dashboard-columns">
@@ -133,7 +143,7 @@ export function HomeView({ model: m }: { model: WorkspaceModel }) {
               ) : (
                 <EmptyState
                   title="우리 모임의 첫 자료를 기다려요"
-                  description="PDF나 메모를 등록하면 모아AI가 함께 찾아드려요."
+                  description="함께 볼 PDF나 메모를 등록해 보세요."
                 />
               )}
             </div>
@@ -201,7 +211,7 @@ export function HomeView({ model: m }: { model: WorkspaceModel }) {
             <button onClick={() => m.changeView("챗봇")}>
               <span className="step-number">2</span>
               <span>
-                궁금한 내용을 물어봐요<small>자료의 근거와 함께 답변</small>
+                궁금한 내용을 물어봐요<small>모임에 대한 질문은 모아AI에</small>
               </span>
               <Icon name="arrow" size={15} />
             </button>

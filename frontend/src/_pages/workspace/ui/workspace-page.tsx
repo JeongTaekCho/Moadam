@@ -12,6 +12,7 @@ import {
   Icon,
   Toast,
   Dialog,
+  MoaAiIcon,
 } from "@/shared/ui";
 import { WorkspaceShell } from "@/widgets/workspace-shell";
 import { useWorkspace } from "../model/use-workspace";
@@ -187,6 +188,7 @@ export function WorkspacePage({
       {assistantOpen && m.groupId && (
         <Dialog
           title="모아AI"
+          icon={<MoaAiIcon size={28} />}
           className="assistant-dialog"
           onClose={() => setAssistantOpen(false)}
         >

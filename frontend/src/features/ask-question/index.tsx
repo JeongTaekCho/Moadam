@@ -3,10 +3,12 @@ import { Button, Icon } from "@/shared/ui";
 import { useRef, useState } from "react";
 export function QuestionComposer({
   busy,
+  groupName,
   onSend,
   onStop,
 }: {
   busy: boolean;
+  groupName?: string;
   onSend: (question: string) => Promise<boolean>;
   onStop?: () => void;
 }) {
@@ -24,13 +26,17 @@ export function QuestionComposer({
       }}
     >
       <label htmlFor="chat-question" className="sr-only">
-        모임 자료에 질문하기
+        모임에 대해 모아AI에 질문하기
       </label>
       <textarea
         id="chat-question"
         value={question}
         onChange={(e) => setQuestion(e.target.value)}
-        placeholder="모임 자료에서 무엇이 궁금하세요?"
+        placeholder={
+          groupName
+            ? `${groupName} 모임에 대해 무엇이 궁금하세요?`
+            : "모임에 대해 궁금한 점을 질문하세요."
+        }
         maxLength={4000}
         required
         disabled={busy}
@@ -48,9 +54,7 @@ export function QuestionComposer({
       />
       <div className="composer-footer">
         <span>
-          {busy
-            ? "자료를 찾고 답변을 정리하고 있어요…"
-            : "⌘ / Ctrl + Enter로 전송"}
+          {busy ? "답변을 준비하고 있어요…" : "⌘ / Ctrl + Enter로 전송"}
         </span>
         {onStop ? (
           <Button type="button" variant="secondary" onClick={onStop}>

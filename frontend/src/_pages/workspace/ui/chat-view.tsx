@@ -4,7 +4,7 @@ import { ChatMessage } from "@/entities/chat";
 import { QuestionComposer } from "@/features/ask-question";
 import { api, type Page } from "@/shared/api";
 
-import { Button, Icon } from "@/shared/ui";
+import { Button, Icon, MoaAiIcon, PageIllustration } from "@/shared/ui";
 import { useCallback, useEffect, useLayoutEffect, useRef } from "react";
 import type { WorkspaceModel } from "../model/use-workspace";
 export function ChatView({ model: m }: { model: WorkspaceModel }) {
@@ -36,7 +36,6 @@ export function ChatView({ model: m }: { model: WorkspaceModel }) {
     observer.observe(element);
     return () => observer.disconnect();
   }, [scrollToLatest]);
-  const ready = m.documents.filter((d) => d.status === "ready").length;
   return (
     <section className="chat-workspace">
       <aside className="conversation-sidebar">
@@ -91,16 +90,14 @@ export function ChatView({ model: m }: { model: WorkspaceModel }) {
           onClick={() => m.changeView("자료")}
         >
           <Icon name="file" size={18} />
-          <span>
-            모임 자료 보관함<small>현재 목록에서 {ready}개 사용 가능</small>
-          </span>
+          <span>모임 자료</span>
           <Icon name="arrow" size={15} />
         </button>
       </aside>
       <div className="chat-panel">
         <div className="chat-panel-header">
           <span className="row">
-            <span className="assistant-dot" />
+            <MoaAiIcon size={24} />
             모아AI
           </span>
           <div className="row">
@@ -170,66 +167,26 @@ export function ChatView({ model: m }: { model: WorkspaceModel }) {
             ))
           ) : (
             <div className="chat-welcome">
-              <span className="assistant-emblem">
-                <Icon name="spark" size={30} />
-              </span>
-              <p className="eyebrow">YOUR KNOWLEDGE, CONNECTED</p>
-              <h2>
-                함께 쌓은 자료에서
+              <PageIllustration
+                variant="assistant"
+                className="chat-welcome-art"
+              />
+              <h2 className="sr-only">모아AI에 질문하기</h2>
+              <p className="chat-welcome-copy">
+                {m.group?.name ?? "현재"} 모임에 대해 궁금한 점을
                 <br />
-                답을 찾아볼까요?
-              </h2>
-              <p>
-                궁금한 점을 편하게 질문하세요.
-                <br />
-                모임 자료를 읽고, 출처와 함께 정리해드려요.
+                모아AI에 질문하세요.
               </p>
-              <div className="suggestion-grid">
-                {[
-                  {
-                    icon: "file" as const,
-                    title: "핵심만 빠르게",
-                    q: "등록된 자료의 핵심 내용을 요약해줘",
-                  },
-                  {
-                    icon: "posts" as const,
-                    title: "쉽게 이해하기",
-                    q: "자료의 주요 내용을 처음 보는 사람도 이해하도록 설명해줘",
-                  },
-                  {
-                    icon: "calendar" as const,
-                    title: "실행할 일 찾기",
-                    q: "자료에서 준비하거나 해야 할 일을 정리해줘",
-                  },
-                ].map((x) => (
-                  <button
-                    key={x.title}
-                    disabled={m.busy}
-                    onClick={() => void m.sendQuestion(x.q)}
-                  >
-                    <Icon name={x.icon} size={19} />
-                    <strong>{x.title}</strong>
-                    <span>{x.q}</span>
-                    <Icon name="arrow" size={15} />
-                  </button>
-                ))}
-              </div>
-              {ready === 0 && (
-                <p className="chat-document-hint">
-                  사용 가능한 자료가 없다면 보관함에서 처리 상태를 확인해
-                  주세요.
-                </p>
-              )}
             </div>
           )}
           {m.busy &&
             !m.messages.find((message) => message.id === m.streamingId)
               ?.content && (
               <div className="thinking-status" role="status">
-                <Icon name="spark" size={18} />
+                <MoaAiIcon size={20} />
                 <span>
                   {m.streamStage === "retrieving"
-                    ? "모임 자료에서 근거를 찾고 있어요"
+                    ? "모임에 대해 확인하고 있어요"
                     : m.streamStage === "saving"
                       ? "답변을 마무리하고 있어요"
                       : "답변을 작성하고 있어요"}
@@ -241,13 +198,11 @@ export function ChatView({ model: m }: { model: WorkspaceModel }) {
         <div className="chat-composer-area">
           <QuestionComposer
             busy={m.busy}
+            groupName={m.group?.name}
             onSend={m.sendQuestion}
             onStop={m.streamingId ? m.cancelAnswer : undefined}
           />
-          <p className="chat-disclaimer">
-            답변이 정확한지 인용된 자료에서 확인해 주세요. 근거가 부족한 내용은
-            안내해드려요.
-          </p>
+          <p className="chat-disclaimer">답변의 출처를 함께 확인해 주세요.</p>
         </div>
       </div>
     </section>

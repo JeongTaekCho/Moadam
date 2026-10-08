@@ -176,6 +176,7 @@ export function CommunityView({ model }: { model: WorkspaceModel }) {
               ) : (
                 <Card>
                   <EmptyState
+                    illustration="community"
                     title={
                       posts.length
                         ? "조건에 맞는 글이 없어요"

@@ -14,6 +14,7 @@ import {
   FilterChips,
   Icon,
   ListSearch,
+  MoaAiIcon,
 } from "@/shared/ui";
 import { useState } from "react";
 import type { WorkspaceModel } from "../model/use-workspace";
@@ -87,7 +88,7 @@ export function DocumentsView({ model }: { model: WorkspaceModel }) {
                     )
                   }
                 >
-                  <Icon name="spark" size={16} />이 자료에 질문하기
+                  <MoaAiIcon size={20} />이 자료에 질문하기
                 </Button>
               )}
               {admin && (
@@ -184,6 +185,7 @@ export function DocumentsView({ model }: { model: WorkspaceModel }) {
               ) : (
                 <Card>
                   <EmptyState
+                    illustration="documents"
                     title={
                       documents.length
                         ? "조건에 맞는 자료가 없어요"

@@ -2,7 +2,7 @@
 import type { Citation, Message } from "./model";
 import { memo } from "react";
 
-import { Icon, Markdown } from "@/shared/ui";
+import { Icon, Markdown, MoaAiIcon } from "@/shared/ui";
 export function CitationList({
   citations,
   onOpen,
@@ -39,7 +39,7 @@ export const ChatMessage = memo(function ChatMessage({
   return (
     <div className={`message ${message.role}`} aria-busy={streaming}>
       <small>
-        {message.role === "assistant" && <Icon name="spark" size={14} />}{" "}
+        {message.role === "assistant" && <MoaAiIcon size={20} />}{" "}
         {message.role === "user" ? "나" : "모아AI"}
         {streaming
           ? " · 답변 작성 중"

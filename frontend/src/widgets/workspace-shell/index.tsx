@@ -5,12 +5,25 @@ import { GroupSwitcher } from "@/entities/group";
 
 import { viewPaths, type View } from "@/shared/config/navigation";
 import Link from "next/link";
-import { Avatar, Badge, BrandLogo, Dialog, Icon } from "@/shared/ui";
+import {
+  Avatar,
+  Badge,
+  BrandLogo,
+  Dialog,
+  Icon,
+  MoaAiIcon,
+  PageIllustration,
+  type IllustrationScene,
+} from "@/shared/ui";
 import type { IconName } from "@/shared/ui/icon";
 import { useState, type ReactNode } from "react";
-const primary: { view: View; label: string; icon: IconName }[] = [
+type NavigationItem = { view: View; label: string; icon: IconName | "moa-ai" };
+function NavigationIcon({ name }: { name: NavigationItem["icon"] }) {
+  return name === "moa-ai" ? <MoaAiIcon size={24} /> : <Icon name={name} />;
+}
+const primary: NavigationItem[] = [
   { view: "홈", label: "모임 홈", icon: "home" },
-  { view: "챗봇", label: "모아AI", icon: "spark" },
+  { view: "챗봇", label: "모아AI", icon: "moa-ai" },
   { view: "자료", label: "자료 보관함", icon: "file" },
   { view: "커뮤니티", label: "커뮤니티", icon: "posts" },
   { view: "일정", label: "일정", icon: "calendar" },
@@ -20,6 +33,16 @@ const secondary: typeof primary = [
   { view: "멤버", label: "멤버 · 초대", icon: "people" },
   { view: "설정", label: "모임 설정", icon: "settings" },
 ];
+const scenes: Record<View, IllustrationScene> = {
+  홈: "home",
+  챗봇: "assistant",
+  자료: "documents",
+  커뮤니티: "community",
+  일정: "calendar",
+  멤버: "members",
+  마이페이지: "profile",
+  설정: "settings",
+};
 const titles: Record<View, { title: string; description: string }> = {
   마이페이지: {
     title: "나의 모아담",
@@ -31,7 +54,7 @@ const titles: Record<View, { title: string; description: string }> = {
   },
   챗봇: {
     title: "모아AI",
-    description: "모임 자료를 바탕으로 답하고, 근거를 함께 보여드려요.",
+    description: "모임에 대해 궁금한 점을 모아AI에 질문하세요.",
   },
   자료: {
     title: "자료 보관함",
@@ -85,7 +108,7 @@ export function WorkspaceShell(p: Props) {
             onClick={() => navigate(x.view)}
             disabled={!p.groupId}
           >
-            <Icon name={x.icon} />
+            <NavigationIcon name={x.icon} />
             <span>{x.label}</span>
             <span className="nav-ai">AI</span>
           </button>
@@ -105,7 +128,7 @@ export function WorkspaceShell(p: Props) {
               if (p.groupId || x.view === "마이페이지") navigate(x.view);
             }}
           >
-            <Icon name={x.icon} />
+            <NavigationIcon name={x.icon} />
             <span>{x.label}</span>
           </Link>
         ),
@@ -214,20 +237,23 @@ export function WorkspaceShell(p: Props) {
           id="workspace-main"
           tabIndex={-1}
         >
-          <header className="page-header">
+          <header
+            key={p.view}
+            className={`page-header illustrated-page-header page-scene-${scenes[p.view]}`}
+          >
             <div>
-              <p className="eyebrow">
-                {p.view === "홈"
-                  ? "OUR WORKSPACE"
-                  : p.view === "챗봇"
-                    ? "KNOWLEDGE ASSISTANT"
-                    : p.view === "자료"
-                      ? "KNOWLEDGE LIBRARY"
-                      : "TOGETHER IN MOADAM"}
-              </p>
               <h1>{titles[p.view].title}</h1>
-              <p className="muted">{titles[p.view].description}</p>
+              <p className="muted">
+                {p.view === "챗봇" && p.group
+                  ? `${p.group.name} 모임에 대해 궁금한 점을 모아AI에 질문하세요.`
+                  : titles[p.view].description}
+              </p>
             </div>
+            {p.view !== "홈" && (
+              <div className="page-header-art">
+                <PageIllustration variant={scenes[p.view]} />
+              </div>
+            )}
             {p.view !== "마이페이지" && p.group?.role === "owner" ? (
               <span
                 className="inline-flex size-10 shrink-0 items-center justify-center rounded-full border border-brand-200 bg-brand-50 text-brand-600"
@@ -267,7 +293,7 @@ export function WorkspaceShell(p: Props) {
             className={p.view === x.view ? "active" : ""}
             onClick={() => navigate(x.view)}
           >
-            <Icon name={x.icon} />
+            <NavigationIcon name={x.icon} />
             <span>
               {x.view === "챗봇"
                 ? "모아AI"
@@ -289,15 +315,11 @@ export function WorkspaceShell(p: Props) {
           aria-label="모아AI 열기"
         >
           <span className="assistant-fab__mascot" aria-hidden="true">
-            <Icon name="smile" size={23} />
-            <i>✦</i>
+            <MoaAiIcon size={46} />
           </span>
           <span className="assistant-fab__copy">
             <strong>모아AI</strong>
-            <small>궁금한 걸 물어봐요</small>
-          </span>
-          <span className="assistant-fab__sparkle" aria-hidden="true">
-            ✧
+            <small>모임에 대해 물어봐요</small>
           </span>
         </button>
       )}

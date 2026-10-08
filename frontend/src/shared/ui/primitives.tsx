@@ -1,5 +1,6 @@
 "use client";
 import Image from "next/image";
+import { PageIllustration, type IllustrationScene } from "./page-illustration";
 import {
   useEffect,
   useId,
@@ -187,11 +188,13 @@ export function Card({
 }
 export function Dialog({
   title,
+  icon,
   children,
   onClose,
   className = "",
 }: {
   title: string;
+  icon?: ReactNode;
   children: ReactNode;
   onClose: () => void;
   className?: string;
@@ -223,7 +226,10 @@ export function Dialog({
       }}
     >
       <div className="row between">
-        <h2>{title}</h2>
+        <h2 className={icon ? "dialog-title" : undefined}>
+          {icon}
+          {title}
+        </h2>
         <Button variant="ghost" onClick={onClose} aria-label="닫기">
           ✕
         </Button>
@@ -323,12 +329,20 @@ export function Toast({ message }: { message: string }) {
 export function EmptyState({
   title,
   description,
+  illustration,
 }: {
   title: string;
   description: string;
+  illustration?: IllustrationScene;
 }) {
   return (
     <div className="empty">
+      {illustration && (
+        <PageIllustration
+          variant={illustration}
+          className="empty-illustration"
+        />
+      )}
       <h3>{title}</h3>
       <p className="muted">{description}</p>
     </div>

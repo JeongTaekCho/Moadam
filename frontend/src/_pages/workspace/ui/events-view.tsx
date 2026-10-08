@@ -143,6 +143,7 @@ export function EventsView({ model }: { model: WorkspaceModel }) {
             ) : (
               <Card>
                 <EmptyState
+                  illustration="calendar"
                   title="일정이 없어요"
                   description="모임의 다음 만남을 기록해 보세요."
                 />

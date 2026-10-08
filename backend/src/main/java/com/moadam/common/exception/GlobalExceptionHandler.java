@@ -11,6 +11,8 @@ import org.springframework.web.server.ResponseStatusException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+  private static final org.slf4j.Logger log =
+      org.slf4j.LoggerFactory.getLogger(GlobalExceptionHandler.class);
   @ExceptionHandler(Exception.class)
   ResponseEntity<Map<String, String>> handle(
       Exception e, jakarta.servlet.http.HttpServletRequest request) {
@@ -32,6 +34,13 @@ public class GlobalExceptionHandler {
                         org.springframework.http.converter.HttpMessageNotReadableException
                 ? 400
                 : 500;
+    String requestId =
+        Objects.toString(request.getAttribute("requestId"), UUID.randomUUID().toString());
+    if (status >= 500) {
+      log.error(
+          "Request failed: requestId={} method={} path={} status={}",
+          requestId, request.getMethod(), request.getRequestURI(), status, e);
+    }
     String message =
         status == 403
             ? "이 작업을 수행할 권한이 없습니다"
@@ -48,6 +57,6 @@ public class GlobalExceptionHandler {
                 "message",
                 message,
                 "requestId",
-                Objects.toString(request.getAttribute("requestId"), UUID.randomUUID().toString())));
+                requestId));
   }
 }

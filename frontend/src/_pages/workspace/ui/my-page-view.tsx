@@ -3,7 +3,6 @@ import { useEffect, useRef, useState } from "react";
 import { api, type MyProfile, type MyActivity, type Page } from "@/shared/api";
 import {
   Avatar,
-  Badge,
   Button,
   Card,
   EmptyState,
@@ -68,11 +67,7 @@ export function MyPageView({ model: m }: { model: WorkspaceModel }) {
               <Icon name="camera" size={14} />
             </span>
           </button>
-          <div>
-            <Badge tone="brand">나의 프로필</Badge>
-            <h2>{profile.display_name}</h2>
-            <p className="muted">함께하는 사람들에게 보여지는 내 모습이에요.</p>
-          </div>
+          <h2>{profile.display_name}</h2>
         </div>
         <input
           ref={fileRef}
@@ -158,7 +153,10 @@ export function MyPageView({ model: m }: { model: WorkspaceModel }) {
           <Button loading={m.busy}>프로필 저장</Button>
         </form>
         <div className="profile-account-info">
-          <h3>내 계정 정보</h3>
+          <h3 className="mypage-section-icon" title="내 계정 정보">
+            <Icon name="lock" size={18} />
+            <span className="sr-only">내 계정 정보</span>
+          </h3>
           <dl>
             <dt>이메일</dt>
             <dd>{profile.email || "이메일 정보 없음"}</dd>
@@ -178,9 +176,9 @@ export function MyPageView({ model: m }: { model: WorkspaceModel }) {
       </Card>
       <Card className="my-activity-card">
         <div className="section-heading">
-          <h2>
+          <h2 className="mypage-section-icon" title="내가 남긴 기록">
             <Icon name="posts" size={19} />
-            내가 남긴 기록
+            <span className="sr-only">내가 남긴 기록</span>
           </h2>
         </div>
         <div className="filter-chips" role="group" aria-label="내 활동 종류">
@@ -277,6 +275,7 @@ export function MyPageView({ model: m }: { model: WorkspaceModel }) {
           </>
         ) : (
           <EmptyState
+            illustration={kind === "posts" ? "community" : "documents"}
             title={
               kind === "posts"
                 ? "아직 작성한 글이 없어요"

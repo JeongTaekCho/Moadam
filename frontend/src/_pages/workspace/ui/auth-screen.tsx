@@ -9,6 +9,8 @@ import {
   Tabs,
   TextField,
   Toast,
+  MoaAiIcon,
+  PageIllustration,
 } from "@/shared/ui";
 import type { WorkspaceModel } from "../model/use-workspace";
 export function AuthScreen({ model: m }: { model: WorkspaceModel }) {
@@ -19,6 +21,7 @@ export function AuthScreen({ model: m }: { model: WorkspaceModel }) {
           <BrandLogo />
         </div>
         <div className="auth-story-content">
+          <PageIllustration variant="welcome" className="auth-welcome-art" />
           <p className="eyebrow">A SPACE FOR YOUR PEOPLE</p>
           <h1>
             함께 나눈 이야기,
@@ -35,7 +38,7 @@ export function AuthScreen({ model: m }: { model: WorkspaceModel }) {
           <div className="auth-preview" aria-label="서비스 이용 예시">
             <div className="row between">
               <span>
-                <Icon name="spark" size={18} /> 모아AI와 함께하는 모임
+                <MoaAiIcon size={20} /> 모아AI와 함께하는 모임
               </span>
               <span className="preview-live">이용 예시</span>
             </div>
@@ -70,6 +73,7 @@ export function AuthScreen({ model: m }: { model: WorkspaceModel }) {
         <div className="auth-form-box">
           <span className="auth-mobile-brand">
             <BrandLogo />
+            <PageIllustration variant="welcome" className="auth-mobile-art" />
           </span>
           <p className="eyebrow">WELCOME TO MOADAM</p>
           <h2>
