@@ -14,7 +14,9 @@
     "test:oauth": "node scripts/oauth-smoke.mjs",
     "test:profile": "node --env-file=../.env scripts/profile-smoke.mjs",
     "test:chat-stream": "node scripts/chat-stream-smoke.mjs",
-    "test:chat-live": "node --env-file=../.env scripts/chat-live-smoke.mjs"
+    "test:chat-live": "node --env-file=../.env scripts/chat-live-smoke.mjs",
+    "test:cache": "node scripts/cache-smoke.mjs",
+    "test:performance": "node scripts/performance-smoke.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "2.117.2",
@@ -31,6 +33,7 @@
     "@types/react": "19.2.14",
     "@types/react-dom": "19.2.3",
     "openapi-typescript": "7.13.0",
+    "playwright": "1.58.2",
     "postcss": "^8.5.29",
     "prettier": "3.8.3",
     "tailwindcss": "^4.3.3",

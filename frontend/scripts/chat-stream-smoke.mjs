@@ -12,7 +12,7 @@ const directory = await mkdtemp(join(tmpdir(), "moadam-stream-"));
 let next;
 const backend = createServer();
 try {
-  for (const name of ["client", "chat-stream"]) {
+  for (const name of ["request-cache", "client", "chat-stream"]) {
     const source = await readFile(
       new URL(`../src/shared/api/${name}.ts`, import.meta.url),
       "utf8",

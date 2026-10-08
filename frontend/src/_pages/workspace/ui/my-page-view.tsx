@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import {
   ApiError,
   api,
+  invalidateApiCache,
   type MyProfile,
   type MyActivity,
   type Page,
@@ -16,6 +17,7 @@ import {
   Icon,
   TextField,
 } from "@/shared/ui";
+import { ContentSkeleton } from "@/shared/ui/skeleton";
 import type { WorkspaceModel } from "../model/use-workspace";
 
 export function MyPageView({ model: m }: { model: WorkspaceModel }) {
@@ -119,6 +121,7 @@ export function MyPageView({ model: m }: { model: WorkspaceModel }) {
               const result = await response.json();
               if (!response.ok)
                 throw new Error(result.message || "사진을 저장하지 못했습니다");
+              invalidateApiCache();
               m.setProfile(result as MyProfile);
               m.notify("프로필 사진을 변경했습니다");
             });
@@ -225,17 +228,18 @@ export function MyPageView({ model: m }: { model: WorkspaceModel }) {
           현재 참여 중인 모든 모임의 내 기록을 확인할 수 있어요.
         </p>
         {error ? (
-          <ErrorState message={error} onRetry={() => setReload(reload + 1)} />
+          <ErrorState
+            message={error}
+            onRetry={() => {
+              invalidateApiCache();
+              setReload(reload + 1);
+            }}
+          />
         ) : loading ? (
-          <div
-            className="view-skeleton"
-            role="status"
-            aria-label="내 활동을 불러오는 중"
-          >
-            {[0, 1, 2].map((i) => (
-              <div key={i} className="skeleton-block" />
-            ))}
-          </div>
+          <ContentSkeleton
+            view="마이페이지"
+            label="내 활동을 불러오고 있어요"
+          />
         ) : activity?.items.length ? (
           <>
             <div className="my-activity-list">

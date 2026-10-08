@@ -3680,3 +3680,117 @@
     }
   }
 }
+
+@layer components {
+  .content-skeleton {
+    display: grid;
+    gap: 24px;
+    width: 100%;
+    padding: 8px 0;
+  }
+  .skeleton-shimmer {
+    background: linear-gradient(
+      100deg,
+      var(--brand-soft) 20%,
+      var(--surface) 45%,
+      var(--brand-soft) 70%
+    );
+    background-size: 220% 100%;
+    animation: skeleton-sweep 1.6s ease-in-out infinite;
+    border-radius: 10px;
+  }
+  .skeleton-heading {
+    height: 36px;
+    width: min(300px, 65%);
+  }
+  .skeleton-cards {
+    display: grid;
+    gap: 16px;
+  }
+  .skeleton-home .skeleton-cards {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .skeleton-card {
+    display: grid;
+    gap: 16px;
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 24px;
+    background: var(--surface);
+  }
+  .skeleton-line {
+    height: 16px;
+    width: 85%;
+  }
+  .skeleton-line:first-child {
+    width: 50%;
+    height: 24px;
+  }
+  .skeleton-line:last-child {
+    width: 65%;
+  }
+  .skeleton-home .skeleton-card {
+    min-height: 220px;
+    align-content: start;
+  }
+  .skeleton-calendar .skeleton-card {
+    min-height: 150px;
+  }
+  .workspace-boot-skeleton {
+    min-height: 100dvh;
+    display: grid;
+    grid-template-columns: 244px minmax(0, 1fr);
+    background: var(--background);
+  }
+  .workspace-boot-skeleton > aside {
+    border-right: 1px solid var(--border);
+    padding: 32px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  .skeleton-group {
+    height: 48px;
+    margin: 20px 0;
+  }
+  .skeleton-nav {
+    height: 38px;
+  }
+  .workspace-boot-skeleton > section {
+    padding: 28px 40px;
+  }
+  .skeleton-topbar {
+    height: 42px;
+    margin-bottom: 52px;
+  }
+  @media (max-width: 800px) {
+    .workspace-boot-skeleton {
+      grid-template-columns: 1fr;
+    }
+    .workspace-boot-skeleton > aside {
+      display: none;
+    }
+    .workspace-boot-skeleton > section {
+      padding: 24px 20px;
+    }
+    .skeleton-home .skeleton-cards {
+      grid-template-columns: 1fr;
+    }
+    .skeleton-home .skeleton-card {
+      min-height: 140px;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .skeleton-shimmer {
+      animation: none;
+    }
+  }
+}
+@keyframes skeleton-sweep {
+  from {
+    background-position: 100% 0;
+  }
+  to {
+    background-position: -100% 0;
+  }
+}

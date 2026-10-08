@@ -114,6 +114,7 @@ export function WorkspaceShell(p: Props) {
           </button>
         ) : (
           <Link
+            prefetch={false}
             key={x.view}
             href={
               viewPaths[x.view] +

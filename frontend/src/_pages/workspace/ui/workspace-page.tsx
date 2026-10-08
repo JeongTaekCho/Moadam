@@ -1,10 +1,10 @@
 "use client";
 import { logout } from "@/features/auth";
-import { EditorDialog } from "@/features/content-editor";
+import dynamic from "next/dynamic";
+import { ContentSkeleton, WorkspaceSkeleton } from "@/shared/ui/skeleton";
 import { api, setApiScope } from "@/shared/api";
 import {
   Button,
-  BrandLogo,
   Card,
   ConfirmDialog,
   EmptyState,
@@ -17,17 +17,43 @@ import {
 import { WorkspaceShell } from "@/widgets/workspace-shell";
 import { useWorkspace } from "../model/use-workspace";
 import { AuthScreen } from "./auth-screen";
-import { ChatView } from "./chat-view";
-import { CommunityView } from "./community-view";
-import { DocumentsView } from "./documents-view";
-import { EventsView } from "./events-view";
-import { MyPageView } from "./my-page-view";
+const ChatView = dynamic(
+  () => import("./chat-view").then((module) => module.ChatView),
+  { loading: () => <ContentSkeleton view="챗봇" /> },
+);
+const CommunityView = dynamic(
+  () => import("./community-view").then((module) => module.CommunityView),
+  { loading: () => <ContentSkeleton view="커뮤니티" /> },
+);
+const DocumentsView = dynamic(
+  () => import("./documents-view").then((module) => module.DocumentsView),
+  { loading: () => <ContentSkeleton view="자료" /> },
+);
+const EventsView = dynamic(
+  () => import("./events-view").then((module) => module.EventsView),
+  { loading: () => <ContentSkeleton view="일정" /> },
+);
+const MyPageView = dynamic(
+  () => import("./my-page-view").then((module) => module.MyPageView),
+  { loading: () => <ContentSkeleton view="마이페이지" /> },
+);
 import { HomeView } from "./home-view";
-import { MembersView } from "./members-view";
-import { SettingsView } from "./settings-view";
-import { useEffect, useState } from "react";
+const MembersView = dynamic(
+  () => import("./members-view").then((module) => module.MembersView),
+  { loading: () => <ContentSkeleton view="멤버" /> },
+);
+const SettingsView = dynamic(
+  () => import("./settings-view").then((module) => module.SettingsView),
+  { loading: () => <ContentSkeleton view="설정" /> },
+);
+import { useEffect, useState, lazy, Suspense } from "react";
 import { usePathname } from "next/navigation";
 import { viewFromPath } from "@/shared/config/navigation";
+const EditorDialog = lazy(() =>
+  import("@/features/content-editor/ui/editor-dialog").then((module) => ({
+    default: module.EditorDialog,
+  })),
+);
 export function WorkspacePage({
   initialView = "홈",
   hasSession = false,
@@ -62,19 +88,7 @@ export function WorkspacePage({
   useEffect(() => {
     if (m.signed && viewFromPath(pathname) === "챗봇") setAssistantOpen(true);
   }, [pathname, m.signed]);
-  if (m.boot)
-    return (
-      <main className="boot-screen">
-        <div className="brand">
-          <BrandLogo />
-        </div>
-        <p>모임의 공간을 준비하고 있어요</p>
-        <div className="loading-inline" role="status" aria-live="polite">
-          <span className="loading-spinner" aria-hidden="true" />
-          <span>로그인 상태를 확인하고 있어요</span>
-        </div>
-      </main>
-    );
+  if (m.boot) return <WorkspaceSkeleton />;
   if (!m.signed) return <AuthScreen model={m} />;
   return (
     <>
@@ -109,7 +123,7 @@ export function WorkspacePage({
         }
       >
         {m.error && (
-          <ErrorState message={m.error} onRetry={() => void m.load()} />
+          <ErrorState message={m.error} onRetry={() => void m.load(true)} />
         )}{" "}
         {!m.groupId && m.view !== "마이페이지" ? (
           <Card className="no-group">
@@ -134,16 +148,7 @@ export function WorkspacePage({
             </div>
           </Card>
         ) : !m.viewReady && !m.error ? (
-          <div
-            className="view-skeleton"
-            role="status"
-            aria-label="화면을 불러오고 있어요"
-          >
-            <span className="sr-only">화면을 불러오고 있어요</span>
-            {[0, 1, 2, 3].map((i) => (
-              <div key={i} className="skeleton-block" aria-hidden="true" />
-            ))}
-          </div>
+          <ContentSkeleton view={m.view} />
         ) : (
           <div key={m.view} className="workspace-content" aria-busy={m.loading}>
             {m.loading && (
@@ -198,14 +203,27 @@ export function WorkspacePage({
           <ChatView model={assistantModel} />
         </Dialog>
       )}
-      <EditorDialog
-        modal={m.modal}
-        busy={m.busy}
-        error={m.error}
-        admin={m.admin}
-        onClose={() => m.setModal(null)}
-        submit={m.submit}
-      />
+      {m.modal && (
+        <Suspense
+          fallback={
+            <Dialog title="편집 화면 준비" onClose={() => m.setModal(null)}>
+              <ContentSkeleton
+                view="커뮤니티"
+                label="편집 화면을 준비하고 있어요"
+              />
+            </Dialog>
+          }
+        >
+          <EditorDialog
+            modal={m.modal}
+            busy={m.busy}
+            error={m.error}
+            admin={m.admin}
+            onClose={() => m.setModal(null)}
+            submit={m.submit}
+          />
+        </Suspense>
+      )}
       {m.confirm && (
         <ConfirmDialog
           title={m.confirm.title}

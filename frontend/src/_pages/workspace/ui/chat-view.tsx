@@ -6,6 +6,7 @@ import { api, type Page } from "@/shared/api";
 
 import { Button, Icon, MoaAiIcon, PageIllustration } from "@/shared/ui";
 import { useCallback, useEffect, useLayoutEffect, useRef } from "react";
+import { ContentSkeleton } from "@/shared/ui/skeleton";
 import type { WorkspaceModel } from "../model/use-workspace";
 export function ChatView({ model: m }: { model: WorkspaceModel }) {
   const viewport = useRef<HTMLDivElement>(null);
@@ -46,18 +47,16 @@ export function ChatView({ model: m }: { model: WorkspaceModel }) {
             variant="ghost"
             disabled={m.busy}
             aria-label="새 대화 시작"
-            onClick={() => {
-              m.setSessionId("");
-              m.setMessages([]);
-              m.setMessagePage(0);
-            }}
+            onClick={m.startConversation}
           >
             <Icon name="plus" size={18} />
           </Button>
         </div>
         <p className="conversation-caption">나에게만 보이는 개인 대화</p>
         <div className="conversation-list">
-          {m.sessions.length ? (
+          {m.assistantLoading && !m.sessions.length ? (
+            <ContentSkeleton view="멤버" label="대화 목록을 불러오고 있어요" />
+          ) : m.sessions.length ? (
             m.sessions.map((s) => (
               <button
                 className={m.sessionId === s.id ? "active" : ""}
@@ -129,7 +128,7 @@ export function ChatView({ model: m }: { model: WorkspaceModel }) {
         <div
           className="chat-scroll"
           aria-live="polite"
-          aria-busy={m.busy}
+          aria-busy={m.busy || m.messageLoading}
           ref={viewport}
           onScroll={(event) => {
             const element = event.currentTarget;
@@ -156,7 +155,9 @@ export function ChatView({ model: m }: { model: WorkspaceModel }) {
               이전 메시지 불러오기
             </Button>
           )}
-          {m.messages.length ? (
+          {m.messageLoading ? (
+            <ContentSkeleton view="커뮤니티" label="대화를 불러오고 있어요" />
+          ) : m.messages.length ? (
             m.messages.map((message) => (
               <ChatMessage
                 key={message.id}

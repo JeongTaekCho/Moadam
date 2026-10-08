@@ -4,7 +4,8 @@ import type { Document } from "@/entities/document";
 import type { Event } from "@/entities/event";
 import type { Group, Invite, Member } from "@/entities/group";
 import type { Comment, Post } from "@/entities/post";
-import { saveEditor, type Modal } from "@/features/content-editor";
+import { saveEditor } from "@/features/content-editor/api/save-editor";
+import type { Modal } from "@/features/content-editor/model/types";
 import type { Page, MyProfile, MyActivity } from "@/shared/api";
 
 import {
@@ -12,6 +13,7 @@ import {
   ApiError,
   getApiScope,
   setApiScope,
+  invalidateApiCache,
   streamQuestion,
 } from "@/shared/api";
 import {
@@ -34,12 +36,17 @@ export function useWorkspace(initialView: View = "홈", hasSession = false) {
   const loadVersion = useRef(0);
   const bootTask = useRef<Promise<void> | null>(null);
   const streamAbort = useRef<AbortController | null>(null);
+  const [assistantLoading, setAssistantLoading] = useState(false);
+  const [messageLoading, setMessageLoading] = useState(false);
+  const sessionVersion = useRef(0);
   const [streamingId, setStreamingId] = useState<string | null>(null);
   const [streamStage, setStreamStage] = useState("retrieving");
   useEffect(() => () => streamAbort.current?.abort(), []);
   const [loadedKey, setLoadedKey] = useState("");
   const busyRef = useRef(false);
   const activityVersion = useRef(0);
+  const detailVersion = useRef(0);
+  const assistantVersion = useRef(0);
   const detailOrigin = useRef<{ view: View; page: number } | null>(null);
   const [commentPage, setCommentPage] = useState(0),
     [commentTotal, setCommentTotal] = useState(0),
@@ -118,6 +125,7 @@ export function useWorkspace(initialView: View = "홈", hasSession = false) {
       ? requested
       : g.items[0]?.id || "";
     if (getApiScope() !== selected) {
+      setLoadedKey("");
       setPosts([]);
       setEvents([]);
       setDocuments([]);
@@ -168,73 +176,103 @@ export function useWorkspace(initialView: View = "홈", hasSession = false) {
       })
       .finally(() => setBoot(false));
   }, [loadGroups, fail, hasSession]);
-  const load = useCallback(async () => {
-    if (!signed || !groupId || view === "마이페이지" || view === "설정") return;
-    const requestId = ++loadVersion.current;
-    setLoading(true);
-    setError("");
-    try {
-      if (view === "홈") {
-        const [p, e, d] = await Promise.all([
-          api<Page<Post>>(`${base}/posts?size=5`),
-          api<Page<Event>>(
-            `${base}/events?size=5&from=${encodeURIComponent(new Date().toISOString())}`,
-          ),
-          api<Page<Document>>(`${base}/documents?size=5`),
-        ]);
-        if (requestId !== loadVersion.current) return;
-        setPosts(p.items);
-        if (requestId !== loadVersion.current) return;
-        setEvents(e.items.filter((x) => new Date(x.ends_at) > new Date()));
-        if (requestId !== loadVersion.current) return;
-        setDocuments(d.items);
-      }
-      if (view === "커뮤니티") {
-        const p = await api<Page<Post>>(`${base}/posts?page=${page}`);
-        if (requestId !== loadVersion.current) return;
-        setPosts(p.items);
-        setTotal(p.total);
-      }
-      if (view === "일정") {
-        const e = await api<Page<Event>>(
-          `${base}/events?page=${page}&size=100`,
-        );
-        if (requestId !== loadVersion.current) return;
-        setEvents(e.items);
-        setTotal(e.total);
-      }
-      if (view === "자료") {
-        const d = await api<Page<Document>>(`${base}/documents?page=${page}`);
-        if (requestId !== loadVersion.current) return;
-        setDocuments(d.items);
-        setTotal(d.total);
-      }
-      if (view === "멤버") {
-        const m = await api<Page<Member>>(`${base}/members?page=${page}`);
-        if (requestId !== loadVersion.current) return;
-        setMembers(m.items);
-        setTotal(m.total);
-        if (admin) {
-          const i = await api<Page<Invite>>(`${base}/invites?size=100`);
+  const load = useCallback(
+    async (fresh = false) => {
+      if (!signed || !groupId || view === "마이페이지" || view === "설정")
+        return;
+      if (fresh) invalidateApiCache();
+      const requestId = ++loadVersion.current;
+      setLoading(true);
+      setError("");
+      try {
+        if (view === "홈") {
+          const [p, e, d] = await Promise.all([
+            api<Page<Post>>(`${base}/posts?size=5`),
+            api<Page<Event>>(
+              `${base}/events?size=5&from=${encodeURIComponent(new Date(Math.floor(Date.now() / 30000) * 30000).toISOString())}`,
+            ),
+            api<Page<Document>>(`${base}/documents?size=5`),
+          ]);
           if (requestId !== loadVersion.current) return;
-          setInvites(i.items);
+          setPosts(p.items);
+          if (requestId !== loadVersion.current) return;
+          setEvents(e.items.filter((x) => new Date(x.ends_at) > new Date()));
+          if (requestId !== loadVersion.current) return;
+          setDocuments(d.items);
         }
+        if (view === "커뮤니티") {
+          const p = await api<Page<Post>>(`${base}/posts?page=${page}`);
+          if (requestId !== loadVersion.current) return;
+          setPosts(p.items);
+          setTotal(p.total);
+        }
+        if (view === "일정") {
+          const e = await api<Page<Event>>(
+            `${base}/events?page=${page}&size=100`,
+          );
+          if (requestId !== loadVersion.current) return;
+          setEvents(e.items);
+          setTotal(e.total);
+        }
+        if (view === "자료") {
+          const d = await api<Page<Document>>(`${base}/documents?page=${page}`);
+          if (requestId !== loadVersion.current) return;
+          setDocuments(d.items);
+          setTotal(d.total);
+        }
+        if (view === "멤버") {
+          const [m, i] = await Promise.all([
+            api<Page<Member>>(`${base}/members?page=${page}`),
+            admin
+              ? api<Page<Invite>>(`${base}/invites?size=100`)
+              : Promise.resolve(null),
+          ]);
+          if (requestId !== loadVersion.current) return;
+          setMembers(m.items);
+          setTotal(m.total);
+          setInvites(i?.items || []);
+        }
+        if (requestId === loadVersion.current)
+          setLoadedKey(`${groupId}:${view}:${page}`);
+      } catch (e) {
+        if (requestId === loadVersion.current) fail(e);
+      } finally {
+        if (requestId === loadVersion.current) setLoading(false);
       }
-      if (requestId === loadVersion.current)
-        setLoadedKey(`${groupId}:${view}:${page}`);
-    } catch (e) {
-      if (requestId === loadVersion.current) fail(e);
-    } finally {
-      if (requestId === loadVersion.current) setLoading(false);
-    }
-  }, [groupId, base, view, page, admin, signed, fail]);
+    },
+    [groupId, base, view, page, admin, signed, fail],
+  );
   useEffect(() => {
     void load();
     return () => {
       loadVersion.current++;
     };
   }, [load]);
+  useEffect(() => {
+    if (!signed) return;
+    let lastRefresh = Date.now();
+    const refresh = () => {
+      if (
+        globalThis.document.visibilityState !== "visible" ||
+        busyRef.current ||
+        Date.now() - lastRefresh < 30000
+      )
+        return;
+      lastRefresh = Date.now();
+      void load(true);
+    };
+    window.addEventListener("focus", refresh);
+    globalThis.document.addEventListener("visibilitychange", refresh);
+    return () => {
+      window.removeEventListener("focus", refresh);
+      globalThis.document.removeEventListener("visibilitychange", refresh);
+    };
+  }, [signed, load]);
   const changeGroup = (id: string) => {
+    setLoadedKey("");
+    sessionVersion.current++;
+    detailVersion.current++;
+    setMessageLoading(false);
     streamAbort.current?.abort();
     activityVersion.current++;
     detailOrigin.current = null;
@@ -259,6 +297,8 @@ export function useWorkspace(initialView: View = "홈", hasSession = false) {
     setInviteToken("");
   };
   const changeView = (next: View) => {
+    detailVersion.current++;
+    setLoading(false);
     activityVersion.current++;
     detailOrigin.current = null;
     navigateWorkspace(next, groupId);
@@ -339,6 +379,7 @@ export function useWorkspace(initialView: View = "홈", hasSession = false) {
   }
   const canEdit = (author: string) => admin || author === me;
   async function openPost(p: Post) {
+    const version = ++detailVersion.current;
     setLoading(true);
     setError("");
     try {
@@ -346,6 +387,7 @@ export function useWorkspace(initialView: View = "홈", hasSession = false) {
         api<Post>(`${base}/posts/${p.id}`),
         api<Page<Comment>>(`${base}/posts/${p.id}/comments?size=100`),
       ]);
+      if (version !== detailVersion.current) return;
       setPost(detail);
       setComments(c.items);
       setCommentPage(0);
@@ -354,38 +396,46 @@ export function useWorkspace(initialView: View = "홈", hasSession = false) {
       navigateWorkspace("커뮤니티", groupId);
       setView("커뮤니티");
     } catch (e) {
-      fail(e);
+      if (version === detailVersion.current) fail(e);
     } finally {
-      setLoading(false);
+      if (version === detailVersion.current) setLoading(false);
     }
   }
   async function openEvent(e: Event) {
+    const version = ++detailVersion.current;
     setLoading(true);
     setError("");
     try {
-      setAttendance(await api(`${base}/events/${e.id}/attendance`));
+      const result = await api<{ user_id: string; status: string }[]>(
+        `${base}/events/${e.id}/attendance`,
+      );
+      if (version !== detailVersion.current) return;
+      setAttendance(result);
       setEvent(e);
       detailOrigin.current = { view, page };
       navigateWorkspace("일정", groupId);
       setView("일정");
     } catch (e) {
-      fail(e);
+      if (version === detailVersion.current) fail(e);
     } finally {
-      setLoading(false);
+      if (version === detailVersion.current) setLoading(false);
     }
   }
   async function openDocument(id: string) {
+    const version = ++detailVersion.current;
     setLoading(true);
     setError("");
     try {
-      setDocument(await api<Document>(`${base}/documents/${id}`));
+      const result = await api<Document>(`${base}/documents/${id}`);
+      if (version !== detailVersion.current) return;
+      setDocument(result);
       detailOrigin.current = { view, page };
       navigateWorkspace("자료", groupId);
       setView("자료");
     } catch (e) {
-      fail(e);
+      if (version === detailVersion.current) fail(e);
     } finally {
-      setLoading(false);
+      if (version === detailVersion.current) setLoading(false);
     }
   }
   function goBackFromDetail() {
@@ -401,7 +451,8 @@ export function useWorkspace(initialView: View = "홈", hasSession = false) {
     }
   }
   async function openSession(id: string) {
-    setLoading(true);
+    const version = ++sessionVersion.current;
+    setMessageLoading(true);
     setError("");
     try {
       const m = await api<Page<Message>>(
@@ -414,13 +465,14 @@ export function useWorkspace(initialView: View = "홈", hasSession = false) {
               `${base}/chat/sessions/${id}/messages?size=100&page=${lastPage}`,
             )
           : m;
+      if (version !== sessionVersion.current) return;
       setSessionId(id);
       setMessagePage(lastPage);
       setMessages(latest.items);
     } catch (e) {
-      fail(e);
+      if (version === sessionVersion.current) fail(e);
     } finally {
-      setLoading(false);
+      if (version === sessionVersion.current) setMessageLoading(false);
     }
   }
   async function submit(e: FormEvent<HTMLFormElement>) {
@@ -622,6 +674,7 @@ export function useWorkspace(initialView: View = "홈", hasSession = false) {
               once: true,
             });
           });
+        invalidateApiCache();
         finish();
       } finally {
         cancelAnimationFrame(frame);
@@ -640,15 +693,28 @@ export function useWorkspace(initialView: View = "홈", hasSession = false) {
     return succeeded;
   }
   const loadAssistant = useCallback(async () => {
+    const version = ++assistantVersion.current;
     if (!signed || !groupId) return;
+    setAssistantLoading(true);
     try {
       const result = await api<Page<Session>>(`${base}/chat/sessions?page=0`);
-      setSessions(result.items);
+      if (version === assistantVersion.current) setSessions(result.items);
     } catch (e) {
       fail(e);
+    } finally {
+      if (version === assistantVersion.current) setAssistantLoading(false);
     }
   }, [signed, groupId, base, fail]);
   return {
+    startConversation: () => {
+      sessionVersion.current++;
+      setMessageLoading(false);
+      setSessionId("");
+      setMessages([]);
+      setMessagePage(0);
+    },
+    assistantLoading,
+    messageLoading,
     streamingId,
     streamStage,
     cancelAnswer: () => streamAbort.current?.abort(),

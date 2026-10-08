@@ -37,4 +37,22 @@ class ContractTest {
     assertEquals(HttpStatus.UNAUTHORIZED, denied.getStatusCode());
     assertTrue(denied.getBody().contains("UNAUTHENTICATED"));
   }
+  @Test
+  void compressesLargeJsonResponses() throws Exception {
+    var client = java.net.http.HttpClient.newHttpClient();
+    var request = java.net.http.HttpRequest.newBuilder()
+        .uri(java.net.URI.create(http.getRootUri() + "/v3/api-docs"))
+        .header("Accept-Encoding", "gzip")
+        .build();
+    var response = client.send(request, java.net.http.HttpResponse.BodyHandlers.ofByteArray());
+    assertEquals(200, response.statusCode());
+    assertEquals("gzip", response.headers().firstValue("Content-Encoding").orElse(""));
+    byte[] raw;
+    try (var gzip = new java.util.zip.GZIPInputStream(new java.io.ByteArrayInputStream(response.body()))) {
+      raw = gzip.readAllBytes();
+    }
+    assertTrue(new String(raw, java.nio.charset.StandardCharsets.UTF_8).contains("PagePost"));
+    assertTrue(response.body().length < raw.length);
+    System.out.printf("JSON compression: %d -> %d bytes%n", raw.length, response.body().length);
+  }
 }

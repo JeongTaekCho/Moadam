@@ -1,4 +1,4 @@
-import { ApiError } from "@/shared/api";
+import { ApiError, clearApiSession } from "@/shared/api";
 export async function authenticate(
   fields: Record<string, string>,
   action: "login" | "signup",
@@ -14,6 +14,7 @@ export async function authenticate(
       response.status,
       result.message || "로그인 요청을 처리하지 못했습니다",
     );
+  if (action === "login") clearApiSession();
   return result;
 }
 export async function logout() {
@@ -24,6 +25,7 @@ export async function logout() {
   });
   if (!response.ok)
     throw new Error("로그아웃을 처리하지 못했습니다. 다시 시도해 주세요.");
+  clearApiSession();
 }
 
 export async function signInWithGoogle() {
