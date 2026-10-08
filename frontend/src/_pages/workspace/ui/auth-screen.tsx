@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { authenticate, signInWithGoogle } from "@/features/auth";
 import { ApiError } from "@/shared/api";
@@ -76,6 +77,9 @@ export function AuthScreen({ model: m }: { model: WorkspaceModel }) {
               모아AI에게 물어보세요.
             </p>
           </div>
+          <Link href="/about" className="auth-about-link">
+            모아담 알아보기 <Icon name="arrow" size={14} />
+          </Link>
         </div>
         <span className="auth-footnote">
           작은 기록이 모여, 오래 남는 연결이 됩니다.
@@ -244,6 +248,9 @@ export function AuthScreen({ model: m }: { model: WorkspaceModel }) {
               <Icon name="arrow" size={17} />
             </Button>
           </form>
+          <Link href="/about" className="auth-about-link auth-mobile-about">
+            모아담 알아보기 <Icon name="arrow" size={14} />
+          </Link>
           <p className="auth-trust">
             <Icon name="lock" size={14} />
             모임 자료는 참여한 멤버에게만 공개됩니다.

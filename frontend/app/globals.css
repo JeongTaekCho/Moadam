@@ -3516,3 +3516,167 @@
     }
   }
 }
+
+@layer components {
+  .auth-about-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    margin-top: 24px;
+    color: var(--brand);
+    font-size: 12px;
+    text-decoration: none;
+  }
+  .auth-mobile-about {
+    display: none;
+  }
+  .service-about {
+    background: #fffaf5;
+    min-height: 100dvh;
+  }
+  .service-about-nav,
+  .service-about main,
+  .service-about-footer {
+    max-width: 1120px;
+    margin: 0 auto;
+    padding: 24px;
+  }
+  .service-about-nav,
+  .service-about-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+  }
+  .service-about-nav .brand-image-frame {
+    width: 150px;
+    height: auto;
+  }
+  .service-about-nav .brand-image {
+    width: 100%;
+    transform: none;
+  }
+  .service-about-hero {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: center;
+    gap: 50px;
+    padding: 60px 12px 72px;
+  }
+  .service-about h1 {
+    font-size: clamp(32px, 4vw, 52px);
+    line-height: 1.4;
+    letter-spacing: -0.045em;
+    font-weight: 600;
+    margin: 0 0 22px;
+  }
+  .service-about p {
+    line-height: 1.9;
+    color: var(--muted);
+    font-size: 15px;
+  }
+  .service-about-art {
+    width: 100%;
+    max-width: 420px;
+    justify-self: center;
+  }
+  .service-about-hero .button {
+    margin-top: 18px;
+    text-decoration: none;
+  }
+  .service-about-features {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+  }
+  .service-about-features article {
+    padding: 24px;
+    border: 1px solid var(--brand-border);
+    border-radius: 24px;
+    background: white;
+  }
+  .service-about-features .page-illustration {
+    max-width: 180px;
+    margin: 0 auto 24px;
+  }
+  .service-about h2 {
+    font-size: 20px;
+    line-height: 1.6;
+    font-weight: 600;
+    letter-spacing: -0.03em;
+  }
+  .service-about-features p {
+    font-size: 13px;
+  }
+  .service-about-ai {
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    align-items: center;
+    gap: 40px;
+    padding: 40px;
+    margin: 40px 0;
+    border-radius: 24px;
+    background: var(--brand-soft);
+  }
+  .service-about-ai .muted {
+    font-size: 12px;
+  }
+  .service-about-faq {
+    max-width: 800px;
+    margin: 60px auto;
+  }
+  .service-about-faq details {
+    padding: 20px 0;
+    border-bottom: 1px solid var(--brand-border);
+  }
+  .service-about-faq summary {
+    cursor: pointer;
+    font-size: 15px;
+    line-height: 1.7;
+  }
+  .service-about-footer {
+    border-top: 1px solid var(--brand-border);
+    color: var(--muted);
+    font-size: 12px;
+  }
+  .service-about-footer a {
+    color: var(--brand);
+  }
+  @media (max-width: 650px) {
+    .auth-mobile-about {
+      display: inline-flex;
+    }
+    .service-about-nav,
+    .service-about main,
+    .service-about-footer {
+      padding: 20px;
+    }
+    .service-about-nav .brand-image-frame {
+      width: 120px;
+    }
+    .service-about-hero {
+      grid-template-columns: 1fr;
+      gap: 20px;
+      padding: 28px 0 40px;
+    }
+    .service-about-art {
+      max-width: 240px;
+      grid-row: 1;
+    }
+    .service-about-features {
+      grid-template-columns: 1fr;
+    }
+    .service-about-ai {
+      grid-template-columns: 1fr;
+      gap: 14px;
+      padding: 24px;
+    }
+    .service-about-ai .page-illustration {
+      max-width: 180px;
+      margin: auto;
+    }
+    .service-about-footer {
+      flex-wrap: wrap;
+    }
+  }
+}
