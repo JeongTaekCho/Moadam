@@ -1,3 +1,4 @@
+import { validSignupPassword } from "@/shared/lib/password";
 import { setAuthSession } from "@/shared/lib/auth-session";
 import { failure, limitedBody } from "@/shared/lib/server";
 import { NextRequest, NextResponse } from "next/server";
@@ -46,6 +47,11 @@ export async function POST(req: NextRequest) {
     password.length > 128
   )
     return failure(400, "이메일과 8자 이상의 비밀번호를 확인하세요");
+  if (action === "signup" && !validSignupPassword(password))
+    return failure(
+      400,
+      "비밀번호는 8자 이상, 특수문자를 1개 이상 포함해 주세요.",
+    );
   if (!url || !key) return failure(503, "Supabase 환경 설정이 필요합니다");
   try {
     const endpoint = new URL(

@@ -19,14 +19,12 @@ const mock = createServer(async (request, response) => {
     const { email } = JSON.parse(input);
     response.setHeader("Content-Type", "application/json");
     if (email === "duplicate-error@example.test") {
-      response
-        .writeHead(422)
-        .end(
-          JSON.stringify({
-            error_code: "user_already_exists",
-            msg: "User already registered",
-          }),
-        );
+      response.writeHead(422).end(
+        JSON.stringify({
+          error_code: "user_already_exists",
+          msg: "User already registered",
+        }),
+      );
       return;
     }
     if (email === "duplicate-hidden@example.test") {
@@ -231,6 +229,26 @@ try {
   }
   console.log(
     "PASS: explicit and obfuscated duplicate signup return conflict without session cookies",
+  );
+  for (const password of [
+    "abcdefgh",
+    "abc!",
+    "가나다라마바사아",
+    "abcdefgh ",
+  ]) {
+    const invalid = await fetch(app + "/api/auth", {
+      method: "POST",
+      headers: { origin: app, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        action: "signup",
+        email: "preview@example.test",
+        password,
+      }),
+    });
+    assert.equal(invalid.status, 400);
+  }
+  console.log(
+    "PASS: signup rejects short passwords and passwords without punctuation/symbols",
   );
 } catch (error) {
   if (serverErrors) console.error(serverErrors);

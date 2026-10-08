@@ -3446,3 +3446,73 @@
     border: 1px solid var(--danger-border);
   }
 }
+
+@layer components {
+  .toast {
+    inset: auto;
+    position: fixed;
+    left: 50%;
+    bottom: max(24px, env(safe-area-inset-bottom));
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 18px 12px 12px;
+    width: max-content;
+    max-width: min(520px, calc(100vw - 32px));
+    border: 1px solid var(--brand-border);
+    border-radius: 18px;
+    background: #fffdf9;
+    color: var(--text);
+    box-shadow: 0 10px 36px rgb(96 49 20 / 0.16);
+    font-size: 13px;
+    animation: toast-rise 360ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+  .toast-moa {
+    display: grid;
+    place-items: center;
+    flex: 0 0 42px;
+    height: 42px;
+    border-radius: 13px;
+    background: var(--brand-soft);
+  }
+  .toast-message {
+    line-height: 1.65;
+    overflow-wrap: anywhere;
+  }
+  .toast.toast-error {
+    background: #fffaf7;
+  }
+  .password-hint {
+    display: block;
+    margin: -8px 0 18px;
+    color: var(--muted);
+    font-size: 11px;
+    line-height: 1.6;
+  }
+  .password-hint.is-valid {
+    color: var(--brand);
+  }
+  @keyframes toast-rise {
+    from {
+      opacity: 0;
+      transform: translate(-50%, 28px) scale(0.96);
+    }
+    to {
+      opacity: 1;
+      transform: translate(-50%, 0) scale(1);
+    }
+  }
+  @media (max-width: 650px) {
+    .toast {
+      bottom: calc(88px + env(safe-area-inset-bottom));
+      font-size: 12px;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .toast {
+      animation: none;
+      transform: translateX(-50%);
+    }
+  }
+}

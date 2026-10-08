@@ -1,5 +1,6 @@
 "use client";
 import Image from "next/image";
+import { MoaAiIcon } from "./moa-ai-icon";
 import { PageIllustration, type IllustrationScene } from "./page-illustration";
 import {
   useEffect,
@@ -43,11 +44,16 @@ export function TextField({
   const errorId = useId();
   return (
     <label className="field">
-      <span>{label}</span>
+      <span id={`${errorId}-label`}>{label}</span>
       <input
         {...props}
+        aria-labelledby={props["aria-labelledby"] ?? `${errorId}-label`}
         aria-invalid={!!error}
-        aria-describedby={error ? errorId : undefined}
+        aria-describedby={
+          [props["aria-describedby"], error ? errorId : undefined]
+            .filter(Boolean)
+            .join(" ") || undefined
+        }
       />
       {error && (
         <small id={errorId} role="alert">
@@ -72,7 +78,11 @@ export function Textarea({
       <textarea
         {...props}
         aria-invalid={!!error}
-        aria-describedby={error ? errorId : undefined}
+        aria-describedby={
+          [props["aria-describedby"], error ? errorId : undefined]
+            .filter(Boolean)
+            .join(" ") || undefined
+        }
       />
       {error && (
         <small id={errorId} role="alert">
@@ -98,7 +108,11 @@ export function Select({
       <select
         {...props}
         aria-invalid={!!error}
-        aria-describedby={error ? errorId : undefined}
+        aria-describedby={
+          [props["aria-describedby"], error ? errorId : undefined]
+            .filter(Boolean)
+            .join(" ") || undefined
+        }
       >
         {children}
       </select>
@@ -326,12 +340,22 @@ export function Toast({
   message: string;
   variant?: "default" | "error";
 }) {
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (message) ref.current?.showPopover();
+  }, [message]);
   return message ? (
     <div
+      key={message}
+      ref={ref}
+      popover="manual"
       role={variant === "error" ? "alert" : "status"}
       className={`toast${variant === "error" ? " toast-error" : ""}`}
     >
-      {message}
+      <span className="toast-moa">
+        <MoaAiIcon size={30} />
+      </span>
+      <span className="toast-message">{message}</span>
     </div>
   ) : null;
 }

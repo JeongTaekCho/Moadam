@@ -2,6 +2,10 @@
 import { useEffect, useState } from "react";
 import { authenticate, signInWithGoogle } from "@/features/auth";
 import { ApiError } from "@/shared/api";
+import {
+  passwordRequirement,
+  validSignupPassword,
+} from "@/shared/lib/password";
 import { values } from "@/shared/lib/form";
 import {
   BrandLogo,
@@ -17,6 +21,11 @@ import {
 } from "@/shared/ui";
 import type { WorkspaceModel } from "../model/use-workspace";
 export function AuthScreen({ model: m }: { model: WorkspaceModel }) {
+  const [password, setPassword] = useState("");
+  const [confirmation, setConfirmation] = useState("");
+  const signingUp = m.authTab === "가입";
+  const passwordValid = validSignupPassword(password);
+  const passwordsMatch = confirmation === password;
   const [confirmationOpen, setConfirmationOpen] = useState(false);
   const [signupError, setSignupError] = useState("");
   useEffect(() => {
@@ -116,7 +125,11 @@ export function AuthScreen({ model: m }: { model: WorkspaceModel }) {
           <Tabs
             items={["로그인", "가입"]}
             value={m.authTab}
-            onChange={m.setAuthTab}
+            onChange={(tab) => {
+              m.setAuthTab(tab);
+              setConfirmation("");
+              setSignupError("");
+            }}
           />
           {m.error && <ErrorState message={m.error} />}
           <form
@@ -125,10 +138,21 @@ export function AuthScreen({ model: m }: { model: WorkspaceModel }) {
               const form = e.currentTarget;
               const b = values(e);
               const action = m.authTab === "로그인" ? "login" : "signup";
+              if (action === "signup" && (!passwordValid || !passwordsMatch)) {
+                setSignupError(
+                  !passwordValid
+                    ? "비밀번호는 8자 이상, 특수문자를 1개 이상 포함해 주세요."
+                    : "비밀번호가 일치하지 않습니다.",
+                );
+                return;
+              }
               await m.run(async () => {
                 let d;
                 try {
-                  d = await authenticate(b, action);
+                  d = await authenticate(
+                    { email: b.email, password: b.password },
+                    action,
+                  );
                 } catch (error) {
                   if (
                     action === "signup" &&
@@ -140,7 +164,11 @@ export function AuthScreen({ model: m }: { model: WorkspaceModel }) {
                   }
                   throw error;
                 }
-                if (action === "signup") form.reset();
+                if (action === "signup") {
+                  form.reset();
+                  setPassword("");
+                  setConfirmation("");
+                }
                 if (d.confirmationRequired) {
                   setConfirmationOpen(true);
                 } else await m.loadGroups();
@@ -159,14 +187,59 @@ export function AuthScreen({ model: m }: { model: WorkspaceModel }) {
               label="비밀번호"
               name="password"
               type="password"
-              placeholder="8자 이상 입력해 주세요"
+              placeholder={
+                signingUp
+                  ? "8자 이상 · 특수문자 포함"
+                  : "비밀번호를 입력해 주세요"
+              }
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              maxLength={128}
+              aria-describedby={signingUp ? "signup-password-hint" : undefined}
+              error={
+                signingUp && password && !passwordValid
+                  ? "8자 이상, 특수문자 1개 이상을 포함해 주세요."
+                  : undefined
+              }
               minLength={8}
               autoComplete={
                 m.authTab === "로그인" ? "current-password" : "new-password"
               }
               required
             />
-            <Button loading={m.busy}>
+            {signingUp && (
+              <>
+                <small
+                  id="signup-password-hint"
+                  className={`password-hint${passwordValid ? " is-valid" : ""}`}
+                >
+                  {passwordRequirement}
+                </small>
+                <TextField
+                  label="비밀번호 확인"
+                  name="passwordConfirmation"
+                  type="password"
+                  placeholder="비밀번호를 한 번 더 입력해 주세요"
+                  autoComplete="new-password"
+                  value={confirmation}
+                  onChange={(e) => setConfirmation(e.target.value)}
+                  error={
+                    confirmation && !passwordsMatch
+                      ? "비밀번호가 일치하지 않습니다."
+                      : undefined
+                  }
+                  maxLength={128}
+                  required
+                />
+              </>
+            )}
+            <Button
+              loading={m.busy}
+              disabled={
+                signingUp &&
+                (!passwordValid || !confirmation || !passwordsMatch)
+              }
+            >
               {m.authTab === "로그인" ? "로그인하기" : "이메일로 가입하기"}
               <Icon name="arrow" size={17} />
             </Button>
