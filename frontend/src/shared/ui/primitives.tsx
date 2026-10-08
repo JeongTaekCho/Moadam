@@ -160,7 +160,7 @@ export function UserIdentity({
   label?: string;
 }) {
   const name =
-    profile?.display_name || (id ? `멤버 ${id.slice(0, 8)}` : "멤버");
+    profile?.display_name || (id ? `모아 ${id.slice(0, 8)}` : "멤버");
   return (
     <span className="user-identity">
       <Avatar name={name} src={profile?.avatar_url} />

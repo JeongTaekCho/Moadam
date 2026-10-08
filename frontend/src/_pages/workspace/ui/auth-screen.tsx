@@ -22,47 +22,40 @@ export function AuthScreen({ model: m }: { model: WorkspaceModel }) {
         </div>
         <div className="auth-story-content">
           <PageIllustration variant="welcome" className="auth-welcome-art" />
-          <p className="eyebrow">A SPACE FOR YOUR PEOPLE</p>
           <h1>
-            함께 나눈 이야기,
+            모임의 이야기를,
             <br />
-            우리만의 지식이 되다.
+            한곳에 모아.
           </h1>
           <p>
-            소중한 사람들과 나누는 소식부터
+            함께 나눈 이야기와 자료, 다음 만남의 일정까지.
             <br />
-            언제든 다시 꺼내볼 자료까지.
-            <br />
-            모임의 소중한 정보를 모아 담아요.
+            우리 모임의 일상을 모아담에서 이어가세요.
           </p>
-          <div className="auth-preview" aria-label="서비스 이용 예시">
-            <div className="row between">
-              <span>
-                <MoaAiIcon size={20} /> 모아AI와 함께하는 모임
-              </span>
-              <span className="preview-live">이용 예시</span>
-            </div>
-            <div className="preview-question">이번 모임 준비물, 뭐였죠?</div>
-            <div className="preview-answer">
-              함께 기록한 자료에서 찾아드릴게요.
-              <div className="preview-source">
-                <Icon name="file" size={15} /> 준비 안내.pdf · 출처와 함께
-              </div>
-            </div>
+          <div
+            className="auth-service-features"
+            aria-label="모아담에서 할 수 있는 일"
+          >
+            <span>
+              <Icon name="posts" size={20} />
+              이야기 나누기
+            </span>
+            <span>
+              <Icon name="file" size={20} />
+              자료 모으기
+            </span>
+            <span>
+              <Icon name="calendar" size={20} />
+              함께 만날 일정
+            </span>
           </div>
-          <div className="auth-features">
-            <span>
-              <Icon name="posts" size={17} />
-              함께 나누는 이야기
-            </span>
-            <span>
-              <Icon name="calendar" size={17} />
-              다음 만남의 계획
-            </span>
-            <span>
-              <Icon name="lock" size={17} />
-              우리만의 안전한 공간
-            </span>
+          <div className="auth-ai-note">
+            <MoaAiIcon size={28} />
+            <p>
+              우리 모임에 대해 궁금할 땐,
+              <br />
+              모아AI에게 물어보세요.
+            </p>
           </div>
         </div>
         <span className="auth-footnote">
@@ -73,15 +66,13 @@ export function AuthScreen({ model: m }: { model: WorkspaceModel }) {
         <div className="auth-form-box">
           <span className="auth-mobile-brand">
             <BrandLogo />
-            <PageIllustration variant="welcome" className="auth-mobile-art" />
           </span>
-          <p className="eyebrow">WELCOME TO MOADAM</p>
           <h2>
             {m.authTab === "로그인"
               ? "다시 만나 반가워요"
-              : "우리 모임의 공간을 시작해요"}
+              : "모아담과 함께 시작해요"}
           </h2>
-          <p className="muted">Google 계정 또는 이메일로 시작하세요.</p>
+          <p className="muted">이야기를 모으고, 함께하는 시간을 이어가세요.</p>
           <Button
             type="button"
             variant="secondary"

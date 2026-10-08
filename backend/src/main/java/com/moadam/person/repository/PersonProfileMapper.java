@@ -12,7 +12,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 public final class PersonProfileMapper {
   public static PublicProfile publicProfile(UUID id, Map<String, Object> row) {
     String name = Objects.toString(row.get("display_name"), "").strip();
-    if (name.isBlank()) name = "멤버 " + id.toString().substring(0, 8);
+    if (name.isBlank()) name = "모아 " + id.toString().substring(0, 8);
     String path = Objects.toString(row.get("avatar_path"), "");
     String avatar =
         path.isBlank()

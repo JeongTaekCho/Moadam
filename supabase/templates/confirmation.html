@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>모아담 이메일 확인</title>
+  </head>
+  <body
+    style="
+      margin: 0;
+      padding: 0;
+      background-color: #fff8f0;
+      font-family:
+        Arial, &quot;Apple SD Gothic Neo&quot;, &quot;Malgun Gothic&quot;,
+        sans-serif;
+      color: #34261f;
+    "
+  >
+    <div style="display: none; max-height: 0; overflow: hidden; mso-hide: all">
+      이메일을 확인하고 우리 모임의 이야기를 모아 담아요.
+    </div>
+    <table
+      role="presentation"
+      width="100%"
+      cellpadding="0"
+      cellspacing="0"
+      style="background-color: #fff8f0"
+    >
+      <tr>
+        <td align="center" style="padding: 32px 16px">
+          <table
+            role="presentation"
+            width="560"
+            cellpadding="0"
+            cellspacing="0"
+            style="width: 100%; max-width: 560px"
+          >
+            <tr>
+              <td align="center" style="padding: 0 0 24px">
+                <a
+                  href="https://moadam.vercel.app/"
+                  style="text-decoration: none"
+                  ><img
+                    src="https://moadam.vercel.app/images/logo.png"
+                    width="138"
+                    alt="모아담"
+                    style="
+                      display: block;
+                      width: 138px;
+                      height: auto;
+                      border: 0;
+                    "
+                /></a>
+              </td>
+            </tr>
+            <tr>
+              <td
+                align="center"
+                style="
+                  padding: 36px 24px;
+                  background-color: #ffffff;
+                  border: 1px solid #f2dfcd;
+                  border-radius: 24px;
+                "
+              >
+                <img
+                  src="https://moadam.vercel.app/images/moa-ai-icon.png"
+                  width="112"
+                  height="112"
+                  alt="반갑게 맞이하는 모아 캐릭터"
+                  style="
+                    display: block;
+                    width: 112px;
+                    height: 112px;
+                    border: 0;
+                    margin: 0 auto 22px;
+                  "
+                />
+                <h1
+                  style="
+                    font-size: 25px;
+                    font-weight: 600;
+                    line-height: 1.5;
+                    letter-spacing: -1px;
+                    margin: 0 0 16px;
+                  "
+                >
+                  반가워요, 모아담이에요.
+                </h1>
+                <p
+                  style="
+                    font-size: 15px;
+                    line-height: 1.9;
+                    color: #7a685b;
+                    margin: 0 0 28px;
+                  "
+                >
+                  모아담에 오신 것을 환영해요.<br />아래 버튼을 눌러 이메일을
+                  확인하면<br />우리 모임의 공간을 시작할 수 있어요.
+                </p>
+                <table role="presentation" cellpadding="0" cellspacing="0">
+                  <tr>
+                    <td
+                      align="center"
+                      bgcolor="#c2410c"
+                      style="border-radius: 12px; mso-padding-alt: 16px 32px"
+                    >
+                      <a
+                        href="{{ .ConfirmationURL }}"
+                        style="
+                          display: inline-block;
+                          padding: 16px 32px;
+                          font-size: 15px;
+                          font-weight: bold;
+                          color: #ffffff;
+                          text-decoration: none;
+                          border-radius: 12px;
+                        "
+                        >이메일 확인하고 시작하기</a
+                      >
+                    </td>
+                  </tr>
+                </table>
+                <p
+                  style="
+                    font-size: 13px;
+                    line-height: 1.8;
+                    color: #7a685b;
+                    margin: 24px 0 0;
+                  "
+                >
+                  확인이 끝나면 가입한 이메일과 비밀번호로 로그인해 주세요.<br />닉네임은
+                  마이페이지에서 언제든 바꿀 수 있어요.
+                </p>
+                <table
+                  role="presentation"
+                  width="100%"
+                  cellpadding="0"
+                  cellspacing="0"
+                  style="margin-top: 28px; border-top: 1px solid #f2e8df"
+                >
+                  <tr>
+                    <td
+                      align="center"
+                      style="
+                        padding-top: 20px;
+                        font-size: 12px;
+                        color: #9a8574;
+                        line-height: 1.8;
+                      "
+                    >
+                      이야기 나누기 &nbsp;·&nbsp; 자료 모으기 &nbsp;·&nbsp; 다음
+                      만남의 일정
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+            <tr>
+              <td
+                style="
+                  padding: 24px 12px;
+                  font-size: 12px;
+                  line-height: 1.8;
+                  color: #968477;
+                "
+              >
+                <p style="margin: 0 0 12px">
+                  직접 가입을 요청하지 않았다면 이 메일을 무시하셔도 됩니다.
+                </p>
+                <p style="margin: 0 0 6px">
+                  버튼이 열리지 않으면 아래 링크를 브라우저 주소창에 붙여 넣어
+                  주세요.
+                </p>
+                <a
+                  href="{{ .ConfirmationURL }}"
+                  style="
+                    color: #a54820;
+                    word-break: break-all;
+                    overflow-wrap: anywhere;
+                  "
+                  >{{ .ConfirmationURL }}</a
+                >
+                <p style="margin: 24px 0 0; text-align: center">
+                  작은 기록이 모여, 오래 남는 연결이 됩니다.<br />모아담
+                </p>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>

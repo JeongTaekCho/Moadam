@@ -8,6 +8,13 @@ const app = "http://localhost:3100";
 let expectedVerifier = "";
 let exchangeCount = 0;
 const mock = createServer(async (request, response) => {
+  const endpoint = new URL(request.url, "http://mock.test");
+  if (endpoint.pathname === "/auth/v1/signup") {
+    assert.equal(endpoint.searchParams.get("redirect_to"), app + "/");
+    response.setHeader("Content-Type", "application/json");
+    response.end(JSON.stringify({ id: "pending-email-user" }));
+    return;
+  }
   if (request.url !== "/auth/v1/token?grant_type=pkce") {
     response.writeHead(404).end();
     return;
@@ -159,6 +166,21 @@ try {
   assert.equal(success.headers.get("cache-control"), "no-store");
   console.log(
     "PASS: successful exchange sets BFF cookies, clears verifier, blocks external redirect",
+  );
+  const signup = await fetch(app + "/api/auth", {
+    method: "POST",
+    headers: { origin: app, "Content-Type": "application/json" },
+    body: JSON.stringify({
+      action: "signup",
+      email: "preview@example.test",
+      password: "mock-password-123",
+    }),
+  });
+  assert.equal(signup.status, 200);
+  assert.equal((await signup.json()).confirmationRequired, true);
+  assert.equal(signup.headers.getSetCookie().length, 0);
+  console.log(
+    "PASS: email signup uses frontend redirect and awaits confirmation without session cookies",
   );
 } catch (error) {
   if (serverErrors) console.error(serverErrors);

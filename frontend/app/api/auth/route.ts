@@ -48,15 +48,20 @@ export async function POST(req: NextRequest) {
     return failure(400, "이메일과 8자 이상의 비밀번호를 확인하세요");
   if (!url || !key) return failure(503, "Supabase 환경 설정이 필요합니다");
   try {
-    const response = await fetch(
+    const endpoint = new URL(
       `${url}/auth/v1/${action === "signup" ? "signup" : "token?grant_type=password"}`,
-      {
-        method: "POST",
-        headers: { apikey: key, "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-        signal: AbortSignal.timeout(10000),
-      },
     );
+    if (action === "signup")
+      endpoint.searchParams.set(
+        "redirect_to",
+        new URL("/", req.nextUrl.origin).toString(),
+      );
+    const response = await fetch(endpoint, {
+      method: "POST",
+      headers: { apikey: key, "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password }),
+      signal: AbortSignal.timeout(10000),
+    });
     const data = await response.json();
     if (!response.ok)
       return failure(

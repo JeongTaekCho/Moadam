@@ -45,7 +45,7 @@ public class PersonService extends DomainService {
 
   public PersonResponse profile(Jwt jwt) {
     UUID id = user(jwt);
-    String name = "멤버 " + id.toString().substring(0, 8);
+    String name = "모아 " + id.toString().substring(0, 8);
     Map<String, Object> metadata = jwt.getClaimAsMap("user_metadata");
     if (metadata != null) {
       String proposed =
