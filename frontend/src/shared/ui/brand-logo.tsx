@@ -1,33 +1,27 @@
+import Image from "next/image";
 import Link from "next/link";
-
 export function BrandLogo({ subtitle = false }: { subtitle?: boolean }) {
   return (
     <Link
       href="/"
-      className={`brand-logo${subtitle ? " with-subtitle" : ""}`}
+      scroll={false}
+      className="brand-logo rounded-control focus-visible:outline-brand-600"
       aria-label="모아담 홈으로 이동"
     >
-      <svg className="brand-symbol" viewBox="0 0 48 48" aria-hidden="true">
-        <rect width="48" height="48" rx="16" fill="#256b52" />
-        <path
-          d="M11.5 32V19.2c0-2.6 3.2-3.5 4.8-1.4L24 27l7.7-9.2c1.7-2 4.8-.9 4.8 1.5V32"
-          fill="none"
-          stroke="#f5f8f1"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth="4.2"
+      <span className="brand-image-frame">
+        <Image
+          src="/images/logo.png"
+          alt="모아담"
+          width={1920}
+          height={832}
+          sizes="220px"
+          priority
+          className="brand-image"
         />
-        <path
-          d="m36 7 1.5 3.8 3.8 1.5-3.8 1.5L36 17.5l-1.5-3.7-3.7-1.5 3.7-1.5z"
-          fill="#f2cd85"
-        />
-      </svg>
-      <span className="brand-logo-copy">
-        <span className="brand-wordmark">모아담</span>
-        {subtitle && (
-          <span className="brand-caption">모임의 정보를 모아 담다</span>
-        )}
       </span>
+      {subtitle && (
+        <span className="brand-caption">모임의 정보를 모아 담다</span>
+      )}
     </Link>
   );
 }

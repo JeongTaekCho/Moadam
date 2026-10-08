@@ -14,6 +14,7 @@ export function Button({
   size = "normal",
   loading,
   children,
+  className = "",
   ...props
 }: ButtonHTMLAttributes<HTMLButtonElement> & {
   variant?: "primary" | "secondary" | "ghost" | "danger";
@@ -24,7 +25,7 @@ export function Button({
     <button
       {...props}
       disabled={props.disabled || loading}
-      className={`button ${variant} ${size}`}
+      className={`button ${variant} ${size} disabled:pointer-events-none focus-visible:ring-4 focus-visible:ring-brand-200 ${className}`}
       aria-busy={loading}
     >
       {loading ? "처리 중…" : children}
@@ -129,7 +130,13 @@ export function Card({
   children: ReactNode;
   className?: string;
 }) {
-  return <section className={`card ${className}`}>{children}</section>;
+  return (
+    <section
+      className={`card rounded-panel bg-surface border-line ${className}`}
+    >
+      {children}
+    </section>
+  );
 }
 export function Dialog({
   title,

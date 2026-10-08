@@ -20,11 +20,14 @@
   "devDependencies": {
     "@electric-sql/pglite": "0.5.8",
     "@electric-sql/pglite-pgvector": "0.0.9",
+    "@tailwindcss/postcss": "^4.3.3",
     "@types/node": "22.19.15",
     "@types/react": "19.2.14",
     "@types/react-dom": "19.2.3",
     "openapi-typescript": "7.13.0",
+    "postcss": "^8.5.29",
     "prettier": "3.8.3",
+    "tailwindcss": "^4.3.3",
     "typescript": "5.9.3"
   },
   "packageManager": "pnpm@12.5.1"

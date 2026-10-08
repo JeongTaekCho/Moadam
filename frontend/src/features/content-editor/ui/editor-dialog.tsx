@@ -7,6 +7,7 @@ import { localInput } from "@/shared/lib/form";
 import {
   Button,
   Dialog,
+  DateTimePicker,
   ErrorState,
   Select,
   TextField,
@@ -124,17 +125,15 @@ export function EditorDialog({
                   입력과 표시는 한국 표준시(KST, UTC+9) 기준입니다. 저장 시
                   UTC로 변환됩니다.
                 </p>
-                <TextField
+                <DateTimePicker
                   label="시작"
                   name="starts_at"
-                  type="datetime-local"
                   defaultValue={localInput((modal.item as Event)?.starts_at)}
                   required
                 />
-                <TextField
+                <DateTimePicker
                   label="종료"
                   name="ends_at"
-                  type="datetime-local"
                   defaultValue={localInput((modal.item as Event)?.ends_at)}
                   required
                 />

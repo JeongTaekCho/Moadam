@@ -13,6 +13,7 @@ import {
   viewFromPath,
   type View,
 } from "@/shared/config/navigation";
+import { usePathname } from "next/navigation";
 import { values } from "@/shared/lib/form";
 import { koreaMonthStart } from "@/shared/lib/form";
 import {
@@ -23,6 +24,9 @@ import {
   type FormEvent,
 } from "react";
 export function useWorkspace(initialView: View = "홈") {
+  const pathname = usePathname();
+  const loadVersion = useRef(0);
+  const [loadedKey, setLoadedKey] = useState("");
   const busyRef = useRef(false);
   const detailOrigin = useRef<{ view: View; page: number } | null>(null);
   const [commentPage, setCommentPage] = useState(0),
@@ -113,6 +117,7 @@ export function useWorkspace(initialView: View = "홈") {
     setSigned(true);
   }, []);
   useEffect(() => {
+    setView(viewFromPath(window.location.pathname) || initialView);
     loadGroups()
       .catch((e) => {
         if (!(e instanceof ApiError && e.status === 401)) fail(e);
@@ -121,6 +126,7 @@ export function useWorkspace(initialView: View = "홈") {
   }, [loadGroups, fail]);
   const load = useCallback(async () => {
     if (!groupId) return;
+    const requestId = ++loadVersion.current;
     setLoading(true);
     setError("");
     try {
@@ -132,12 +138,16 @@ export function useWorkspace(initialView: View = "홈") {
           ),
           api<Page<Document>>(`${base}/documents?size=5`),
         ]);
+        if (requestId !== loadVersion.current) return;
         setPosts(p.items);
+        if (requestId !== loadVersion.current) return;
         setEvents(e.items.filter((x) => new Date(x.ends_at) > new Date()));
+        if (requestId !== loadVersion.current) return;
         setDocuments(d.items);
       }
       if (view === "커뮤니티") {
         const p = await api<Page<Post>>(`${base}/posts?page=${page}`);
+        if (requestId !== loadVersion.current) return;
         setPosts(p.items);
         setTotal(p.total);
       }
@@ -145,11 +155,13 @@ export function useWorkspace(initialView: View = "홈") {
         const e = await api<Page<Event>>(
           `${base}/events?page=${page}&size=100`,
         );
+        if (requestId !== loadVersion.current) return;
         setEvents(e.items);
         setTotal(e.total);
       }
       if (view === "자료") {
         const d = await api<Page<Document>>(`${base}/documents?page=${page}`);
+        if (requestId !== loadVersion.current) return;
         setDocuments(d.items);
         setTotal(d.total);
       }
@@ -158,27 +170,35 @@ export function useWorkspace(initialView: View = "홈") {
           api<Page<Session>>(`${base}/chat/sessions?page=${page}`),
           api<Page<Document>>(`${base}/documents?size=100`),
         ]);
+        if (requestId !== loadVersion.current) return;
         setDocuments(d.items);
         setSessions(s.items);
         setTotal(s.total);
       }
       if (view === "멤버") {
         const m = await api<Page<Member>>(`${base}/members?page=${page}`);
+        if (requestId !== loadVersion.current) return;
         setMembers(m.items);
         setTotal(m.total);
         if (admin) {
           const i = await api<Page<Invite>>(`${base}/invites?size=100`);
+          if (requestId !== loadVersion.current) return;
           setInvites(i.items);
         }
       }
+      if (requestId === loadVersion.current)
+        setLoadedKey(`${groupId}:${view}:${page}`);
     } catch (e) {
-      fail(e);
+      if (requestId === loadVersion.current) fail(e);
     } finally {
-      setLoading(false);
+      if (requestId === loadVersion.current) setLoading(false);
     }
   }, [groupId, base, view, page, admin, fail]);
   useEffect(() => {
     void load();
+    return () => {
+      loadVersion.current++;
+    };
   }, [load]);
   const changeGroup = (id: string) => {
     detailOrigin.current = null;
@@ -212,6 +232,17 @@ export function useWorkspace(initialView: View = "홈") {
     setDocument(null);
     setError("");
   };
+  useEffect(() => {
+    const next = viewFromPath(pathname);
+    if (!next || next === view) return;
+    detailOrigin.current = null;
+    setView(next);
+    setPage(0);
+    setPost(null);
+    setEvent(null);
+    setDocument(null);
+    setError("");
+  }, [pathname, view]);
   const run = async (task: () => Promise<void>) => {
     if (busyRef.current) return;
     busyRef.current = true;
@@ -473,6 +504,7 @@ export function useWorkspace(initialView: View = "홈") {
     messages,
     setMessages,
     loading,
+    viewReady: loadedKey === `${groupId}:${view}:${page}`,
     setLoading,
     busy,
     setBusy,

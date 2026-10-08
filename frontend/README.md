@@ -33,8 +33,9 @@ pnpm start
 
 ```text
 app/                            Next의 route/layout/BFF entrypoints
-  page.tsx                      FSD 페이지를 조합하는 얇은 진입점
-  [section]/page.tsx             허용한 메뉴 경로만 매핑
+  (workspace)/layout.tsx        이동 중 상태를 유지하는 워크스페이스
+  (workspace)/page.tsx          홈 route
+  (workspace)/[section]/page.tsx 허용한 메뉴 경로만 매핑
   api/                          기존 HttpOnly 쿠키 Auth/REST proxy
 src/
   _pages/workspace/             FSD pages: 전체 화면 조합과 모임 상태
@@ -71,6 +72,8 @@ src/
 - [Linear UI refresh · 2026-03-12](https://linear.app/changelog/2026-03-12-ui-refresh)
 - [Linear의 최신 디자인 방향](https://linear.app/now/behind-the-latest-design-refresh)
 - [Notion 홈·일정·사이드바 구성](https://www.notion.com/releases/2024-06-11)
+
+Tailwind CSS 4의 PostCSS 플러그인과 `@theme`으로 주황 계열 브랜드, 따뜻한 중립색, 성공·경고·오류 색상을 정의합니다. 공통 컨트롤은 동일한 토큰을 사용합니다. 로고는 `public/images/logo.png`입니다. 워크스페이스는 `app/(workspace)/layout.tsx`에서 유지되며 메뉴 이동과 로고 이동에도 로그인·모임 상태를 보존합니다. 데이터 갱신 중에는 기존 내용을 유지하고 첫 진입 시에만 본문 스켈레톤을 표시합니다.
 
 토큰은 `src/shared/styles/tokens.css`, 화면 스타일은 `app/globals.css`에 있습니다. 외부 폰트/아이콘 네트워크 의존 없이 시스템 한국어 폰트와 SVG를 사용합니다. 키보드 focus, 모달 focus trap(native dialog), 상태 문구, reduced motion, 모바일 safe area를 지원합니다. 챗 Markdown은 제한된 텍스트 포맷만 처리하고 raw HTML을 실행하지 않습니다. Ctrl/Cmd+Enter로 질문을 전송할 수 있고 실패한 질문 입력은 유지합니다.
 

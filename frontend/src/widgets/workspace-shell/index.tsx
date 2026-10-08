@@ -2,7 +2,8 @@
 import type { Group } from "@/entities/group";
 import { GroupSwitcher } from "@/entities/group";
 
-import type { View } from "@/shared/config/navigation";
+import { viewPaths, type View } from "@/shared/config/navigation";
+import Link from "next/link";
 import { Badge, BrandLogo, Dialog, Icon } from "@/shared/ui";
 import type { IconName } from "@/shared/ui/icon";
 import { useState, type ReactNode } from "react";
@@ -70,19 +71,38 @@ export function WorkspaceShell(p: Props) {
   };
   const nav = (items: typeof primary) => (
     <nav className="workspace-nav" aria-label="모임 메뉴">
-      {items.map((x) => (
-        <button
-          key={x.view}
-          aria-current={p.view === x.view ? "page" : undefined}
-          className={p.view === x.view ? "active" : ""}
-          onClick={() => navigate(x.view)}
-          disabled={!p.groupId}
-        >
-          <Icon name={x.icon} />
-          <span>{x.label}</span>
-          {x.view === "챗봇" && <span className="nav-ai">AI</span>}
-        </button>
-      ))}
+      {items.map((x) =>
+        x.view === "챗봇" ? (
+          <button
+            key={x.view}
+            onClick={() => navigate(x.view)}
+            disabled={!p.groupId}
+          >
+            <Icon name={x.icon} />
+            <span>{x.label}</span>
+            <span className="nav-ai">AI</span>
+          </button>
+        ) : (
+          <Link
+            key={x.view}
+            href={
+              viewPaths[x.view] +
+              (p.groupId ? "?group=" + encodeURIComponent(p.groupId) : "")
+            }
+            scroll={false}
+            aria-current={p.view === x.view ? "page" : undefined}
+            aria-disabled={!p.groupId}
+            className={p.view === x.view ? "active" : ""}
+            onNavigate={(event) => {
+              event.preventDefault();
+              if (p.groupId) navigate(x.view);
+            }}
+          >
+            <Icon name={x.icon} />
+            <span>{x.label}</span>
+          </Link>
+        ),
+      )}
     </nav>
   );
   const sidebar = (
@@ -191,19 +211,30 @@ export function WorkspaceShell(p: Props) {
               <h1>{titles[p.view].title}</h1>
               <p className="muted">{titles[p.view].description}</p>
             </div>
-            {p.group && (
-              <Badge tone="brand">
-                <span className="profile-avatar compact">
-                  <Icon name="smile" size={16} />
-                </span>
-                <span>
-                  {
-                    { owner: "소유자", admin: "관리자", member: "멤버" }[
-                      p.group.role
-                    ]
-                  }
-                </span>
-              </Badge>
+            {p.group?.role === "owner" ? (
+              <span
+                className="inline-flex size-10 shrink-0 items-center justify-center rounded-full border border-brand-200 bg-brand-50 text-brand-600"
+                role="img"
+                aria-label="모임 소유자"
+                title="모임 소유자"
+              >
+                <Icon name="crown" size={22} />
+              </span>
+            ) : (
+              p.group && (
+                <Badge tone="brand">
+                  <span className="profile-avatar compact">
+                    <Icon name="smile" size={16} />
+                  </span>
+                  <span>
+                    {
+                      { owner: "소유자", admin: "관리자", member: "멤버" }[
+                        p.group.role
+                      ]
+                    }
+                  </span>
+                </Badge>
+              )
             )}
           </header>
           {p.children}

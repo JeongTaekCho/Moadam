@@ -31,7 +31,6 @@ export function WorkspacePage({
 }) {
   const m = useWorkspace(initialView);
   const [assistantOpen, setAssistantOpen] = useState(initialView === "챗봇");
-  const [showPageLoading, setShowPageLoading] = useState(false);
   const assistantModel = {
     ...m,
     changeView: (view: import("@/shared/config/navigation").View) => {
@@ -53,14 +52,6 @@ export function WorkspacePage({
   useEffect(() => {
     if (assistantOpen && m.groupId) void m.loadAssistant();
   }, [assistantOpen, m.groupId]);
-  useEffect(() => {
-    if (!m.loading) {
-      setShowPageLoading(false);
-      return;
-    }
-    const timeout = window.setTimeout(() => setShowPageLoading(true), 220);
-    return () => window.clearTimeout(timeout);
-  }, [m.loading]);
   useEffect(() => {
     if (m.view === "챗봇") {
       setAssistantOpen(true);
@@ -135,13 +126,26 @@ export function WorkspacePage({
               </Button>
             </div>
           </Card>
-        ) : m.loading && showPageLoading ? (
-          <div className="page-loading" role="status" aria-live="polite">
-            <span className="loading-spinner" aria-hidden="true" />
-            <span>화면을 불러오고 있어요</span>
+        ) : !m.viewReady && !m.error ? (
+          <div
+            className="view-skeleton"
+            role="status"
+            aria-label="화면을 불러오고 있어요"
+          >
+            <span className="sr-only">화면을 불러오고 있어요</span>
+            {[0, 1, 2, 3].map((i) => (
+              <div key={i} className="skeleton-block" aria-hidden="true" />
+            ))}
           </div>
         ) : (
-          <>
+          <div key={m.view} className="workspace-content" aria-busy={m.loading}>
+            {m.loading && (
+              <div
+                className="workspace-refresh"
+                role="status"
+                aria-label="최신 정보를 불러오고 있어요"
+              />
+            )}
             {m.view === "홈" && <HomeView model={assistantModel} />}{" "}
             {m.view === "커뮤니티" && <CommunityView model={m} />}{" "}
             {m.view === "일정" && <EventsView model={m} />}{" "}
@@ -173,7 +177,7 @@ export function WorkspacePage({
                   </Button>
                 </div>
               )}
-          </>
+          </div>
         )}
       </WorkspaceShell>
       {assistantOpen && m.groupId && (
