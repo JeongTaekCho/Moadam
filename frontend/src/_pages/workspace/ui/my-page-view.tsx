@@ -1,6 +1,12 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
-import { api, type MyProfile, type MyActivity, type Page } from "@/shared/api";
+import {
+  ApiError,
+  api,
+  type MyProfile,
+  type MyActivity,
+  type Page,
+} from "@/shared/api";
 import {
   Avatar,
   Button,
@@ -21,15 +27,29 @@ export function MyPageView({ model: m }: { model: WorkspaceModel }) {
   const [reload, setReload] = useState(0);
   const fileRef = useRef<HTMLInputElement>(null);
   useEffect(() => {
+    if (!m.signed || !m.me) return;
+    const controller = new AbortController();
     let active = true;
     setLoading(true);
     setError("");
     setActivity(null);
-    api<Page<MyActivity>>(`me/activity?type=${kind}&page=${page}`)
+    // Let immediate effect cleanup cancel before dispatching the request.
+    Promise.resolve()
+      .then(() => {
+        controller.signal.throwIfAborted();
+        return api<Page<MyActivity>>(
+          `me/activity?type=${kind}&page=${page}`,
+          "GET",
+          undefined,
+          controller.signal,
+        );
+      })
       .then((result) => {
         if (active) setActivity(result);
       })
       .catch((error) => {
+        if (active && error instanceof ApiError && error.status === 401)
+          m.fail(error);
         if (active)
           setError(
             error instanceof Error
@@ -42,8 +62,9 @@ export function MyPageView({ model: m }: { model: WorkspaceModel }) {
       });
     return () => {
       active = false;
+      controller.abort();
     };
-  }, [kind, page, reload]);
+  }, [kind, page, reload, m.signed, m.me, m.fail]);
   const profile = m.profile;
   if (!profile) return null;
   return (

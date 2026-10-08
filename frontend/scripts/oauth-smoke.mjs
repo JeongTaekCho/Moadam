@@ -14,8 +14,31 @@ const mock = createServer(async (request, response) => {
       endpoint.searchParams.get("redirect_to"),
       "https://moadam.vercel.app/",
     );
+    let input = "";
+    for await (const chunk of request) input += chunk;
+    const { email } = JSON.parse(input);
     response.setHeader("Content-Type", "application/json");
-    response.end(JSON.stringify({ id: "pending-email-user" }));
+    if (email === "duplicate-error@example.test") {
+      response
+        .writeHead(422)
+        .end(
+          JSON.stringify({
+            error_code: "user_already_exists",
+            msg: "User already registered",
+          }),
+        );
+      return;
+    }
+    if (email === "duplicate-hidden@example.test") {
+      response.end(JSON.stringify({ id: "obfuscated-user", identities: [] }));
+      return;
+    }
+    response.end(
+      JSON.stringify({
+        id: "pending-email-user",
+        identities: [{ provider: "email" }],
+      }),
+    );
     return;
   }
   if (request.url !== "/auth/v1/token?grant_type=pkce") {
@@ -185,6 +208,29 @@ try {
   assert.equal(signup.headers.getSetCookie().length, 0);
   console.log(
     "PASS: email signup uses frontend redirect and awaits confirmation without session cookies",
+  );
+  for (const email of [
+    "duplicate-error@example.test",
+    "duplicate-hidden@example.test",
+  ]) {
+    const duplicate = await fetch(app + "/api/auth", {
+      method: "POST",
+      headers: { origin: app, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        action: "signup",
+        email,
+        password: "mock-password-123",
+      }),
+    });
+    assert.equal(duplicate.status, 409);
+    assert.equal(
+      (await duplicate.json()).message,
+      "이미 가입된 이메일입니다. 로그인해 주세요.",
+    );
+    assert.equal(duplicate.headers.getSetCookie().length, 0);
+  }
+  console.log(
+    "PASS: explicit and obfuscated duplicate signup return conflict without session cookies",
   );
 } catch (error) {
   if (serverErrors) console.error(serverErrors);

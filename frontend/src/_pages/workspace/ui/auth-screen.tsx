@@ -1,6 +1,7 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { authenticate, signInWithGoogle } from "@/features/auth";
+import { ApiError } from "@/shared/api";
 import { values } from "@/shared/lib/form";
 import {
   BrandLogo,
@@ -17,6 +18,12 @@ import {
 import type { WorkspaceModel } from "../model/use-workspace";
 export function AuthScreen({ model: m }: { model: WorkspaceModel }) {
   const [confirmationOpen, setConfirmationOpen] = useState(false);
+  const [signupError, setSignupError] = useState("");
+  useEffect(() => {
+    if (!signupError) return;
+    const timer = setTimeout(() => setSignupError(""), 5000);
+    return () => clearTimeout(timer);
+  }, [signupError]);
   return (
     <main className="auth-layout">
       <section className="auth-story">
@@ -114,11 +121,25 @@ export function AuthScreen({ model: m }: { model: WorkspaceModel }) {
           {m.error && <ErrorState message={m.error} />}
           <form
             onSubmit={async (e) => {
+              setSignupError("");
               const form = e.currentTarget;
               const b = values(e);
               const action = m.authTab === "로그인" ? "login" : "signup";
               await m.run(async () => {
-                const d = await authenticate(b, action);
+                let d;
+                try {
+                  d = await authenticate(b, action);
+                } catch (error) {
+                  if (
+                    action === "signup" &&
+                    error instanceof ApiError &&
+                    error.status === 409
+                  ) {
+                    setSignupError(error.message);
+                    return;
+                  }
+                  throw error;
+                }
                 if (action === "signup") form.reset();
                 if (d.confirmationRequired) {
                   setConfirmationOpen(true);
@@ -181,7 +202,10 @@ export function AuthScreen({ model: m }: { model: WorkspaceModel }) {
           </Button>
         </Dialog>
       )}
-      <Toast message={m.toast} />
+      <Toast
+        message={signupError || m.toast}
+        variant={signupError ? "error" : "default"}
+      />
     </main>
   );
 }

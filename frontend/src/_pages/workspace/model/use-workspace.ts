@@ -29,9 +29,10 @@ import {
   useState,
   type FormEvent,
 } from "react";
-export function useWorkspace(initialView: View = "홈") {
+export function useWorkspace(initialView: View = "홈", hasSession = false) {
   const pathname = usePathname();
   const loadVersion = useRef(0);
+  const bootTask = useRef<Promise<void> | null>(null);
   const streamAbort = useRef<AbortController | null>(null);
   const [streamingId, setStreamingId] = useState<string | null>(null);
   const [streamStage, setStreamStage] = useState("retrieving");
@@ -44,11 +45,13 @@ export function useWorkspace(initialView: View = "홈") {
     [commentTotal, setCommentTotal] = useState(0),
     [messagePage, setMessagePage] = useState(0);
   const [signed, setSigned] = useState(false),
-    [boot, setBoot] = useState(true),
+    [boot, setBoot] = useState(hasSession),
     [groups, setGroups] = useState<Group[]>([]),
     [groupId, setGroupId] = useState(""),
     [me, setMe] = useState(""),
-    [view, setView] = useState<View>(initialView);
+    [view, setView] = useState<View>(
+      initialView === "챗봇" ? "홈" : initialView,
+    );
   const [profile, setProfile] = useState<MyProfile | null>(null);
   const [posts, setPosts] = useState<Post[]>([]),
     [events, setEvents] = useState<Event[]>([]),
@@ -94,19 +97,16 @@ export function useWorkspace(initialView: View = "홈") {
     if (e instanceof ApiError && e.status === 401) setSigned(false);
   }, []);
   const loadGroups = useCallback(async () => {
-    const [g, u] = await Promise.all([
-      (async () => {
-        const first = await api<Page<Group>>("groups?size=100");
-        const items = [...first.items];
-        for (let page = 1; items.length < first.total; page++) {
-          const next = await api<Page<Group>>(`groups?size=100&page=${page}`);
-          if (!next.items.length) break;
-          items.push(...next.items);
-        }
-        return { ...first, items };
-      })(),
-      api<MyProfile>("me"),
-    ]);
+    // Validate the session/profile first; an expired session must not fan out.
+    const u = await api<MyProfile>("me");
+    const first = await api<Page<Group>>("groups?size=100");
+    const items = [...first.items];
+    for (let page = 1; items.length < first.total; page++) {
+      const next = await api<Page<Group>>(`groups?size=100&page=${page}`);
+      if (!next.items.length) break;
+      items.push(...next.items);
+    }
+    const g = { ...first, items };
     setGroups(g.items);
     setMe(u.id);
     setProfile(u);
@@ -139,7 +139,8 @@ export function useWorkspace(initialView: View = "홈") {
     setSigned(true);
   }, []);
   useEffect(() => {
-    setView(viewFromPath(window.location.pathname) || initialView);
+    const routeView = viewFromPath(window.location.pathname) || initialView;
+    setView(routeView === "챗봇" ? "홈" : routeView);
     const authError = new URLSearchParams(window.location.search).get(
       "auth_error",
     );
@@ -158,14 +159,17 @@ export function useWorkspace(initialView: View = "홈") {
       window.history.replaceState(null, "", url.pathname + url.search);
     }
 
-    loadGroups()
+    if (!hasSession) return;
+    // Share bootstrap work across Strict Mode effect setup instead of duplicating requests.
+    bootTask.current ??= loadGroups();
+    bootTask.current
       .catch((e) => {
         if (!(e instanceof ApiError && e.status === 401)) fail(e);
       })
       .finally(() => setBoot(false));
-  }, [loadGroups, fail]);
+  }, [loadGroups, fail, hasSession]);
   const load = useCallback(async () => {
-    if (!signed || (!groupId && view !== "마이페이지")) return;
+    if (!signed || !groupId || view === "마이페이지" || view === "설정") return;
     const requestId = ++loadVersion.current;
     setLoading(true);
     setError("");
@@ -204,16 +208,6 @@ export function useWorkspace(initialView: View = "홈") {
         if (requestId !== loadVersion.current) return;
         setDocuments(d.items);
         setTotal(d.total);
-      }
-      if (view === "챗봇") {
-        const [s, d] = await Promise.all([
-          api<Page<Session>>(`${base}/chat/sessions?page=${page}`),
-          api<Page<Document>>(`${base}/documents?size=100`),
-        ]);
-        if (requestId !== loadVersion.current) return;
-        setDocuments(d.items);
-        setSessions(s.items);
-        setTotal(s.total);
       }
       if (view === "멤버") {
         const m = await api<Page<Member>>(`${base}/members?page=${page}`);
@@ -276,7 +270,8 @@ export function useWorkspace(initialView: View = "홈") {
     setError("");
   };
   useEffect(() => {
-    const next = viewFromPath(pathname);
+    const routeView = viewFromPath(pathname);
+    const next = routeView === "챗봇" ? "홈" : routeView;
     if (!next || next === view) return;
     detailOrigin.current = null;
     setView(next);
@@ -470,7 +465,8 @@ export function useWorkspace(initialView: View = "홈") {
     const onBack = () => {
       streamAbort.current?.abort();
       activityVersion.current++;
-      const next = viewFromPath(window.location.pathname) || "홈";
+      const routeView = viewFromPath(window.location.pathname) || "홈";
+      const next = routeView === "챗봇" ? "홈" : routeView;
       detailOrigin.current = null;
       const requested = new URLSearchParams(window.location.search).get(
         "group",
@@ -643,24 +639,20 @@ export function useWorkspace(initialView: View = "홈") {
     });
     return succeeded;
   }
+  const loadAssistant = useCallback(async () => {
+    if (!signed || !groupId) return;
+    try {
+      const result = await api<Page<Session>>(`${base}/chat/sessions?page=0`);
+      setSessions(result.items);
+    } catch (e) {
+      fail(e);
+    }
+  }, [signed, groupId, base, fail]);
   return {
     streamingId,
     streamStage,
     cancelAnswer: () => streamAbort.current?.abort(),
-    loadAssistant: async () => {
-      if (!groupId) return;
-      try {
-        const [s, d] = await Promise.all([
-          api<Page<Session>>(`${base}/chat/sessions?page=0`),
-          api<Page<Document>>(`${base}/documents?size=100`),
-        ]);
-        setSessions(s.items);
-        setDocuments(d.items);
-        setTotal(s.total);
-      } catch (e) {
-        fail(e);
-      }
-    },
+    loadAssistant,
     sendQuestion,
     busyRef,
     commentPage,
@@ -710,7 +702,10 @@ export function useWorkspace(initialView: View = "홈") {
     messages,
     setMessages,
     loading,
-    viewReady: loadedKey === `${groupId}:${view}:${page}`,
+    viewReady:
+      view === "마이페이지" ||
+      view === "설정" ||
+      loadedKey === `${groupId}:${view}:${page}`,
     setLoading,
     busy,
     setBusy,

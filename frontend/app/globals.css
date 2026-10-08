@@ -3438,3 +3438,11 @@
     margin-top: 12px;
   }
 }
+
+@layer components {
+  .toast.toast-error {
+    background: var(--danger-soft);
+    color: var(--danger);
+    border: 1px solid var(--danger-border);
+  }
+}

@@ -69,6 +69,19 @@ export async function POST(req: NextRequest) {
       signal: AbortSignal.timeout(10000),
     });
     const data = await response.json();
+    const user = data.user ?? data;
+    const duplicateSignup =
+      action === "signup" &&
+      (["user_already_exists", "email_exists"].includes(
+        data.error_code ?? data.code,
+      ) ||
+        (!response.ok &&
+          /user already registered/i.test(data.msg ?? data.message ?? "")) ||
+        (response.ok &&
+          Array.isArray(user.identities) &&
+          user.identities.length === 0));
+    if (duplicateSignup)
+      return failure(409, "이미 가입된 이메일입니다. 로그인해 주세요.");
     if (!response.ok)
       return failure(
         response.status,

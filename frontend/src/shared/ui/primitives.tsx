@@ -319,9 +319,18 @@ export function Tabs({
     </div>
   );
 }
-export function Toast({ message }: { message: string }) {
+export function Toast({
+  message,
+  variant = "default",
+}: {
+  message: string;
+  variant?: "default" | "error";
+}) {
   return message ? (
-    <div role="status" className="toast">
+    <div
+      role={variant === "error" ? "alert" : "status"}
+      className={`toast${variant === "error" ? " toast-error" : ""}`}
+    >
       {message}
     </div>
   ) : null;

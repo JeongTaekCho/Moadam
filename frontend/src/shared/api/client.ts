@@ -43,13 +43,18 @@ export async function api<T>(
   path: string,
   method = "GET",
   body?: unknown,
+  signal?: AbortSignal,
 ): Promise<T> {
   const requestScope = scope;
   const group = path.match(/^groups\/([^/?]+)/)?.[1];
   if (group && scope && group !== scope)
     throw new DOMException("Stale group request", "AbortError");
   const response = await fetch("/api/proxy/" + path, {
-    signal: group ? controller.signal : undefined,
+    signal: group
+      ? signal
+        ? AbortSignal.any([controller.signal, signal])
+        : controller.signal
+      : signal,
     method,
     headers: { "Content-Type": "application/json" },
     body: body === undefined ? undefined : JSON.stringify(body),

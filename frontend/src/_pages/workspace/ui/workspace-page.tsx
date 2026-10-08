@@ -26,12 +26,17 @@ import { HomeView } from "./home-view";
 import { MembersView } from "./members-view";
 import { SettingsView } from "./settings-view";
 import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
+import { viewFromPath } from "@/shared/config/navigation";
 export function WorkspacePage({
   initialView = "홈",
+  hasSession = false,
 }: {
+  hasSession?: boolean;
   initialView?: import("@/shared/config/navigation").View;
 }) {
-  const m = useWorkspace(initialView);
+  const pathname = usePathname();
+  const m = useWorkspace(initialView, hasSession);
   const [assistantOpen, setAssistantOpen] = useState(initialView === "챗봇");
   const assistantModel = {
     ...m,
@@ -52,14 +57,11 @@ export function WorkspacePage({
     },
   };
   useEffect(() => {
-    if (assistantOpen && m.groupId) void m.loadAssistant();
-  }, [assistantOpen, m.groupId]);
+    if (assistantOpen && m.signed && m.groupId) void m.loadAssistant();
+  }, [assistantOpen, m.signed, m.groupId, m.loadAssistant]);
   useEffect(() => {
-    if (m.view === "챗봇") {
-      setAssistantOpen(true);
-      m.changeView("홈");
-    }
-  }, [m.view]);
+    if (m.signed && viewFromPath(pathname) === "챗봇") setAssistantOpen(true);
+  }, [pathname, m.signed]);
   if (m.boot)
     return (
       <main className="boot-screen">
@@ -93,6 +95,7 @@ export function WorkspacePage({
         onLogout={() =>
           void m.run(async () => {
             await logout();
+            setAssistantOpen(false);
             m.setSigned(false);
             m.setProfile(null);
             setApiScope("");

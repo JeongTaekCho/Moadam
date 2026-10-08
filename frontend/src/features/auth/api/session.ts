@@ -1,3 +1,4 @@
+import { ApiError } from "@/shared/api";
 export async function authenticate(
   fields: Record<string, string>,
   action: "login" | "signup",
@@ -9,7 +10,10 @@ export async function authenticate(
   });
   const result = await response.json();
   if (!response.ok)
-    throw new Error(result.message || "로그인 요청을 처리하지 못했습니다");
+    throw new ApiError(
+      response.status,
+      result.message || "로그인 요청을 처리하지 못했습니다",
+    );
   return result;
 }
 export async function logout() {
