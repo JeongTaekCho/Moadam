@@ -227,7 +227,7 @@ otp_expiry = 3600
 # sender_name = "Admin"
 
 [auth.email.template.confirmation]
-subject = "[모아담] 이메일을 확인하고 우리 모임을 시작하세요"
+subject = "[모아담] 이메일 주소를 확인해 주세요"
 content_path = "./supabase/templates/confirmation.html"
 
 # Uncomment to customize email template

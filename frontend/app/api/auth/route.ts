@@ -54,7 +54,13 @@ export async function POST(req: NextRequest) {
     if (action === "signup")
       endpoint.searchParams.set(
         "redirect_to",
-        new URL("/", req.nextUrl.origin).toString(),
+        new URL(
+          "/",
+          process.env.AUTH_SITE_URL ||
+            (process.env.VERCEL_ENV === "production"
+              ? "https://moadam.vercel.app"
+              : req.nextUrl.origin),
+        ).toString(),
       );
     const response = await fetch(endpoint, {
       method: "POST",
@@ -76,7 +82,25 @@ export async function POST(req: NextRequest) {
       setAuthSession(res, data);
     }
     return res;
-  } catch {
-    return failure(503, "인증 서비스를 연결할 수 없습니다");
+  } catch (error) {
+    const response = failure(503, "인증 서비스를 연결할 수 없습니다");
+    const { requestId } = await response.clone().json();
+    // Never log credentials, auth response bodies, or URLs containing keys.
+    const cause = error instanceof Error ? error.cause : undefined;
+    const causeCode =
+      cause &&
+      typeof cause === "object" &&
+      "code" in cause &&
+      typeof cause.code === "string" &&
+      /^[A-Z0-9_]{1,64}$/.test(cause.code)
+        ? cause.code
+        : undefined;
+    console.error("Auth request failed", {
+      requestId,
+      action,
+      errorType: error instanceof Error ? error.name : "UnknownError",
+      causeCode,
+    });
+    return response;
   }
 }

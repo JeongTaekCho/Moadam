@@ -10,7 +10,10 @@ let exchangeCount = 0;
 const mock = createServer(async (request, response) => {
   const endpoint = new URL(request.url, "http://mock.test");
   if (endpoint.pathname === "/auth/v1/signup") {
-    assert.equal(endpoint.searchParams.get("redirect_to"), app + "/");
+    assert.equal(
+      endpoint.searchParams.get("redirect_to"),
+      "https://moadam.vercel.app/",
+    );
     response.setHeader("Content-Type", "application/json");
     response.end(JSON.stringify({ id: "pending-email-user" }));
     return;
@@ -75,6 +78,7 @@ const server = spawn(
       SUPABASE_URL: "http://127.0.0.1:9101",
       SUPABASE_PUBLISHABLE_KEY: "mock-publishable-key",
       NODE_ENV: "production",
+      AUTH_SITE_URL: "https://moadam.vercel.app",
     },
   },
 );
