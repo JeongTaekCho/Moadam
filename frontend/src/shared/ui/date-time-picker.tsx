@@ -11,6 +11,7 @@ type PickerProps = {
   name?: string;
   required?: boolean;
   disabled?: boolean;
+  minDate?: string;
 };
 const datePattern = "[0-9]{4}-[0-9]{2}-[0-9]{2}";
 const timePattern = "([01][0-9]|2[0-3]):[0-5][0-9]";
@@ -81,6 +82,7 @@ export function DatePicker({
   name,
   required,
   disabled,
+  minDate,
 }: PickerProps) {
   const id = useId();
   const popoverId = `${id}-calendar`;
@@ -99,10 +101,13 @@ export function DatePicker({
     date.setUTCDate(start.getUTCDate() + index);
     return date;
   });
-  const preferredDay = focusDay || (parseDate(value) ? value : today);
+  const selectable = (day: string) => !minDate || day >= minDate;
+  const preferredDay =
+    focusDay ||
+    (parseDate(value) && selectable(value) ? value : minDate || today);
   const tabbableDay = days.some((day) => dateKey(day) === preferredDay)
     ? preferredDay
-    : `${month}-01`;
+    : days.map(dateKey).find(selectable) || `${month}-01`;
   useEffect(() => {
     if (focusDay)
       popover.current
@@ -115,6 +120,7 @@ export function DatePicker({
     setMonth(dateKey(date).slice(0, 7));
   };
   const choose = (day: string) => {
+    if (!selectable(day)) return;
     onChange(day);
     popover.current?.hidePopover();
     trigger.current?.focus();
@@ -174,7 +180,7 @@ export function DatePicker({
         name={name}
         required={required}
         disabled={disabled}
-        valid={!!parseDate(value)}
+        valid={!!parseDate(value) && selectable(value)}
         trigger={trigger}
         errorId={`${id}-error`}
       />
@@ -225,6 +231,7 @@ export function DatePicker({
                 aria-pressed={day === value}
                 aria-current={day === today ? "date" : undefined}
                 tabIndex={day === tabbableDay ? 0 : -1}
+                disabled={!selectable(day)}
                 onClick={() => choose(day)}
                 onKeyDown={(event) => {
                   const offsets: Record<string, number> = {
@@ -238,6 +245,7 @@ export function DatePicker({
                   const target = new Date(date);
                   target.setUTCDate(target.getUTCDate() + offsets[event.key]);
                   const next = dateKey(target);
+                  if (!selectable(next)) return;
                   setFocusDay(next);
                   if (next.slice(0, 7) !== month) setMonth(next.slice(0, 7));
                 }}
@@ -249,7 +257,11 @@ export function DatePicker({
         </div>
         <div className="picker-footer">
           <span>방향키로 날짜 이동</span>
-          <button type="button" onClick={() => choose(today)}>
+          <button
+            type="button"
+            disabled={!selectable(today)}
+            onClick={() => choose(today)}
+          >
             오늘
           </button>
         </div>

@@ -12,5 +12,6 @@ export type Modal = {
     | "pdf"
     | "comment"
     | "documentEdit";
+  initialDate?: string;
   item?: Post | Event | Comment | Document;
 };

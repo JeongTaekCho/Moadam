@@ -3,11 +3,10 @@ import type { Document } from "@/entities/document";
 import type { Event } from "@/entities/event";
 import type { Comment, Post } from "@/entities/post";
 
-import { localInput } from "@/shared/lib/form";
+import { EventFields } from "./event-fields";
 import {
   Button,
   Dialog,
-  DateTimePicker,
   ErrorState,
   Select,
   TextField,
@@ -47,6 +46,7 @@ export function EditorDialog({
             }[modal.kind]
           }
           onClose={() => !busy && onClose()}
+          className={modal.kind === "event" ? "event-editor-dialog" : undefined}
         >
           <form onSubmit={submit}>
             {error && <ErrorState message={error} />}{" "}
@@ -103,41 +103,11 @@ export function EditorDialog({
               />
             )}
             {modal.kind === "event" && (
-              <>
-                <TextField
-                  label="일정 제목"
-                  name="title"
-                  defaultValue={(modal.item as Event)?.title}
-                  maxLength={200}
-                  required
-                />
-                <Textarea
-                  label="설명"
-                  name="description"
-                  defaultValue={(modal.item as Event)?.description}
-                />
-                <TextField
-                  label="장소"
-                  name="location"
-                  defaultValue={(modal.item as Event)?.location}
-                />
-                <p className="muted">
-                  입력과 표시는 한국 표준시(KST, UTC+9) 기준입니다. 저장 시
-                  UTC로 변환됩니다.
-                </p>
-                <DateTimePicker
-                  label="시작"
-                  name="starts_at"
-                  defaultValue={localInput((modal.item as Event)?.starts_at)}
-                  required
-                />
-                <DateTimePicker
-                  label="종료"
-                  name="ends_at"
-                  defaultValue={localInput((modal.item as Event)?.ends_at)}
-                  required
-                />
-              </>
+              <EventFields
+                event={modal.item as Event | undefined}
+                initialDate={modal.initialDate}
+                busy={busy}
+              />
             )}
             {["memo", "pdf", "documentEdit"].includes(modal.kind) && (
               <TextField

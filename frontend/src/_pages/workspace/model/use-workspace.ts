@@ -2,6 +2,11 @@
 import type { Message, Session } from "@/entities/chat";
 import type { Document } from "@/entities/document";
 import type { Event } from "@/entities/event";
+import {
+  calendarLayout,
+  addDateDays,
+  eventDateRange,
+} from "@/entities/event/schedule";
 import type { Group, Invite, Member } from "@/entities/group";
 import type { Comment, Post } from "@/entities/post";
 import { saveEditor } from "@/features/content-editor/api/save-editor";
@@ -23,7 +28,7 @@ import {
 } from "@/shared/config/navigation";
 import { usePathname } from "next/navigation";
 import { values } from "@/shared/lib/form";
-import { koreaMonthStart } from "@/shared/lib/form";
+import { koreaDateKey, koreaMonthStart } from "@/shared/lib/form";
 import {
   useCallback,
   useEffect,
@@ -95,6 +100,7 @@ export function useWorkspace(initialView: View = "홈", hasSession = false) {
     admin = !!group && group.role !== "member",
     owner = group?.role === "owner";
   const base = `groups/${groupId}`;
+  const calendarMonthKey = koreaDateKey(month).slice(0, 7);
   const notify = (text: string) => {
     setToast(text);
     setTimeout(() => setToast(""), 4000);
@@ -207,12 +213,32 @@ export function useWorkspace(initialView: View = "홈", hasSession = false) {
           setTotal(p.total);
         }
         if (view === "일정") {
-          const e = await api<Page<Event>>(
-            `${base}/events?page=${page}&size=100`,
+          const gridStart = calendarLayout([], calendarMonthKey).start;
+          const gridEnd = addDateDays(gridStart, 41);
+          const from = encodeURIComponent(
+            new Date(`${gridStart}T00:00:00+09:00`).toISOString(),
           );
-          if (requestId !== loadVersion.current) return;
-          setEvents(e.items);
-          setTotal(e.total);
+          const collected: Event[] = [];
+          for (let eventPage = 0; ; eventPage++) {
+            const result = await api<Page<Event>>(
+              `${base}/events?page=${eventPage}&size=100&from=${from}`,
+            );
+            if (requestId !== loadVersion.current) return;
+            collected.push(
+              ...result.items.filter((event) => {
+                const range = eventDateRange(event);
+                return range.start <= gridEnd && range.end >= gridStart;
+              }),
+            );
+            if (
+              !result.items.length ||
+              (eventPage + 1) * result.size >= result.total ||
+              koreaDateKey(new Date(result.items.at(-1)!.starts_at)) > gridEnd
+            )
+              break;
+          }
+          setEvents(collected);
+          setTotal(collected.length);
         }
         if (view === "자료") {
           const d = await api<Page<Document>>(`${base}/documents?page=${page}`);
@@ -240,7 +266,7 @@ export function useWorkspace(initialView: View = "홈", hasSession = false) {
         if (requestId === loadVersion.current) setLoading(false);
       }
     },
-    [groupId, base, view, page, admin, signed, fail],
+    [groupId, base, view, page, admin, signed, fail, calendarMonthKey],
   );
   const cancelViewLoad = useCallback(() => {
     loadVersion.current++;
@@ -502,8 +528,8 @@ export function useWorkspace(initialView: View = "홈", hasSession = false) {
             : "모임을 만들었습니다",
         );
       }
+      if (saved.event && event?.id === saved.event.id) setEvent(saved.event);
       if (active.kind === "post") setPost(null);
-      if (active.kind === "event") setEvent(null);
       if (active.kind === "comment" && post) await openPost(post);
       if (active.kind === "documentEdit" && active.item)
         await openDocument(active.item.id);

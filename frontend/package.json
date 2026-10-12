@@ -20,12 +20,15 @@
     "format:check": "prettier --check .prettierrc.json app src scripts *.ts *.mjs *.json *.md *.yaml",
     "lint": "eslint app src scripts next.config.ts eslint.config.mjs --max-warnings=0",
     "lint:fix": "pnpm lint --fix",
-    "check": "pnpm format:check && pnpm lint && pnpm typecheck"
+    "check": "pnpm format:check && pnpm lint && pnpm typecheck",
+    "test:events": "node scripts/event-calendar-smoke.mjs",
+    "test:events-ui": "node scripts/event-calendar-ui-smoke.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "2.117.2",
     "next": "16.4.0",
     "react": "19.2.4",
+    "react-calendar": "6.0.1",
     "react-dom": "19.2.4",
     "server-only": "0.0.1"
   },

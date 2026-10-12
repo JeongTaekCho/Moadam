@@ -27,10 +27,10 @@ jobs:
           version: 12.5.1
       - run: pnpm install --frozen-lockfile
       - run: make -C .. frontend-check
-      - run: pnpm test:cache && pnpm test:db
+      - run: pnpm test:cache && pnpm test:db && pnpm test:events
       - run: pnpm build
       - run: pnpm exec playwright install --with-deps chromium
-      - run: pnpm test:oauth && pnpm test:chat-stream && pnpm test:performance
+      - run: pnpm test:oauth && pnpm test:chat-stream && pnpm test:performance && pnpm test:events-ui
   backend:
     runs-on: ubuntu-latest
     steps:

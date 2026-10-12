@@ -1,7 +1,8 @@
 import type { Document } from "@/entities/document";
+import type { Event } from "@/entities/event";
 import type { Group } from "@/entities/group";
 import { api } from "@/shared/api";
-import { koreaLocalInputToUtc } from "@/shared/lib/form";
+import { koreaDateKey, koreaLocalInputToUtc } from "@/shared/lib/form";
 
 import type { Modal } from "../model/types";
 type Input = {
@@ -17,7 +18,7 @@ export async function saveEditor({
   file,
   base,
   postId,
-}: Input): Promise<{ group?: Group }> {
+}: Input): Promise<{ group?: Group; event?: Event }> {
   switch (active.kind) {
     case "group":
       return {
@@ -45,19 +46,24 @@ export async function saveEditor({
         { body: b.body },
       );
       break;
-    case "event":
+    case "event": {
+      if (b.starts_at.slice(0, 10) < koreaDateKey(new Date()))
+        throw new Error("오늘 이전 날짜로 일정을 만들 수 없습니다");
       if (koreaLocalInputToUtc(b.ends_at) <= koreaLocalInputToUtc(b.starts_at))
         throw new Error("종료 시간은 시작 시간보다 늦어야 합니다");
-      await api(
+      const event = await api<Event>(
         `${base}/events${active.item ? "/" + active.item.id : ""}`,
         active.item ? "PATCH" : "POST",
         {
-          ...b,
+          title: b.title,
+          description: b.description,
+          location: b.location,
           starts_at: koreaLocalInputToUtc(b.starts_at),
           ends_at: koreaLocalInputToUtc(b.ends_at),
         },
       );
-      break;
+      return { event };
+    }
     case "documentEdit":
       await api(`${base}/documents/${active.item?.id}`, "PATCH", {
         title: b.title,

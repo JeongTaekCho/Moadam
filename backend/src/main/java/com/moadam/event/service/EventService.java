@@ -48,6 +48,8 @@ public class EventService extends DomainService {
   }
 
   void validateEvent(EventCreateRequest b) {
+    if (EventDatePolicy.isBeforeToday(b.starts_at(), Instant.now()))
+      throw new IllegalArgumentException("Past event date");
     if (!b.ends_at().isAfter(b.starts_at())) throw new IllegalArgumentException();
   }
 
@@ -101,7 +103,11 @@ public class EventService extends DomainService {
 
   public Map<String, Boolean> attend(Jwt j, UUID g, UUID id, AttendanceRequest b) {
     policy.member(g, user(j));
-    one("events", g, id);
+    var event = one("events", g, id);
+    var startsAt = ((java.sql.Timestamp) event.get("starts_at")).toInstant();
+    if (EventDatePolicy.isBeforeToday(startsAt, Instant.now()))
+      throw new org.springframework.web.server.ResponseStatusException(
+          org.springframework.http.HttpStatus.CONFLICT, "Attendance is closed");
     repository.upsertAttendance(g, id, user(j), b.status());
     return Map.of("updated", true);
   }

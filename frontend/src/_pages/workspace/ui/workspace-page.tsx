@@ -167,7 +167,7 @@ export function WorkspacePage({
             {m.view === "자료" && <DocumentsView model={assistantModel} />}{" "}
             {m.view === "멤버" && <MembersView model={m} />}{" "}
             {m.view === "설정" && <SettingsView model={m} />}{" "}
-            {["커뮤니티", "일정", "자료", "멤버"].includes(m.view) &&
+            {["커뮤니티", "자료", "멤버"].includes(m.view) &&
               !m.post &&
               !m.event &&
               !m.document &&

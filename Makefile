@@ -35,12 +35,12 @@ conventions:
 	$(RAG_PYTHON) scripts/check-migrations.py
 
 test:
-	cd frontend && pnpm test:cache && pnpm test:db
+	cd frontend && pnpm test:cache && pnpm test:db && pnpm test:events
 	cd backend && $(MVN) verify
 	cd rag && $(RAG_PYTHON) -m unittest discover -s tests -v
 
 qa:
-	cd frontend && pnpm build && pnpm test:oauth && pnpm test:chat-stream && pnpm test:performance
+	cd frontend && pnpm build && pnpm test:oauth && pnpm test:chat-stream && pnpm test:performance && pnpm test:events-ui
 
 api-types:
 	cd backend && $(MVN) -Dtest=ContractTest -DexportOpenApi=true test
