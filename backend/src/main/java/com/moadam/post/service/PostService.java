@@ -2,6 +2,7 @@ package com.moadam.post.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.moadam.auth.MembershipPolicy;
+import com.moadam.comment.service.CommentService;
 import com.moadam.common.dto.DtoMapper;
 import com.moadam.common.dto.Page;
 import com.moadam.common.repository.ResourceRepository;
@@ -13,24 +14,25 @@ import com.moadam.post.dto.PostResponse;
 import com.moadam.post.repository.PostRepository;
 import java.util.Map;
 import java.util.UUID;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 
 @Service
 public class PostService extends DomainService {
   private final PostRepository repository;
+  private final CommentService comments;
 
   public PostService(
       PostRepository repository,
+      CommentService comments,
       ResourceRepository resources,
       DtoMapper mapper,
       MembershipPolicy policy,
       ObjectMapper json) {
     super(resources, mapper, policy, json);
     this.repository = repository;
+    this.comments = comments;
   }
 
   public Page<PostResponse> posts(Jwt j, UUID g, int page, int size) {
@@ -71,36 +73,18 @@ public class PostService extends DomainService {
   }
 
   public Page<CommentResponse> comments(Jwt j, UUID g, UUID p, int page, int size) {
-    policy.member(g, user(j));
-    one("posts", g, p);
-    return typed(page("comments", g, page, size, "and post_id=?", p), CommentResponse.class);
+    return comments.list(j, g, "posts", p, page, size);
   }
 
-  @Transactional
   public CommentResponse comment(Jwt j, UUID g, UUID p, CommentCreateRequest b) {
-    policy.member(g, user(j));
-    one("posts", g, p);
-    UUID id = UUID.randomUUID();
-    repository.insertComment(id, g, p, user(j), b.body());
-    return dto(CommentResponse.class, one("comments", g, id));
+    return comments.create(j, g, "posts", p, b);
   }
 
-  @Transactional
   public CommentResponse updateComment(Jwt j, UUID g, UUID p, UUID id, CommentCreateRequest b) {
-    edit("comments", g, id, user(j));
-    if (!one("comments", g, id).get("post_id").equals(p))
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-    repository.updateComment(b.body(), g, p, id);
-    return dto(CommentResponse.class, one("comments", g, id));
+    return comments.update(j, g, "posts", p, id, b);
   }
 
-  @Transactional
   public Map<String, Boolean> deleteComment(Jwt j, UUID g, UUID p, UUID id) {
-    edit("comments", g, id, user(j));
-    if (!one("comments", g, id).get("post_id").equals(p))
-      throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-    repository.deleteComment(g, p, id);
-    audit(g, user(j), "comment.delete", id);
-    return Map.of("deleted", true);
+    return comments.delete(j, g, "posts", p, id);
   }
 }

@@ -3992,8 +3992,8 @@
   }
   .schedule-create {
     position: absolute;
-    bottom: 3px;
-    left: 4px;
+    top: 13px;
+    right: 8px;
     height: 22px;
     max-width: calc(100% - 8px);
     padding: 0 6px;
@@ -4010,6 +4010,9 @@
       opacity 140ms ease,
       transform 140ms ease;
     pointer-events: none;
+  }
+  .schedule-create-symbol {
+    display: none;
   }
   .schedule-create.is-visible,
   .schedule-create:focus-visible {
@@ -4037,10 +4040,19 @@
       font-size: 8px;
     }
     .schedule-create {
-      left: 2px;
-      max-width: calc(100% - 4px);
-      padding: 0 2px;
-      font-size: 10px;
+      top: 10px;
+      right: 2px;
+      width: 20px;
+      height: 20px;
+      padding: 0;
+      font-size: 16px;
+      line-height: 20px;
+    }
+    .schedule-create-label {
+      display: none;
+    }
+    .schedule-create-symbol {
+      display: block;
     }
   }
   @media (prefers-reduced-motion: reduce) {
@@ -4051,7 +4063,7 @@
   }
   .schedule-more {
     position: absolute;
-    top: 12px;
+    bottom: 3px;
     right: 6px;
     color: var(--muted);
     font-size: 10px;
@@ -4443,5 +4455,257 @@
     background: transparent;
     cursor: not-allowed;
     opacity: 0.5;
+  }
+}
+
+@layer components {
+  .post-card {
+    position: relative;
+    transition:
+      border-color 160ms ease,
+      box-shadow 160ms ease;
+  }
+  .post-card:hover {
+    border-color: var(--brand-border);
+    box-shadow: var(--shadow);
+  }
+  .post-card-link {
+    position: absolute;
+    inset: 0;
+    border: 0;
+    border-radius: inherit;
+    background: transparent;
+    cursor: pointer;
+    z-index: 1;
+  }
+  .post-card-link:focus-visible {
+    outline: 2px solid var(--brand);
+    outline-offset: 3px;
+  }
+  .post-card .post-title {
+    margin: 16px 0 12px;
+    font-size: 18px;
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+  }
+  .community-detail {
+    display: grid;
+    gap: 24px;
+  }
+  .community-detail-content {
+    padding: 32px;
+  }
+  .community-detail-content header {
+    display: grid;
+    gap: 20px;
+    justify-items: start;
+  }
+  .community-detail-content h1 {
+    margin: 0;
+    font-size: clamp(24px, 3vw, 34px);
+    line-height: 1.45;
+    overflow-wrap: anywhere;
+  }
+  .community-detail-meta {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+  .community-detail-meta time,
+  .comment-heading time {
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .community-detail-body {
+    margin-top: 28px;
+    padding-top: 28px;
+    border-top: 1px solid var(--border);
+  }
+  .community-detail-body .body {
+    margin: 0;
+    font-size: 16px;
+    line-height: 1.9;
+    overflow-wrap: anywhere;
+  }
+  .discussion-section {
+    padding: 28px;
+    display: grid;
+    gap: 24px;
+  }
+  .discussion-heading {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--brand);
+  }
+  .discussion-heading h2 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 500;
+    color: var(--text);
+  }
+  .discussion-heading h2 span {
+    margin-left: 6px;
+    font-size: 14px;
+    color: var(--muted);
+  }
+  .discussion-composer {
+    display: grid;
+    gap: 16px;
+  }
+  .comment-editor {
+    padding: 16px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--surface-subtle);
+  }
+  .comment-editor .field {
+    margin: 0;
+  }
+  .comment-editor .field > span {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+  .comment-editor textarea {
+    background: var(--surface);
+    min-height: 92px;
+    line-height: 1.7;
+  }
+  .comment-editor-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin-top: 12px;
+  }
+  .comment-editor-footer small {
+    font-size: 11px;
+    color: var(--muted);
+  }
+  .comment-editor-footer .row {
+    flex-wrap: nowrap;
+    gap: 8px;
+  }
+  .discussion-thread {
+    padding: 24px 0;
+    border-top: 1px solid var(--border);
+  }
+  .discussion-thread:last-child {
+    padding-bottom: 0;
+  }
+  .comment-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .comment-body {
+    margin: 16px 0 8px;
+    line-height: 1.8;
+    overflow-wrap: anywhere;
+  }
+  .comment-actions {
+    display: flex;
+    gap: 4px;
+  }
+  .comment-actions .button {
+    padding: 0 10px;
+  }
+  .discussion-replies {
+    margin: 16px 0 0 20px;
+    padding: 4px 0 4px 20px;
+    border-left: 2px solid var(--brand-border);
+  }
+  .discussion-replies .discussion-comment {
+    padding: 16px 0;
+  }
+  .reply-composer {
+    margin: 16px 0 0 20px;
+  }
+  .reply-composer > p {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--brand);
+    font-size: 13px;
+    margin: 0 0 12px;
+  }
+  .comment-delete-confirm,
+  .comment-load-error {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    padding: 12px;
+    border-radius: 10px;
+    background: var(--warning-soft);
+    font-size: 13px;
+  }
+  .discussion-empty {
+    margin: 0;
+    padding: 20px;
+    text-align: center;
+    color: var(--muted);
+    font-size: 14px;
+  }
+  .discussion-skeleton {
+    display: grid;
+    gap: 12px;
+  }
+  .discussion-skeleton div {
+    height: 18px;
+    max-width: 70%;
+    background: var(--surface-subtle);
+    border-radius: 6px;
+  }
+  .discussion-skeleton div:first-child {
+    width: 30%;
+    height: 32px;
+  }
+  .event-detail {
+    gap: 24px;
+  }
+  @media (max-width: 650px) {
+    .community-detail,
+    .event-detail {
+      gap: 16px;
+    }
+    .community-detail-content,
+    .discussion-section {
+      padding: 20px 16px;
+    }
+    .community-detail-meta {
+      gap: 12px;
+    }
+    .community-detail-body {
+      margin-top: 24px;
+      padding-top: 24px;
+    }
+    .comment-editor {
+      padding: 12px;
+    }
+    .comment-editor-footer {
+      align-items: flex-end;
+    }
+    .comment-editor-footer small span {
+      display: none;
+    }
+    .discussion-replies {
+      margin-left: 8px;
+      padding-left: 12px;
+    }
+    .reply-composer {
+      margin-left: 8px;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .post-card {
+      transition: none;
+    }
   }
 }

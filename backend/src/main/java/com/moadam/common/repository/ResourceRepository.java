@@ -65,11 +65,14 @@ public class ResourceRepository {
                     ? "(kind='notice') desc, created_at desc"
                     : table.equals("events")
                         ? "starts_at asc"
-                        : table.equals("chat_messages")
-                            ? "sequence asc"
-                            : List.of("documents", "chat_sessions", "group_invites").contains(table)
-                                ? "created_at desc"
-                                : "created_at asc")
+                        : table.equals("comments")
+                            ? "coalesce((select p.created_at from comments p where p.group_id=comments.group_id and p.id=comments.parent_id), created_at) asc, coalesce(parent_id,id) asc, (parent_id is null) desc, created_at asc, id asc"
+                            : table.equals("chat_messages")
+                                ? "sequence asc"
+                                : List.of("documents", "chat_sessions", "group_invites")
+                                        .contains(table)
+                                    ? "created_at desc"
+                                    : "created_at asc")
                 + " limit ? offset ?",
             args.toArray()),
         page,

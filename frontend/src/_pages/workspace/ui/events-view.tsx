@@ -1,6 +1,7 @@
 "use client";
 import { EventCard, formatEventRange, eventDateRange } from "@/entities/event";
 import { isPastEventStart } from "@/entities/event/schedule";
+import { DiscussionSection } from "@/features/discussion/ui/discussion-section";
 import { Calendar } from "@/entities/event/calendar";
 import { api } from "@/shared/api";
 import { UserIdentity, Button, Card, EmptyState, Icon } from "@/shared/ui";
@@ -71,7 +72,7 @@ export function EventsView({ model: m }: { model: WorkspaceModel }) {
                   m.setConfirm({
                     title: "일정을",
                     path: `${m.base}/events/${event.id}`,
-                    after: () => m.setEvent(null),
+                    after: m.goBackFromDetail,
                   })
                 }
               >
@@ -196,6 +197,14 @@ export function EventsView({ model: m }: { model: WorkspaceModel }) {
             </span>
           </div>
         </Card>
+        <DiscussionSection
+          key={`${m.base}/events/${event.id}`}
+          path={`${m.base}/events/${event.id}/comments`}
+          me={m.me}
+          profile={m.profile}
+          admin={m.admin}
+          notify={m.notify}
+        />
       </section>
     );
   }

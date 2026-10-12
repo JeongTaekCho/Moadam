@@ -1,7 +1,7 @@
 "use client";
 import type { Document } from "@/entities/document";
 import type { Event } from "@/entities/event";
-import type { Comment, Post } from "@/entities/post";
+import type { Post } from "@/entities/post";
 
 import { EventFields } from "./event-fields";
 import {
@@ -41,7 +41,6 @@ export function EditorDialog({
               event: modal.item ? "일정 수정" : "새 일정",
               memo: "메모 작성",
               pdf: "PDF 업로드",
-              comment: modal.item ? "댓글 수정" : "댓글 작성",
               documentEdit: "자료 수정",
             }[modal.kind]
           }
@@ -92,15 +91,6 @@ export function EditorDialog({
                   required
                 />
               </>
-            )}
-            {modal.kind === "comment" && (
-              <Textarea
-                label="댓글"
-                name="body"
-                defaultValue={(modal.item as Comment)?.body}
-                maxLength={5000}
-                required
-              />
             )}
             {modal.kind === "event" && (
               <EventFields

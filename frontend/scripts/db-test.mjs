@@ -16,6 +16,15 @@ await db.exec(
     "utf8",
   ),
 );
+await db.exec(
+  await readFile(
+    new URL(
+      "../../backend/src/main/resources/db/migration/V2__threaded_comments.sql",
+      import.meta.url,
+    ),
+    "utf8",
+  ),
+);
 let checks = 0;
 const query = (sql, args = []) => db.query(sql, args);
 const id = () => crypto.randomUUID();
@@ -86,6 +95,82 @@ await assert.rejects(
     "insert into events(group_id,author_id,title,starts_at,ends_at) values($1,$2,'invalid',now(),now()-interval '1 hour')",
     [g1, u1],
   ),
+);
+checks++;
+const rootComment = id(),
+  replyComment = id(),
+  otherComment = id();
+await query(
+  "insert into comments(id,group_id,post_id,author_id,body) values($1,$2,$3,$4,'root')",
+  [rootComment, g1, p1, u1],
+);
+await query(
+  "insert into comments(id,group_id,post_id,author_id,body,parent_id) values($1,$2,$3,$4,'reply',$5)",
+  [replyComment, g1, p1, u1, rootComment],
+);
+await assert.rejects(
+  query(
+    "insert into comments(group_id,event_id,author_id,body,parent_id) values($1,$2,$3,'wrong target',$4)",
+    [g1, e, u1, rootComment],
+  ),
+);
+checks++;
+await assert.rejects(
+  query(
+    "insert into comments(group_id,post_id,author_id,body,parent_id) values($1,$2,$3,'too deep',$4)",
+    [g1, p1, u1, replyComment],
+  ),
+);
+checks++;
+await assert.rejects(
+  query(
+    "insert into comments(group_id,post_id,event_id,author_id,body) values($1,$2,$3,$4,'two targets')",
+    [g1, p1, e, u1],
+  ),
+);
+checks++;
+await assert.rejects(
+  query("update comments set parent_id=$1 where id=$2", [
+    replyComment,
+    rootComment,
+  ]),
+);
+checks++;
+await query(
+  "update comments set body='삭제된 댓글입니다',deleted=true where id=$1",
+  [rootComment],
+);
+assert.equal(
+  (await query("select body from comments where id=$1", [replyComment])).rows[0]
+    .body,
+  "reply",
+);
+checks++;
+await assert.rejects(
+  query(
+    "insert into comments(group_id,post_id,author_id,body,parent_id) values($1,$2,$3,'deleted parent',$4)",
+    [g1, p1, u1, rootComment],
+  ),
+);
+checks++;
+await query(
+  "insert into comments(id,group_id,event_id,author_id,body) values($1,$2,$3,$4,'event root')",
+  [otherComment, g1, e, u1],
+);
+await query(
+  "insert into comments(group_id,event_id,author_id,body,parent_id) values($1,$2,$3,'event reply',$4)",
+  [g1, e, u1, otherComment],
+);
+assert.equal(
+  (await query("select count(*)::int n from comments where event_id=$1", [e]))
+    .rows[0].n,
+  2,
+);
+checks++;
+assert.equal(
+  (await query("select relrowsecurity from pg_class where relname='comments'"))
+    .rows[0].relrowsecurity,
+  true,
 );
 checks++;
 await query(
@@ -189,6 +274,33 @@ await query("delete from groups where id=$1", [g2]);
 assert.equal(
   (await query("select count(*)::int n from document_chunks")).rows[0].n,
   0,
+);
+checks++;
+assert.equal(
+  (
+    await query(
+      "select has_table_privilege('anon','comments','select') allowed",
+    )
+  ).rows[0].allowed,
+  false,
+);
+checks++;
+assert.equal(
+  (
+    await query(
+      "select has_function_privilege('authenticated','validate_comment_parent()','execute') allowed",
+    )
+  ).rows[0].allowed,
+  false,
+);
+checks++;
+assert.equal(
+  (
+    await query(
+      "select prosecdef from pg_proc where proname='validate_comment_parent'",
+    )
+  ).rows[0].prosecdef,
+  false,
 );
 checks++;
 await db.close();

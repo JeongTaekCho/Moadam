@@ -80,7 +80,9 @@ try {
         method = route.request().method();
       calls.push(path + url.search);
       let data;
-      if (path === "me") data = profile;
+      if (path.endsWith("/comments"))
+        data = { items: [], total: 0, page: 0, size: 100 };
+      else if (path === "me") data = profile;
       else if (path === "groups")
         data = { items: [team], total: 1, size: 100, page: 0 };
       else if (path.endsWith("/attendance")) {
@@ -100,6 +102,8 @@ try {
           ...body,
         };
         events.push(data);
+      } else if (method === "GET" && /\/events\/[^/]+$/.test(path)) {
+        data = events.find((event) => event.id === path.split("/").at(-1));
       } else if (method === "PATCH") {
         const body = JSON.parse(route.request().postData());
         writes.push(body);
@@ -186,7 +190,10 @@ try {
       assert.equal(
         await page.evaluate(
           ({ x, y }) =>
-            document.elementFromPoint(x, y)?.getAttribute("data-calendar-day"),
+            document
+              .elementFromPoint(x, y)
+              ?.closest("button")
+              ?.getAttribute("data-calendar-day"),
           { x, y },
         ),
         day,
@@ -446,7 +453,9 @@ try {
       .getByRole("button", { name: "일정으로 돌아가기", exact: true })
       .click();
     await page.getByRole("button", { name: /지난 일정,.*하루 종일/ }).click();
-    await page.locator(".event-detail").waitFor();
+    await page
+      .getByRole("heading", { name: "지난 일정", exact: true })
+      .waitFor();
     assert.equal(
       await page.locator(".event-attendance-options button:disabled").count(),
       3,

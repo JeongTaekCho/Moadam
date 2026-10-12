@@ -1,10 +1,13 @@
 package com.moadam.event.controller;
 
+import com.moadam.comment.service.CommentService;
 import com.moadam.common.dto.Page;
 import com.moadam.event.dto.AttendanceRequest;
 import com.moadam.event.dto.EventCreateRequest;
 import com.moadam.event.dto.EventResponse;
 import com.moadam.event.service.EventService;
+import com.moadam.post.dto.CommentCreateRequest;
+import com.moadam.post.dto.CommentResponse;
 import jakarta.validation.Valid;
 import java.time.Instant;
 import java.util.List;
@@ -27,9 +30,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/v1")
 public class EventController {
   private final EventService service;
+  private final CommentService comments;
 
-  public EventController(EventService service) {
+  public EventController(EventService service, CommentService comments) {
     this.service = service;
+    this.comments = comments;
   }
 
   @GetMapping("/groups/{g}/events")
@@ -84,5 +89,43 @@ public class EventController {
       @PathVariable UUID id,
       @Valid @RequestBody AttendanceRequest b) {
     return service.attend(j, g, id, b);
+  }
+
+  @GetMapping("/groups/{g}/events/{id}/comments")
+  public Page<CommentResponse> comments(
+      @AuthenticationPrincipal Jwt j,
+      @PathVariable UUID g,
+      @PathVariable UUID id,
+      @RequestParam(defaultValue = "0") int page,
+      @RequestParam(defaultValue = "20") int size) {
+    return comments.list(j, g, "events", id, page, size);
+  }
+
+  @PostMapping("/groups/{g}/events/{id}/comments")
+  public CommentResponse comment(
+      @AuthenticationPrincipal Jwt j,
+      @PathVariable UUID g,
+      @PathVariable UUID id,
+      @Valid @RequestBody CommentCreateRequest b) {
+    return comments.create(j, g, "events", id, b);
+  }
+
+  @PatchMapping("/groups/{g}/events/{id}/comments/{commentId}")
+  public CommentResponse updateComment(
+      @AuthenticationPrincipal Jwt j,
+      @PathVariable UUID g,
+      @PathVariable UUID id,
+      @PathVariable UUID commentId,
+      @Valid @RequestBody CommentCreateRequest b) {
+    return comments.update(j, g, "events", id, commentId, b);
+  }
+
+  @DeleteMapping("/groups/{g}/events/{id}/comments/{commentId}")
+  public Map<String, Boolean> deleteComment(
+      @AuthenticationPrincipal Jwt j,
+      @PathVariable UUID g,
+      @PathVariable UUID id,
+      @PathVariable UUID commentId) {
+    return comments.delete(j, g, "events", id, commentId);
   }
 }

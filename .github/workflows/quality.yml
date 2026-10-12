@@ -30,7 +30,7 @@ jobs:
       - run: pnpm test:cache && pnpm test:db && pnpm test:events
       - run: pnpm build
       - run: pnpm exec playwright install --with-deps chromium
-      - run: pnpm test:oauth && pnpm test:chat-stream && pnpm test:performance && pnpm test:events-ui
+      - run: pnpm test:oauth && pnpm test:chat-stream && pnpm test:performance && pnpm test:events-ui && pnpm test:discussion-ui
   backend:
     runs-on: ubuntu-latest
     steps:

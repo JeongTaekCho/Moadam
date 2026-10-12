@@ -11,7 +11,10 @@ import java.util.UUID;
 public record CommentResponse(
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED) UUID id,
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED) UUID group_id,
-    @Schema(requiredMode = Schema.RequiredMode.REQUIRED) UUID post_id,
+    @Schema(nullable = true) UUID post_id,
+    @Schema(nullable = true) UUID event_id,
+    @Schema(nullable = true) UUID parent_id,
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED) boolean deleted,
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED) UUID author_id,
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED) PublicProfile author,
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED) String body,

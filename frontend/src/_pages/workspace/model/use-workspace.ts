@@ -8,7 +8,7 @@ import {
   eventDateRange,
 } from "@/entities/event/schedule";
 import type { Group, Invite, Member } from "@/entities/group";
-import type { Comment, Post } from "@/entities/post";
+import type { Post } from "@/entities/post";
 import { saveEditor } from "@/features/content-editor/api/save-editor";
 import type { Modal } from "@/features/content-editor/model/types";
 import type { Page, MyProfile, MyActivity } from "@/shared/api";
@@ -22,6 +22,8 @@ import {
   streamQuestion,
 } from "@/shared/api";
 import {
+  subscribeWorkspacePath,
+  detailFromPath,
   navigateWorkspace,
   viewFromPath,
   type View,
@@ -34,10 +36,19 @@ import {
   useEffect,
   useRef,
   useState,
+  useSyncExternalStore,
   type FormEvent,
 } from "react";
 export function useWorkspace(initialView: View = "홈", hasSession = false) {
-  const pathname = usePathname();
+  const routerPathname = usePathname();
+  const pathname = useSyncExternalStore(
+    subscribeWorkspacePath,
+    () => window.location.pathname,
+    () => routerPathname,
+  );
+  const routeDetail = detailFromPath(pathname);
+  const detailId = routeDetail?.id;
+  const detailResource = routeDetail?.resource;
   const loadVersion = useRef(0);
   const bootTask = useRef<Promise<void> | null>(null);
   const streamAbort = useRef<AbortController | null>(null);
@@ -53,9 +64,7 @@ export function useWorkspace(initialView: View = "홈", hasSession = false) {
   const detailVersion = useRef(0);
   const assistantVersion = useRef(0);
   const detailOrigin = useRef<{ view: View; page: number } | null>(null);
-  const [commentPage, setCommentPage] = useState(0),
-    [commentTotal, setCommentTotal] = useState(0),
-    [messagePage, setMessagePage] = useState(0);
+  const [messagePage, setMessagePage] = useState(0);
   const [signed, setSigned] = useState(false),
     [boot, setBoot] = useState(hasSession),
     [groups, setGroups] = useState<Group[]>([]),
@@ -73,7 +82,6 @@ export function useWorkspace(initialView: View = "홈", hasSession = false) {
     [members, setMembers] = useState<Member[]>([]),
     [invites, setInvites] = useState<Invite[]>([]);
   const [post, setPost] = useState<Post | null>(null),
-    [comments, setComments] = useState<Comment[]>([]),
     [event, setEvent] = useState<Event | null>(null),
     [attendance, setAttendance] = useState<
       { user_id: string; status: string }[]
@@ -142,7 +150,6 @@ export function useWorkspace(initialView: View = "홈", hasSession = false) {
       setPost(null);
       setEvent(null);
       setDocument(null);
-      setComments([]);
       setAttendance([]);
       setSessionId("");
       setMessages([]);
@@ -191,6 +198,32 @@ export function useWorkspace(initialView: View = "홈", hasSession = false) {
       setLoading(true);
       setError("");
       try {
+        const activeDetail = detailFromPath(window.location.pathname);
+        const requestedDetailId = activeDetail?.id;
+        const requestedResource = activeDetail?.resource;
+        if (requestedDetailId && requestedResource) {
+          if (requestedResource === "posts") {
+            const detail = await api<Post>(
+              `${base}/posts/${requestedDetailId}`,
+            );
+            if (requestId !== loadVersion.current) return;
+            setPost(detail);
+            setEvent(null);
+          } else {
+            const [detail, attendance] = await Promise.all([
+              api<Event>(`${base}/events/${requestedDetailId}`),
+              api<{ user_id: string; status: string }[]>(
+                `${base}/events/${requestedDetailId}/attendance`,
+              ),
+            ]);
+            if (requestId !== loadVersion.current) return;
+            setEvent(detail);
+            setAttendance(attendance);
+            setPost(null);
+          }
+          setLoadedKey(`${groupId}:${view}:${page}:${requestedDetailId}`);
+          return;
+        }
         if (view === "홈") {
           const [p, e, d] = await Promise.all([
             api<Page<Post>>(`${base}/posts?size=5`),
@@ -275,7 +308,7 @@ export function useWorkspace(initialView: View = "홈", hasSession = false) {
     // eslint-disable-next-line react-hooks/set-state-in-effect -- Start the external API subscription for this route and preserve its loading state.
     void load();
     return cancelViewLoad;
-  }, [load, cancelViewLoad]);
+  }, [load, cancelViewLoad, detailId, detailResource]);
   useEffect(() => {
     if (!signed) return;
     let lastRefresh = Date.now();
@@ -297,6 +330,7 @@ export function useWorkspace(initialView: View = "홈", hasSession = false) {
     };
   }, [signed, load]);
   const changeGroup = (id: string) => {
+    loadVersion.current++;
     setLoadedKey("");
     sessionVersion.current++;
     detailVersion.current++;
@@ -325,6 +359,7 @@ export function useWorkspace(initialView: View = "홈", hasSession = false) {
     setInviteToken("");
   };
   const changeView = (next: View) => {
+    loadVersion.current++;
     detailVersion.current++;
     setLoading(false);
     activityVersion.current++;
@@ -340,7 +375,11 @@ export function useWorkspace(initialView: View = "홈", hasSession = false) {
   useEffect(() => {
     const routeView = viewFromPath(pathname);
     const next = routeView === "챗봇" ? "홈" : routeView;
-    if (!next || next === view) return;
+    if (
+      !next ||
+      (next === view && (detailFromPath(pathname) || (!post && !event)))
+    )
+      return;
     detailOrigin.current = null;
     // eslint-disable-next-line react-hooks/set-state-in-effect -- Synchronize persistent workspace state with external browser navigation.
     setView(next);
@@ -349,7 +388,7 @@ export function useWorkspace(initialView: View = "홈", hasSession = false) {
     setEvent(null);
     setDocument(null);
     setError("");
-  }, [pathname, view]);
+  }, [pathname, view, post, event]);
   const run = async (task: () => Promise<void>) => {
     if (busyRef.current) return;
     busyRef.current = true;
@@ -376,21 +415,16 @@ export function useWorkspace(initialView: View = "홈", hasSession = false) {
     setView(next);
     try {
       if (kind === "posts") {
-        const [post, comments] = await Promise.all([
-          api<Post>(`groups/${item.group_id}/posts/${item.id}`),
-          api<Page<Comment>>(
-            `groups/${item.group_id}/posts/${item.id}/comments`,
-          ),
-        ]);
+        const post = await api<Post>(
+          `groups/${item.group_id}/posts/${item.id}`,
+        );
         if (
           version !== activityVersion.current ||
           getApiScope() !== item.group_id
         )
           return;
         setPost(post);
-        setComments(comments.items);
-        setCommentPage(0);
-        setCommentTotal(comments.total);
+        navigateWorkspace("커뮤니티", item.group_id, true, post.id);
       } else {
         const document = await api<Document>(
           `groups/${item.group_id}/documents/${item.id}`,
@@ -408,21 +442,17 @@ export function useWorkspace(initialView: View = "홈", hasSession = false) {
   }
   const canEdit = (author: string) => admin || author === me;
   async function openPost(p: Post) {
+    loadVersion.current++;
     const version = ++detailVersion.current;
     setLoading(true);
     setError("");
     try {
-      const [detail, c] = await Promise.all([
-        api<Post>(`${base}/posts/${p.id}`),
-        api<Page<Comment>>(`${base}/posts/${p.id}/comments?size=100`),
-      ]);
+      const detail = await api<Post>(`${base}/posts/${p.id}`);
       if (version !== detailVersion.current) return;
       setPost(detail);
-      setComments(c.items);
-      setCommentPage(0);
-      setCommentTotal(c.total);
+      setLoadedKey(`${groupId}:커뮤니티:${page}:${p.id}`);
       detailOrigin.current = { view, page };
-      navigateWorkspace("커뮤니티", groupId);
+      navigateWorkspace("커뮤니티", groupId, false, p.id);
       setView("커뮤니티");
     } catch (e) {
       if (version === detailVersion.current) fail(e);
@@ -431,6 +461,7 @@ export function useWorkspace(initialView: View = "홈", hasSession = false) {
     }
   }
   async function openEvent(e: Event) {
+    loadVersion.current++;
     const version = ++detailVersion.current;
     setLoading(true);
     setError("");
@@ -441,8 +472,9 @@ export function useWorkspace(initialView: View = "홈", hasSession = false) {
       if (version !== detailVersion.current) return;
       setAttendance(result);
       setEvent(e);
+      setLoadedKey(`${groupId}:일정:${page}:${e.id}`);
       detailOrigin.current = { view, page };
-      navigateWorkspace("일정", groupId);
+      navigateWorkspace("일정", groupId, false, e.id);
       setView("일정");
     } catch (e) {
       if (version === detailVersion.current) fail(e);
@@ -468,6 +500,9 @@ export function useWorkspace(initialView: View = "홈", hasSession = false) {
     }
   }
   function goBackFromDetail() {
+    loadVersion.current++;
+    detailVersion.current++;
+    setLoading(false);
     const origin = detailOrigin.current;
     detailOrigin.current = null;
     setPost(null);
@@ -475,8 +510,9 @@ export function useWorkspace(initialView: View = "홈", hasSession = false) {
     setDocument(null);
     if (origin && origin.view !== view) {
       window.history.back();
-    } else if (origin) {
-      setPage(origin.page);
+    } else {
+      navigateWorkspace(view, groupId);
+      if (origin) setPage(origin.page);
     }
   }
   async function openSession(id: string) {
@@ -517,7 +553,6 @@ export function useWorkspace(initialView: View = "홈", hasSession = false) {
         fields: b,
         file,
         base,
-        postId: post?.id,
       });
       if (saved.group) {
         await loadGroups();
@@ -529,8 +564,10 @@ export function useWorkspace(initialView: View = "홈", hasSession = false) {
         );
       }
       if (saved.event && event?.id === saved.event.id) setEvent(saved.event);
-      if (active.kind === "post") setPost(null);
-      if (active.kind === "comment" && post) await openPost(post);
+      if (active.kind === "post") {
+        setPost(null);
+        navigateWorkspace("커뮤니티", groupId, true);
+      }
       if (active.kind === "documentEdit" && active.item)
         await openDocument(active.item.id);
       if (active.kind === "memo" || active.kind === "pdf")
@@ -544,6 +581,7 @@ export function useWorkspace(initialView: View = "홈", hasSession = false) {
 
   useEffect(() => {
     const onBack = () => {
+      detailVersion.current++;
       streamAbort.current?.abort();
       activityVersion.current++;
       const routeView = viewFromPath(window.location.pathname) || "홈";
@@ -570,8 +608,10 @@ export function useWorkspace(initialView: View = "홈", hasSession = false) {
       }
       setView(next);
       setPage(0);
-      setPost(null);
-      setEvent(null);
+      if (!detailFromPath(window.location.pathname)) {
+        setPost(null);
+        setEvent(null);
+      }
       setDocument(null);
       setModal(null);
       setError("");
@@ -750,10 +790,6 @@ export function useWorkspace(initialView: View = "홈", hasSession = false) {
     loadAssistant,
     sendQuestion,
     busyRef,
-    commentPage,
-    setCommentPage,
-    commentTotal,
-    setCommentTotal,
     messagePage,
     setMessagePage,
     signed,
@@ -784,8 +820,6 @@ export function useWorkspace(initialView: View = "홈", hasSession = false) {
     setInvites,
     post,
     setPost,
-    comments,
-    setComments,
     event,
     setEvent,
     attendance,
@@ -800,7 +834,9 @@ export function useWorkspace(initialView: View = "홈", hasSession = false) {
     viewReady:
       view === "마이페이지" ||
       view === "설정" ||
-      loadedKey === `${groupId}:${view}:${page}`,
+      (loadedKey ===
+        `${groupId}:${view}:${page}${detailId ? `:${detailId}` : ""}` &&
+        (!detailId || post?.id === detailId || event?.id === detailId)),
     setLoading,
     busy,
     setBusy,

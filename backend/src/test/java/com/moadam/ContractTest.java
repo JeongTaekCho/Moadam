@@ -25,6 +25,26 @@ import org.springframework.http.HttpStatus;
     })
 class ContractTest {
   @Autowired TestRestTemplate http;
+  @Autowired com.fasterxml.jackson.databind.ObjectMapper mapper;
+
+  @Test
+  void acceptsReplyParentInTheRunningRequestContract() throws Exception {
+    var parent = java.util.UUID.randomUUID();
+    var input =
+        mapper.readValue(
+            "{\"body\":\"답글\",\"parent_id\":\"" + parent + "\"}",
+            com.moadam.post.dto.CommentCreateRequest.class);
+    assertEquals(parent, input.parent_id());
+    var response = http.getForEntity("/v3/api-docs", String.class);
+    var fields =
+        mapper
+            .readTree(response.getBody())
+            .path("components")
+            .path("schemas")
+            .path("CommentInput")
+            .path("properties");
+    assertTrue(fields.has("parent_id"));
+  }
 
   @Test
   void exportsOpenApiAndRequiresAuthentication() throws Exception {

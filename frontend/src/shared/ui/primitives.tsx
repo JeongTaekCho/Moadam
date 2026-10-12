@@ -74,9 +74,10 @@ export function Textarea({
   const errorId = useId();
   return (
     <label className="field">
-      <span>{label}</span>
+      <span id={`${errorId}-label`}>{label}</span>
       <textarea
         {...props}
+        aria-labelledby={props["aria-labelledby"] ?? `${errorId}-label`}
         aria-invalid={!!error}
         aria-describedby={
           [props["aria-describedby"], error ? errorId : undefined]

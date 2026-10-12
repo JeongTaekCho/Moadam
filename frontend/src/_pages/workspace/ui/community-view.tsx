@@ -1,10 +1,9 @@
 "use client";
-import type { Comment } from "@/entities/post";
-import { CommentItem, PostCard } from "@/entities/post";
-import type { Page } from "@/shared/api";
+import { PostCard } from "@/entities/post";
 
-import { api } from "@/shared/api";
+import { DiscussionSection } from "@/features/discussion/ui/discussion-section";
 import {
+  Icon,
   UserIdentity,
   Badge,
   Button,
@@ -17,23 +16,15 @@ import { useState } from "react";
 import type { WorkspaceModel } from "../model/use-workspace";
 export function CommunityView({ model }: { model: WorkspaceModel }) {
   const {
-    commentPage,
-    setCommentPage,
-    commentTotal,
     view,
     posts,
     post,
-    setPost,
     goBackFromDetail,
-    comments,
-    setComments,
-    busy,
     setModal,
     setConfirm,
     total,
     admin,
     base,
-    run,
     canEdit,
     openPost,
   } = model;
@@ -50,97 +41,67 @@ export function CommunityView({ model }: { model: WorkspaceModel }) {
     <>
       {view === "커뮤니티" &&
         (post ? (
-          <Card>
-            <Button variant="ghost" onClick={goBackFromDetail}>
-              ← 이전 페이지
-            </Button>
-            <Badge tone={post.kind === "notice" ? "brand" : ""}>
-              {{ general: "일반", question: "질문", notice: "공지" }[post.kind]}
-            </Badge>
-            <h1>{post.title}</h1>
-            <p className="body">{post.body}</p>
-            <small>
-              <UserIdentity
-                profile={post.author}
-                id={post.author_id}
-                label="작성자"
-              />{" "}
-              · {new Date(post.created_at).toLocaleString("ko-KR")}
-            </small>
-            {canEdit(post.author_id) && (post.kind !== "notice" || admin) && (
-              <div className="row">
-                <Button
-                  variant="secondary"
-                  onClick={() => setModal({ kind: "post", item: post })}
-                >
-                  수정
-                </Button>
-                <Button
-                  variant="ghost"
-                  onClick={() =>
-                    setConfirm({
-                      title: "게시글을",
-                      path: `${base}/posts/${post.id}`,
-                      after: () => setPost(null),
-                    })
-                  }
-                >
-                  삭제
-                </Button>
-              </div>
-            )}
-            <div className="comments">
-              <h2>댓글 {commentTotal}</h2>
-              {comments.length < commentTotal && (
-                <Button
-                  variant="secondary"
-                  loading={busy}
-                  onClick={() =>
-                    void run(async () => {
-                      const next = await api<Page<Comment>>(
-                        `${base}/posts/${post.id}/comments?size=100&page=${commentPage + 1}`,
-                      );
-                      setComments((old) => [...old, ...next.items]);
-                      setCommentPage(commentPage + 1);
-                    })
-                  }
-                >
-                  댓글 더 보기
-                </Button>
-              )}
-              {comments.map((c) => (
-                <CommentItem key={c.id} comment={c}>
-                  {canEdit(c.author_id) && (
-                    <>
-                      <Button
-                        size="small"
-                        variant="ghost"
-                        onClick={() => setModal({ kind: "comment", item: c })}
-                      >
-                        수정
-                      </Button>
-                      <Button
-                        size="small"
-                        variant="ghost"
-                        onClick={() =>
-                          setConfirm({
-                            title: "댓글을",
-                            path: `${base}/posts/${post.id}/comments/${c.id}`,
-                            after: () => void openPost(post),
-                          })
-                        }
-                      >
-                        삭제
-                      </Button>
-                    </>
-                  )}
-                </CommentItem>
-              ))}
-              <Button onClick={() => setModal({ kind: "comment" })}>
-                댓글 작성
+          <section className="community-detail">
+            <div className="event-detail-toolbar">
+              <Button variant="ghost" onClick={goBackFromDetail}>
+                <Icon name="arrow" className="icon-back" size={17} />
+                커뮤니티로 돌아가기
               </Button>
+              {canEdit(post.author_id) && (post.kind !== "notice" || admin) && (
+                <div className="row">
+                  <Button
+                    variant="secondary"
+                    size="small"
+                    onClick={() => setModal({ kind: "post", item: post })}
+                  >
+                    수정
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="small"
+                    onClick={() =>
+                      setConfirm({
+                        title: "게시글을",
+                        path: `${base}/posts/${post.id}`,
+                        after: goBackFromDetail,
+                      })
+                    }
+                  >
+                    삭제
+                  </Button>
+                </div>
+              )}
             </div>
-          </Card>
+            <Card className="community-detail-content">
+              <header>
+                <Badge tone={post.kind === "notice" ? "brand" : ""}>
+                  {
+                    { general: "일반", question: "질문", notice: "공지" }[
+                      post.kind
+                    ]
+                  }
+                </Badge>
+                <h1>{post.title}</h1>
+                <div className="community-detail-meta">
+                  <UserIdentity profile={post.author} id={post.author_id} />
+                  <time dateTime={post.created_at}>
+                    {new Date(post.created_at).toLocaleString("ko-KR")}
+                  </time>
+                </div>
+              </header>
+              <div className="community-detail-body">
+                <p className="body">{post.body}</p>
+              </div>
+            </Card>
+            <DiscussionSection
+              key={`${base}/posts/${post.id}`}
+              path={`${base}/posts/${post.id}/comments`}
+              me={model.me}
+              profile={model.profile}
+              admin={admin}
+              notify={model.notify}
+            />
+          </section>
         ) : (
           <>
             <div className="row between">

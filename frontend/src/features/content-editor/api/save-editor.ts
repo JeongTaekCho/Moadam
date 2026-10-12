@@ -10,14 +10,12 @@ type Input = {
   fields: Record<string, string>;
   file?: File;
   base: string;
-  postId?: string;
 };
 export async function saveEditor({
   active,
   fields: b,
   file,
   base,
-  postId,
 }: Input): Promise<{ group?: Group; event?: Event }> {
   switch (active.kind) {
     case "group":
@@ -36,14 +34,6 @@ export async function saveEditor({
         `${base}/posts${active.item ? "/" + active.item.id : ""}`,
         active.item ? "PATCH" : "POST",
         b,
-      );
-      break;
-    case "comment":
-      if (!postId) throw new Error("게시글을 다시 열어 주세요");
-      await api(
-        `${base}/posts/${postId}/comments${active.item ? "/" + active.item.id : ""}`,
-        active.item ? "PATCH" : "POST",
-        { body: b.body },
       );
       break;
     case "event": {

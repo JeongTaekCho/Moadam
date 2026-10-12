@@ -132,6 +132,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/groups/{g}/events/{id}/comments": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["comments_1"];
+        put?: never;
+        post: operations["comment_1"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/groups/{g}/documents": {
         parameters: {
             query?: never;
@@ -340,6 +356,22 @@ export interface paths {
         patch: operations["updateEvent"];
         trace?: never;
     };
+    "/api/v1/groups/{g}/events/{id}/comments/{commentId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete: operations["deleteComment_1"];
+        options?: never;
+        head?: never;
+        patch: operations["updateComment_1"];
+        trace?: never;
+    };
     "/api/v1/groups/{g}/documents/{id}": {
         parameters: {
             query?: never;
@@ -535,6 +567,8 @@ export interface components {
         };
         CommentInput: {
             body: string;
+            /** Format: uuid */
+            parent_id?: string;
         };
         Comment: {
             /** Format: uuid */
@@ -542,7 +576,12 @@ export interface components {
             /** Format: uuid */
             group_id: string;
             /** Format: uuid */
-            post_id: string;
+            post_id?: string;
+            /** Format: uuid */
+            event_id?: string;
+            /** Format: uuid */
+            parent_id?: string;
+            deleted: boolean;
             /** Format: uuid */
             author_id: string;
             author: components["schemas"]["PublicProfile"];
@@ -1200,6 +1239,59 @@ export interface operations {
             };
         };
     };
+    comments_1: {
+        parameters: {
+            query?: {
+                page?: number;
+                size?: number;
+            };
+            header?: never;
+            path: {
+                g: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["PageComment"];
+                };
+            };
+        };
+    };
+    comment_1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                g: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CommentInput"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["Comment"];
+                };
+            };
+        };
+    };
     documents: {
         parameters: {
             query?: {
@@ -1824,6 +1916,60 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["Event"];
+                };
+            };
+        };
+    };
+    deleteComment_1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                g: string;
+                id: string;
+                commentId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": {
+                        [key: string]: boolean;
+                    };
+                };
+            };
+        };
+    };
+    updateComment_1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                g: string;
+                id: string;
+                commentId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CommentInput"];
+            };
+        };
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["Comment"];
                 };
             };
         };

@@ -176,6 +176,8 @@ try {
     else if (path.endsWith("/documents")) data = paged([doc]);
     else if (path.endsWith("/documents/" + id)) data = doc;
     else if (path.endsWith("/events")) data = paged([event]);
+    else if (path.endsWith("/events/" + id)) data = event;
+    else if (path.endsWith("/attendance")) data = [];
     else if (path.endsWith("/members"))
       data = paged([
         {

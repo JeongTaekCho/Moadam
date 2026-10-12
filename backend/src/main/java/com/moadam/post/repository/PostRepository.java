@@ -12,30 +12,6 @@ public class PostRepository {
     this.db = db;
   }
 
-  public int deleteComment(UUID group, UUID post, UUID id) {
-    return db.update(
-        "delete from comments where group_id=? and post_id=? and id=?", group, post, id);
-  }
-
-  public int updateComment(String body, UUID group, UUID post, UUID id) {
-    return db.update(
-        "update comments set body=? where group_id=? and post_id=? and id=?",
-        body,
-        group,
-        post,
-        id);
-  }
-
-  public int insertComment(UUID id, UUID group, UUID post, UUID author, String body) {
-    return db.update(
-        "insert into comments(id,group_id,post_id,author_id,body) values(?,?,?,?,?)",
-        id,
-        group,
-        post,
-        author,
-        body);
-  }
-
   public int deletePost(UUID group, UUID id) {
     return db.update("delete from posts where group_id=? and id=?", group, id);
   }

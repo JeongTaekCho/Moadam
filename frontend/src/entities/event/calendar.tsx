@@ -115,11 +115,15 @@ export function Calendar({
                 data-calendar-day={day}
                 className={`schedule-create ${hoveredDay === day || focusedDay === day ? "is-visible" : ""} ${selectedDay === day ? "is-selected" : ""}`}
                 aria-label={`${day} 새 일정`}
+                title="새 일정"
                 onClick={() => {
                   if (day >= koreaDateKey(new Date())) onCreate(day);
                 }}
               >
-                새 일정
+                <span className="schedule-create-label">새 일정</span>
+                <span className="schedule-create-symbol" aria-hidden="true">
+                  +
+                </span>
               </button>
             )}
           </div>
