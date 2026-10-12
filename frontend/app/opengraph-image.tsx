@@ -64,7 +64,6 @@ export default async function Image() {
           moadam.vercel.app
         </div>
       </div>
-      {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src={`data:image/png;base64,${mascot.toString("base64")}`}
         width={280}

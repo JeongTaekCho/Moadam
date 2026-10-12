@@ -348,7 +348,7 @@
     width: 42px;
     height: 42px;
     border-radius: 16px;
-    filter: drop-shadow(0 3px 5px var(--shadow-color, rgb(67 20 7 / 0.08)));
+    filter: drop-shadow(0 3px 5px var(--shadow-color, var(--shadow-warm-soft)));
   }
   .brand-logo-copy {
     display: grid;
@@ -600,7 +600,7 @@
     text-align: left;
     color: var(--muted);
     font-size: 12px;
-    box-shadow: 0 3px 8px var(--shadow-color, rgb(67 20 7 / 0.08));
+    box-shadow: 0 3px 8px var(--shadow-color, var(--shadow-warm-soft));
     min-height: 52px;
   }
   .hero-question > svg {
@@ -1264,7 +1264,7 @@
     border: 1px solid var(--brand-border);
     border-radius: 12px;
     background: var(--surface);
-    box-shadow: 0 3px 14px var(--shadow-color, rgb(67 20 7 / 0.08));
+    box-shadow: 0 3px 14px var(--shadow-color, var(--shadow-warm-soft));
     padding: 12px;
   }
   .question-composer:focus-within {
@@ -1468,7 +1468,7 @@
       var(--brand-soft) 100%
     );
     box-shadow:
-      0 9px 26px var(--shadow-color, rgb(67 20 7 / 0.08)),
+      0 9px 26px var(--shadow-color, var(--shadow-warm-soft)),
       inset 0 1px var(--surface);
     font: inherit;
     text-align: left;
@@ -1592,7 +1592,7 @@
   .tabs button[aria-selected="true"] {
     background: white;
     color: var(--brand);
-    box-shadow: 0 2px 5px var(--shadow-color, rgb(67 20 7 / 0.08));
+    box-shadow: 0 2px 5px var(--shadow-color, var(--shadow-warm-soft));
   }
   .auth-layout {
     min-height: 100dvh;
@@ -1634,7 +1634,7 @@
     border-radius: 14px;
     background: color-mix(in srgb, var(--surface) 72%, transparent);
     padding: 22px;
-    box-shadow: 0 10px 28px var(--shadow-color, rgb(67 20 7 / 0.08));
+    box-shadow: 0 10px 28px var(--shadow-color, var(--shadow-warm-soft));
   }
   .auth-preview > .row {
     font-size: 11px;
@@ -2276,7 +2276,7 @@
     min-height: 44px;
   }
   .button.primary {
-    box-shadow: 0 3px 8px rgb(194 65 12 / 0.14);
+    box-shadow: 0 3px 8px var(--shadow-brand-active);
   }
   .button:active:not(:disabled) {
     transform: translateY(1px);
@@ -2466,7 +2466,7 @@
     box-shadow: var(--shadow-dialog);
   }
   .picker-popover::backdrop {
-    background: rgb(41 33 29 / 0.12);
+    background: var(--selection-ink-soft);
   }
   .picker-heading {
     display: flex;
@@ -2829,7 +2829,7 @@
     border-radius: 50%;
     color: white;
     background: var(--brand);
-    box-shadow: 0 2px 6px rgb(41 33 29 / 0.15);
+    box-shadow: 0 2px 6px var(--shadow-neutral);
     transition:
       background 150ms ease,
       transform 150ms ease;
@@ -3000,10 +3000,6 @@
   .page-illustration {
     --scene-orange: var(--color-brand-400);
     --scene-cream: var(--color-brand-100);
-    --scene-ink: #815943;
-    --scene-mint: #cddfcf;
-    --scene-lilac: #e4dcf0;
-    --scene-wash: #f9eee3;
     position: relative;
     width: 260px;
     max-width: 100%;
@@ -3060,7 +3056,7 @@
     border: 1px solid var(--border);
     border-radius: 22px;
     background: linear-gradient(115deg, var(--surface) 30%, var(--brand-soft));
-    box-shadow: 0 4px 20px rgb(67 20 7 / 0.025);
+    box-shadow: 0 4px 20px var(--shadow-scene-subtle);
     animation: page-scene-enter 320ms ease-out both;
   }
   .illustrated-page-header > div:first-child {
@@ -3101,8 +3097,8 @@
     background: linear-gradient(
       110deg,
       var(--brand-soft),
-      #fff0df 70%,
-      #f7eadc
+      var(--scene-sunrise) 70%,
+      var(--scene-sand)
     );
   }
   .illustrated-knowledge-hero > :not(.knowledge-hero-art) {
@@ -3174,7 +3170,7 @@
   }
   .hero-question:hover {
     transform: translateY(-2px);
-    box-shadow: 0 5px 14px rgb(67 20 7 / 0.06);
+    box-shadow: 0 5px 14px var(--shadow-scene);
   }
   .my-activity-item:hover .my-activity-icon {
     transform: rotate(-4deg);
@@ -3345,7 +3341,8 @@
 @layer components {
   .auth-story {
     background:
-      radial-gradient(ellipse at 85% 15%, #ffe8ca 0, transparent 55%), #fff8ee;
+      radial-gradient(ellipse at 85% 15%, var(--hero-glow) 0, transparent 55%),
+      var(--hero-canvas);
   }
   .auth-story-content {
     max-width: 460px;
@@ -3374,7 +3371,7 @@
     padding: 19px 8px;
     border: 1px solid var(--brand-border);
     border-radius: 16px;
-    background: #ffffff90;
+    background: var(--surface-glass);
     color: var(--muted);
     font-size: 11px;
   }
@@ -3462,9 +3459,9 @@
     max-width: min(520px, calc(100vw - 32px));
     border: 1px solid var(--brand-border);
     border-radius: 18px;
-    background: #fffdf9;
+    background: var(--toast-surface);
     color: var(--text);
-    box-shadow: 0 10px 36px rgb(96 49 20 / 0.16);
+    box-shadow: 0 10px 36px var(--shadow-toast);
     font-size: 13px;
     animation: toast-rise 360ms cubic-bezier(0.16, 1, 0.3, 1) both;
   }
@@ -3481,7 +3478,7 @@
     overflow-wrap: anywhere;
   }
   .toast.toast-error {
-    background: #fffaf7;
+    background: var(--toast-error-surface);
   }
   .password-hint {
     display: block;
@@ -3531,7 +3528,7 @@
     display: none;
   }
   .service-about {
-    background: #fffaf5;
+    background: var(--about-canvas);
     min-height: 100dvh;
   }
   .service-about-nav,

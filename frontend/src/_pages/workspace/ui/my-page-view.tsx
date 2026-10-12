@@ -27,11 +27,13 @@ export function MyPageView({ model: m }: { model: WorkspaceModel }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [reload, setReload] = useState(0);
+  const { signed, me, fail } = m;
   const fileRef = useRef<HTMLInputElement>(null);
   useEffect(() => {
-    if (!m.signed || !m.me) return;
+    if (!signed || !me) return;
     const controller = new AbortController();
     let active = true;
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- Reset request state before subscribing to another activity page so previous user data is not displayed.
     setLoading(true);
     setError("");
     setActivity(null);
@@ -51,7 +53,7 @@ export function MyPageView({ model: m }: { model: WorkspaceModel }) {
       })
       .catch((error) => {
         if (active && error instanceof ApiError && error.status === 401)
-          m.fail(error);
+          fail(error);
         if (active)
           setError(
             error instanceof Error
@@ -66,7 +68,7 @@ export function MyPageView({ model: m }: { model: WorkspaceModel }) {
       active = false;
       controller.abort();
     };
-  }, [kind, page, reload, m.signed, m.me, m.fail]);
+  }, [kind, page, reload, signed, me, fail]);
   const profile = m.profile;
   if (!profile) return null;
   return (

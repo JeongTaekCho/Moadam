@@ -12,7 +12,6 @@ import {
   EmptyState,
   ErrorState,
   FilterChips,
-  Icon,
   ListSearch,
   MoaAiIcon,
 } from "@/shared/ui";

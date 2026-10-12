@@ -13,6 +13,7 @@ import org.springframework.web.server.ResponseStatusException;
 public class GlobalExceptionHandler {
   private static final org.slf4j.Logger log =
       org.slf4j.LoggerFactory.getLogger(GlobalExceptionHandler.class);
+
   @ExceptionHandler(Exception.class)
   ResponseEntity<Map<String, String>> handle(
       Exception e, jakarta.servlet.http.HttpServletRequest request) {
@@ -39,7 +40,11 @@ public class GlobalExceptionHandler {
     if (status >= 500) {
       log.error(
           "Request failed: requestId={} method={} path={} status={}",
-          requestId, request.getMethod(), request.getRequestURI(), status, e);
+          requestId,
+          request.getMethod(),
+          request.getRequestURI(),
+          status,
+          e);
     }
     String message =
         status == 403
@@ -50,13 +55,6 @@ public class GlobalExceptionHandler {
                     ? "입력 값을 확인해 주세요"
                     : status == 503 ? "서비스를 사용할 수 없습니다. 잠시 후 다시 시도해 주세요" : "요청을 처리하지 못했습니다";
     return ResponseEntity.status(status)
-        .body(
-            Map.of(
-                "code",
-                "HTTP_" + status,
-                "message",
-                message,
-                "requestId",
-                requestId));
+        .body(Map.of("code", "HTTP_" + status, "message", message, "requestId", requestId));
   }
 }

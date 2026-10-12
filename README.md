@@ -327,3 +327,9 @@ python -m unittest discover -s tests -v
 게시글 삭제는 댓글, 일정 삭제는 참석, 자료 삭제는 벡터, 모임 삭제는 모든 모임 콘텐츠에 cascade됩니다. PDF 파일 삭제가 성공한 뒤 DB 삭제합니다. Storage와 DB 사이에는 분산 트랜잭션이 없으므로 DB 삭제 실패 시 재시도로 마무리해야 합니다. 실패 업로드는 pending 자료로 남아 관리자가 삭제할 수 있습니다.
 
 탈퇴/멤버 제거는 개인 챗·참석을 삭제하고 글·댓글·일정·자료는 모임 기록으로 보존합니다. 소유자는 탈퇴할 수 없으며 현재 MVP에는 소유권 이전이 없습니다. 감사 로그는 모임 삭제 후에도 UUID와 행위·시각만 보존하며 본문·질문·토큰은 저장하지 않습니다. 관리자 표시명 편집, OCR, 백그라운드 작업 큐·다중 서버 rate limit, 바이러스 스캔은 현재 범위에 없습니다. 인덱싱은 동기 처리라 큰 PDF는 시간 제한에 도달할 수 있습니다. 실제 Supabase 프로젝트 및 모델 연동 검증을 완료하기 전 운영 릴리스로 간주하지 마세요.
+
+## 에이전트 개발과 품질 검사
+
+에이전트의 시작 문서는 [AGENTS.md](AGENTS.md)입니다. 각 서비스의 하위 AGENTS.md, [코드/폴더 규칙](docs/development/conventions.md), [변경별 검증](docs/development/verification.md), [디자인 시스템](frontend/DESIGN_SYSTEM.md)을 연결했습니다.
+
+루트에서 `make setup`, `make format`, `make check`, `make test`, `make qa`를 사용합니다. 형식·린트·타입·구조·격리 테스트는 `.github/workflows/quality.yml`에서도 검사합니다. 구성 이유와 이번 정리 결과는 [하네스 설정 보고서](docs/development/harness_setup.md)에 있습니다.

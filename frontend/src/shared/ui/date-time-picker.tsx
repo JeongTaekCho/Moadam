@@ -44,6 +44,7 @@ function PickerValidation({
     ref.current?.setCustomValidity(
       value && !valid ? "올바른 값을 선택해 주세요." : "",
     );
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- Clear the native form validation error after the controlled picker value changes.
     setError(false);
   }, [value, valid]);
   return (

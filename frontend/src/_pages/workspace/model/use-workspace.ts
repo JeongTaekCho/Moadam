@@ -56,9 +56,10 @@ export function useWorkspace(initialView: View = "홈", hasSession = false) {
     [groups, setGroups] = useState<Group[]>([]),
     [groupId, setGroupId] = useState(""),
     [me, setMe] = useState(""),
-    [view, setView] = useState<View>(
-      initialView === "챗봇" ? "홈" : initialView,
-    );
+    [view, setView] = useState<View>(() => {
+      const routeView = viewFromPath(pathname) || initialView;
+      return routeView === "챗봇" ? "홈" : routeView;
+    });
   const [profile, setProfile] = useState<MyProfile | null>(null);
   const [posts, setPosts] = useState<Post[]>([]),
     [events, setEvents] = useState<Event[]>([]),
@@ -147,8 +148,6 @@ export function useWorkspace(initialView: View = "홈", hasSession = false) {
     setSigned(true);
   }, []);
   useEffect(() => {
-    const routeView = viewFromPath(window.location.pathname) || initialView;
-    setView(routeView === "챗봇" ? "홈" : routeView);
     const authError = new URLSearchParams(window.location.search).get(
       "auth_error",
     );
@@ -161,6 +160,7 @@ export function useWorkspace(initialView: View = "홈", hasSession = false) {
         "Google 로그인을 완료하지 못했습니다. 다시 시도하거나 이메일로 로그인해 주세요.",
     };
     if (authError && authMessages[authError]) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- Consume an external OAuth callback error once and remove it from the URL.
       setError(authMessages[authError]);
       const url = new URL(window.location.href);
       url.searchParams.delete("auth_error");
@@ -242,12 +242,14 @@ export function useWorkspace(initialView: View = "홈", hasSession = false) {
     },
     [groupId, base, view, page, admin, signed, fail],
   );
+  const cancelViewLoad = useCallback(() => {
+    loadVersion.current++;
+  }, []);
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- Start the external API subscription for this route and preserve its loading state.
     void load();
-    return () => {
-      loadVersion.current++;
-    };
-  }, [load]);
+    return cancelViewLoad;
+  }, [load, cancelViewLoad]);
   useEffect(() => {
     if (!signed) return;
     let lastRefresh = Date.now();
@@ -314,6 +316,7 @@ export function useWorkspace(initialView: View = "홈", hasSession = false) {
     const next = routeView === "챗봇" ? "홈" : routeView;
     if (!next || next === view) return;
     detailOrigin.current = null;
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- Synchronize persistent workspace state with external browser navigation.
     setView(next);
     setPage(0);
     setPost(null);

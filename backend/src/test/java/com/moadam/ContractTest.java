@@ -31,24 +31,33 @@ class ContractTest {
     var response = http.getForEntity("/v3/api-docs", String.class);
     assertEquals(HttpStatus.OK, response.getStatusCode());
     assertTrue(response.getBody().contains("PagePost"));
-    Files.createDirectories(Path.of("../docs"));
-    Files.writeString(Path.of("../docs/openapi.json"), response.getBody());
+    if (Boolean.getBoolean("exportOpenApi")) {
+      var json = new com.fasterxml.jackson.databind.ObjectMapper();
+      var specification =
+          (com.fasterxml.jackson.databind.node.ObjectNode) json.readTree(response.getBody());
+      specification.putArray("servers").addObject().put("url", "http://localhost:8080");
+      Files.createDirectories(Path.of("../docs"));
+      Files.writeString(Path.of("../docs/openapi.json"), json.writeValueAsString(specification));
+    }
     var denied = http.getForEntity("/api/v1/groups", String.class);
     assertEquals(HttpStatus.UNAUTHORIZED, denied.getStatusCode());
     assertTrue(denied.getBody().contains("UNAUTHENTICATED"));
   }
+
   @Test
   void compressesLargeJsonResponses() throws Exception {
     var client = java.net.http.HttpClient.newHttpClient();
-    var request = java.net.http.HttpRequest.newBuilder()
-        .uri(java.net.URI.create(http.getRootUri() + "/v3/api-docs"))
-        .header("Accept-Encoding", "gzip")
-        .build();
+    var request =
+        java.net.http.HttpRequest.newBuilder()
+            .uri(java.net.URI.create(http.getRootUri() + "/v3/api-docs"))
+            .header("Accept-Encoding", "gzip")
+            .build();
     var response = client.send(request, java.net.http.HttpResponse.BodyHandlers.ofByteArray());
     assertEquals(200, response.statusCode());
     assertEquals("gzip", response.headers().firstValue("Content-Encoding").orElse(""));
     byte[] raw;
-    try (var gzip = new java.util.zip.GZIPInputStream(new java.io.ByteArrayInputStream(response.body()))) {
+    try (var gzip =
+        new java.util.zip.GZIPInputStream(new java.io.ByteArrayInputStream(response.body()))) {
       raw = gzip.readAllBytes();
     }
     assertTrue(new String(raw, java.nio.charset.StandardCharsets.UTF_8).contains("PagePost"));

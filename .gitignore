@@ -6,3 +6,11 @@ __pycache__/
 .env
 .env.local
 !.env.example
+
+# Developer caches and secret environment variants
+.ruff_cache/
+*.tsbuildinfo
+.DS_Store
+.pnpm-store/
+.env.*
+!.env.example

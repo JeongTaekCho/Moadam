@@ -82,12 +82,14 @@ export function WorkspacePage({
       return m.sendQuestion(question);
     },
   };
+  const { signed, groupId, loadAssistant } = m;
   useEffect(() => {
-    if (assistantOpen && m.signed && m.groupId) void m.loadAssistant();
-  }, [assistantOpen, m.signed, m.groupId, m.loadAssistant]);
+    if (assistantOpen && signed && groupId) void loadAssistant();
+  }, [assistantOpen, signed, groupId, loadAssistant]);
   useEffect(() => {
-    if (m.signed && viewFromPath(pathname) === "챗봇") setAssistantOpen(true);
-  }, [pathname, m.signed]);
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- Direct URL navigation opens the modal only after the external session has been validated.
+    if (signed && viewFromPath(pathname) === "챗봇") setAssistantOpen(true);
+  }, [pathname, signed]);
   if (m.boot) return <WorkspaceSkeleton />;
   if (!m.signed) return <AuthScreen model={m} />;
   return (

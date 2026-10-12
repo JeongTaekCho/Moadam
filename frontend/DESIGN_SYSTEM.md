@@ -2,18 +2,18 @@
 
 Tailwind CSS 4 / PostCSS / Pretendard Variable. 토큰의 원본은 `src/shared/styles/tokens.css`이며 `app/globals.css`의 base·components 레이어에서 전체 화면에 적용합니다. Tailwind utilities 레이어는 개별 컴포넌트에서 필요한 스타일을 조정할 수 있습니다.
 
-| 역할 | 토큰 / Tailwind 클래스 | 기준 |
-| --- | --- | --- |
-| 주요 동작 | brand-600 / bg-brand-600 | #c2410c, 흰 글자와 충분한 대비 |
-| hover | brand-700 | #9a3412 |
-| 브랜드 강조 | brand-500 | #f97316, 장식·아이콘 강조 |
-| 부드러운 배경 | brand-50 / brand-100 | 주황 계열의 옅은 배경 |
-| 본문 | ink / text-ink | #29211d |
-| 보조 정보 | muted / text-muted | #74665d |
-| 바탕 / 카드 | canvas / surface | #fcfaf8 / #ffffff |
-| 구분선 | line / border-line | #e9e2dc |
-| 성공 / 경고 / 오류 | positive / caution / negative | 의미별 색상 유지 |
-| 카드 / 컨트롤 | rounded-panel / rounded-control | 16px / 10px |
+| 역할               | 토큰 / Tailwind 클래스          | 기준                           |
+| ------------------ | ------------------------------- | ------------------------------ |
+| 주요 동작          | brand-600 / bg-brand-600        | #c2410c, 흰 글자와 충분한 대비 |
+| hover              | brand-700                       | #9a3412                        |
+| 브랜드 강조        | brand-500                       | #f97316, 장식·아이콘 강조      |
+| 부드러운 배경      | brand-50 / brand-100            | 주황 계열의 옅은 배경          |
+| 본문               | ink / text-ink                  | #29211d                        |
+| 보조 정보          | muted / text-muted              | #74665d                        |
+| 바탕 / 카드        | canvas / surface                | #fcfaf8 / #ffffff              |
+| 구분선             | line / border-line              | #e9e2dc                        |
+| 성공 / 경고 / 오류 | positive / caution / negative   | 의미별 색상 유지               |
+| 카드 / 컨트롤      | rounded-panel / rounded-control | 16px / 10px                    |
 
 간격은 4px 단위, 주요 버튼과 메뉴는 최소 44px 높이입니다. 본문은 15px, 폼과 주요 설명은 14px 이상, 모바일 입력은 16px를 사용합니다. 키보드 focus는 주황색 outline·ring으로 표시합니다. disabled·hover·active·error 상태를 공통으로 처리하고 dialog는 중앙 배치와 native focus trap을 유지합니다.
 
@@ -28,3 +28,15 @@ Tailwind CSS 4 / PostCSS / Pretendard Variable. 토큰의 원본은 `src/shared/
 ## 날짜·시간 입력
 
 `DatePicker`, `TimePicker`, `DateTimePicker`는 `shared/ui/date-time-picker.tsx`의 공통 컴포넌트입니다. 날짜·시간 피커는 controlled value/onChange를 지원하고 통합 피커는 defaultValue와 name으로 폼에 `YYYY-MM-DDTHH:mm`을 전달합니다. 입력란 전체 클릭 또는 Enter·Space·아래 방향키로 피커를 열며 직접 타이핑은 허용하지 않습니다. 별도 검증 필드로 필수값·실제 날짜·24시간 형식 검사를 유지합니다. 날짜 달력은 방향키 이동, 월 전환, 오늘 선택을 지원하고 시간은 1분 단위 선택이 가능합니다. 팝오버는 Escape/바깥 클릭으로 닫히고 선택 후 트리거에 포커스를 돌려줍니다. 모든 textarea는 `resize: none`입니다.
+
+## 에이전트 구현 기준
+
+- 색상 원본은 `src/shared/styles/tokens.css` 하나로 유지합니다. `globals.css`와 신규 UI CSS에는 HEX/RGB/HSL 색을 직접 쓰지 않습니다. 새 의미가 필요하면 이름을 설명하는 토큰을 먼저 추가하고 사용합니다. 기존 scene/hero/toast/about 색상도 이 원본에 모았습니다.
+- OG 이미지처럼 CSS 변수를 해석할 수 없는 이미지 렌더러와 SVG 삽화의 작품 내부 색은 별도 렌더링 값이 필요할 수 있습니다. 일반 UI 버튼·폼·카드에 그 예외를 적용하지 않습니다.
+- 공통 UI 위치: `shared/ui/primitives.tsx`(Button/Dialog/Toast/Avatar/폼), `custom-select.tsx`, `date-time-picker.tsx`, `skeleton.tsx`, `moa-ai-icon.tsx`, `page-illustration.tsx`.
+- 새로운 화면은 기존 Card/폼/모달/스켈레톤을 우선 조합하고, 여러 화면에서 재사용할 책임이 명확할 때 shared 컴포넌트로 확장합니다.
+- 로고는 `public/images/logo.png`, 모아AI는 `moa-ai-icon.png`를 재사용합니다. 원본 로고를 임의로 교체하거나 서비스마다 별도 아이콘을 만들지 않습니다.
+- 장식성 진한 제목·역할 텍스트 배지는 추가하지 않습니다. 아이콘은 접근성 이름/툴팁을 제공하고 콘텐츠 제목·필수 입력 라벨·주요 동작 텍스트는 유지합니다.
+- first load는 페이지 구조에 맞는 스켈레톤, refresh는 기존 콘텐츠 유지, empty/error는 각각 공통 EmptyState/ErrorState를 사용합니다. 오류는 재시도 경로를 제공합니다.
+- 모바일 가로 넘침, native dialog 포커스·Escape, 키보드 선택, aria-busy/status/alert, reduced-motion을 확인합니다.
+- 스타일 변경 후 `pnpm check`와 `make conventions`, 공통 UI 변경 후 운영 빌드 및 브라우저 QA를 실행합니다.

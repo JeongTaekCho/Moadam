@@ -6,12 +6,12 @@
 
 ## 1. 두 콜백 URL의 구분
 
-| 등록 위치 | 등록할 값 | 역할 |
-| --- | --- | --- |
-| Google Cloud → OAuth client → Authorized redirect URIs | `https://kvikbodlebhxeznbjmyv.supabase.co/auth/v1/callback` | Google → Supabase |
-| Supabase → Authentication → URL Configuration → Redirect URLs | `http://localhost:3000/login/callback` | Supabase → 앱 |
-| Supabase → Authentication → URL Configuration → Site URL | `http://localhost:3000` | 앱의 기본 주소 |
-| Google Cloud → OAuth client → Authorized JavaScript origins | `http://localhost:3000` | 앱의 origin, 경로 없이 입력 |
+| 등록 위치                                                     | 등록할 값                                                   | 역할                        |
+| ------------------------------------------------------------- | ----------------------------------------------------------- | --------------------------- |
+| Google Cloud → OAuth client → Authorized redirect URIs        | `https://kvikbodlebhxeznbjmyv.supabase.co/auth/v1/callback` | Google → Supabase           |
+| Supabase → Authentication → URL Configuration → Redirect URLs | `http://localhost:3000/login/callback`                      | Supabase → 앱               |
+| Supabase → Authentication → URL Configuration → Site URL      | `http://localhost:3000`                                     | 앱의 기본 주소              |
+| Google Cloud → OAuth client → Authorized JavaScript origins   | `http://localhost:3000`                                     | 앱의 origin, 경로 없이 입력 |
 
 **Google의 Authorized redirect URIs에 앱의 `/login/callback`을 넣는 방식이 아닙니다.** Google은 Supabase로 돌아오고, Supabase가 다시 앱으로 보냅니다. 기존 설정의 callback이 앱 경로라면 Supabase Redirect URLs에 등록되어 있어야 합니다.
 
@@ -82,14 +82,14 @@ Google 처음 로그인은 Supabase 신규 사용자 생성을 포함할 수 있
 
 ## 오류 해결
 
-| 증상 | 확인 |
-| --- | --- |
-| `Unsupported provider` / `provider is not enabled` | Supabase Google Provider 활성화·저장 |
-| `redirect_uri_mismatch` | Google redirect URI가 앱 주소가 아닌 Supabase callback인지, 문자열이 정확히 일치하는지 |
-| Google에서 앱 접근 차단 | Audience / Testing / Test users / Client 설정 |
-| 홈 대신 다른 주소로 돌아옴 | Supabase Redirect URLs의 전체 앱 callback URL |
-| 로그인 요청 만료 | 같은 브라우저·호스트에서 다시 시작, 콜백 직접 열기 금지, 다른 탭 로그인 완료 여부 |
-| 로그인 후 API 401 | 프론트·백엔드의 동일 Supabase 프로젝트 및 JWT 검증 설정 |
+| 증상                                               | 확인                                                                                   |
+| -------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| `Unsupported provider` / `provider is not enabled` | Supabase Google Provider 활성화·저장                                                   |
+| `redirect_uri_mismatch`                            | Google redirect URI가 앱 주소가 아닌 Supabase callback인지, 문자열이 정확히 일치하는지 |
+| Google에서 앱 접근 차단                            | Audience / Testing / Test users / Client 설정                                          |
+| 홈 대신 다른 주소로 돌아옴                         | Supabase Redirect URLs의 전체 앱 callback URL                                          |
+| 로그인 요청 만료                                   | 같은 브라우저·호스트에서 다시 시작, 콜백 직접 열기 금지, 다른 탭 로그인 완료 여부      |
+| 로그인 후 API 401                                  | 프론트·백엔드의 동일 Supabase 프로젝트 및 JWT 검증 설정                                |
 
 ## 구현·검증
 
@@ -102,6 +102,7 @@ Google 처음 로그인은 Supabase 신규 사용자 생성을 포함할 수 있
 - `node scripts/oauth-smoke.mjs`: 모의 Auth 서버로 cross-origin 차단, S256 verifier 일치, 정확한 callback URL, 실패·취소·성공, 쿠키 설정·삭제 및 외부 redirect 차단 확인. 실제 Google 로그인의 완료를 대신하지 않습니다. 빌드 후 실행합니다.
 
 공식 문서:
+
 - https://supabase.com/docs/guides/auth/social-login/auth-google
 - https://supabase.com/docs/guides/auth/redirect-urls
 - https://supabase.com/docs/guides/auth/sessions/pkce-flow
