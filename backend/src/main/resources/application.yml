@@ -1,5 +1,6 @@
 server:
-  port: 8080
+  port: ${PORT:8080}
+  shutdown: graceful
   compression:
     enabled: true
     min-response-size: 1024
@@ -12,7 +13,16 @@ spring:
       fail-on-unknown-properties: true
   flyway:
     enabled: ${FLYWAY_ENABLED:false}
+  task:
+    scheduling:
+      pool:
+        size: 2
   datasource:
+    hikari:
+      maximum-pool-size: ${DB_POOL_SIZE:5}
+      connection-timeout: 5000
+      validation-timeout: 1000
+      initialization-fail-timeout: -1
     url: ${DATABASE_URL}
     username: ${DATABASE_USER}
     password: ${DATABASE_PASSWORD}
@@ -21,6 +31,13 @@ spring:
       max-file-size: 20MB
       max-request-size: 20MB
 app:
+  document-jobs:
+    enabled: ${DOCUMENT_JOBS_ENABLED:true}
+  documents:
+    max-count: ${DOCUMENT_MAX_COUNT:100}
+    max-bytes: ${DOCUMENT_MAX_BYTES:209715200}
+    daily-index-limit: ${DOCUMENT_DAILY_INDEX_LIMIT:20}
+    daily-upload-limit: ${DOCUMENT_DAILY_UPLOAD_LIMIT:20}
   issuer: ${SUPABASE_URL}/auth/v1
   audience: authenticated
   jwt-secret: ${SUPABASE_JWT_SECRET:}

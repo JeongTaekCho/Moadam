@@ -69,7 +69,12 @@ public class SecurityConfig {
             x ->
                 x.dispatcherTypeMatchers(jakarta.servlet.DispatcherType.ASYNC)
                     .permitAll()
-                    .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html")
+                    .requestMatchers(
+                        "/healthz",
+                        "/readyz",
+                        "/v3/api-docs/**",
+                        "/swagger-ui/**",
+                        "/swagger-ui.html")
                     .permitAll()
                     .anyRequest()
                     .authenticated())

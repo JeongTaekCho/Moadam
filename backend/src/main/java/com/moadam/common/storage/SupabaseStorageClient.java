@@ -116,6 +116,39 @@ public class SupabaseStorageClient {
     }
   }
 
+  public long verifyPdf(String path) {
+    try {
+      var request =
+          HttpRequest.newBuilder(
+                  URI.create(
+                      supabase + "/storage/v1/object/authenticated/group-documents/" + safe(path)))
+              .timeout(Duration.ofSeconds(15))
+              .header("Authorization", "Bearer " + key)
+              .header("apikey", key)
+              .method("HEAD", HttpRequest.BodyPublishers.noBody())
+              .build();
+      var response = http.send(request, HttpResponse.BodyHandlers.discarding());
+      if (response.statusCode() == 404) throw new UploadMissingException();
+      if (response.statusCode() != 200)
+        throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE);
+      long size = response.headers().firstValueAsLong("Content-Length").orElse(-1);
+      if (size < 1
+          || size > 20971520
+          || !response
+              .headers()
+              .firstValue("Content-Type")
+              .orElse("")
+              .toLowerCase(java.util.Locale.ROOT)
+              .startsWith("application/pdf"))
+        throw new ResponseStatusException(HttpStatus.CONFLICT, "20MB 이하 PDF 파일을 업로드해 주세요.");
+      return size;
+    } catch (ResponseStatusException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE);
+    }
+  }
+
   public String uploadUrl(String path) {
     var r =
         request(

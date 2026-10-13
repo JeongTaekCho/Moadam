@@ -6,7 +6,6 @@ import com.moadam.common.dto.DtoMapper;
 import com.moadam.common.dto.Page;
 import com.moadam.common.repository.ResourceRepository;
 import com.moadam.common.service.DomainService;
-import com.moadam.common.storage.SupabaseStorageClient;
 import com.moadam.group.dto.GroupCreateRequest;
 import com.moadam.group.dto.GroupResponse;
 import com.moadam.group.dto.InviteJoinRequest;
@@ -33,7 +32,7 @@ import org.springframework.web.server.ResponseStatusException;
 @Service
 public class GroupService extends DomainService {
   private final GroupRepository repository;
-  private final SupabaseStorageClient storage;
+  private final com.moadam.note.service.DocumentJobService jobs;
 
   public GroupService(
       GroupRepository repository,
@@ -41,10 +40,10 @@ public class GroupService extends DomainService {
       DtoMapper mapper,
       MembershipPolicy policy,
       ObjectMapper json,
-      SupabaseStorageClient storage) {
+      com.moadam.note.service.DocumentJobService jobs) {
     super(resources, mapper, policy, json);
     this.repository = repository;
-    this.storage = storage;
+    this.jobs = jobs;
   }
 
   public Page<GroupResponse> groups(Jwt j, int page, int size) {
@@ -93,7 +92,7 @@ public class GroupService extends DomainService {
   @Transactional
   public Map<String, Boolean> deleteGroup(Jwt j, UUID g) {
     policy.owner(g, user(j));
-    for (var d : repository.findPdfPaths(g)) storage.deleteFile(d.get("storage_path").toString());
+    jobs.cleanupGroup(g);
     audit(g, user(j), "group.delete", g);
     repository.deleteGroup(g);
     return Map.of("deleted", true);

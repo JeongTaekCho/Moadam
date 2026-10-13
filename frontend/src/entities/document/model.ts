@@ -12,6 +12,18 @@ export function documentErrorMessage(code: string): string {
     CHUNK_LIMIT: "자료 분량이 너무 많아요. 문서를 나누어 등록해 주세요.",
     INVALID_PDF:
       "PDF 파일을 읽을 수 없어요. 파일이 손상되지 않았는지 확인해 주세요.",
+    PROVIDER_AUTH_FAILED:
+      "AI 연결 설정을 확인해야 해요. 관리자에게 문의해 주세요.",
+    PROVIDER_RATE_LIMITED:
+      "AI 이용량이 많아 잠시 기다린 뒤 자동으로 다시 처리해요.",
+    PROVIDER_UNAVAILABLE:
+      "AI 서비스 연결이 지연되고 있어요. 자동으로 다시 시도할게요.",
+    RAG_UNAVAILABLE:
+      "AI 연결이 지연되어 자동으로 다시 시도하고 있어요. 잠시 후 처리 상태를 확인해 주세요.",
+    UPLOAD_INCOMPLETE:
+      "파일 업로드가 끝나지 않았어요. 업로드 이어하기로 같은 자료에 파일을 등록해 주세요.",
+    INDEX_RETRY_EXHAUSTED:
+      "자동 처리를 완료하지 못했어요. 연결 상태를 확인한 뒤 다시 처리해 주세요.",
     INDEX_FAILED:
       "자료 처리 중 문제가 생겼어요. 다시 처리해 보고, 반복되면 관리자에게 문의해 주세요.",
   };

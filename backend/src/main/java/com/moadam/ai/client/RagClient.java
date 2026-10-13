@@ -24,7 +24,10 @@ public class RagClient {
   private final NoteRetriever retriever;
   private final String rag, token;
   private final HttpClient http =
-      HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(5)).build();
+      HttpClient.newBuilder()
+          .version(HttpClient.Version.HTTP_1_1)
+          .connectTimeout(Duration.ofSeconds(5))
+          .build();
   private final java.util.concurrent.ScheduledThreadPoolExecutor streamTimer = streamTimer();
 
   public RagClient(
@@ -41,10 +44,14 @@ public class RagClient {
   }
 
   Map<String, Object> request(String url, String method, Object body) {
+    return request(url, method, body, Duration.ofSeconds(90));
+  }
+
+  Map<String, Object> request(String url, String method, Object body, Duration timeout) {
     try {
       var r =
           HttpRequest.newBuilder(URI.create(url))
-              .timeout(Duration.ofSeconds(90))
+              .timeout(timeout)
               .header("Content-Type", "application/json")
               .header("Authorization", "Bearer " + token);
 
@@ -82,10 +89,10 @@ public class RagClient {
     streamTimer.shutdownNow();
   }
 
-  public void index(UUID g, UUID u, Map<String, Object> d) {
+  public Map<String, Object> index(UUID g, UUID u, Map<String, Object> d) {
     UUID id = (UUID) d.get("id");
     try {
-      request(
+      return request(
           rag + "/index",
           "POST",
           Map.of(
@@ -98,9 +105,9 @@ public class RagClient {
               "version",
               d.get("version"),
               "request_id",
-              UUID.randomUUID()));
+              UUID.randomUUID()),
+          Duration.ofSeconds(300));
     } catch (ResponseStatusException e) {
-      notes.markIndexUnavailable(g, id);
       throw e;
     }
   }

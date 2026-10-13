@@ -366,3 +366,87 @@ class RagTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class IndexReliabilityTest(unittest.TestCase):
+    def connection(self, locked=True, completed=True, status="pending"):
+        class Connection:
+            def execute(self, sql, args=()):
+                if "pg_try_advisory" in sql:
+                    self.row = {"locked": locked}
+                elif "select * from documents" in sql:
+                    self.row = {"version": 1, "status": status, "upload_completed": completed}
+                elif "select count(*)" in sql:
+                    self.row = {"count": 3}
+                else:
+                    self.row = {}
+                return self
+
+            def fetchone(self):
+                return self.row
+
+        from contextlib import contextmanager
+
+        @contextmanager
+        def database():
+            yield Connection()
+
+        return database
+
+    def request(self):
+        return rag.IndexRequest(
+            group_id=uuid4(), user_id=uuid4(), document_id=uuid4(), version=1, request_id=uuid4()
+        )
+
+    def test_concurrent_index_is_rejected_before_embedding(self):
+        with (
+            patch.object(rag, "db", self.connection(locked=False)),
+            patch.object(rag, "embed") as embed,
+        ):
+            with self.assertRaises(rag.HTTPException) as error:
+                rag.index(self.request())
+            self.assertEqual(error.exception.status_code, 409)
+            embed.assert_not_called()
+
+    def test_already_indexed_version_is_free_and_idempotent(self):
+        with (
+            patch.object(rag, "db", self.connection(status="ready")),
+            patch.object(rag, "member"),
+            patch.object(rag, "embed") as embed,
+        ):
+            self.assertEqual(rag.index(self.request()).status, "ready")
+            embed.assert_not_called()
+
+    def test_unfinished_upload_never_calls_provider(self):
+        with (
+            patch.object(rag, "db", self.connection(completed=False)),
+            patch.object(rag, "member"),
+            patch.object(rag, "embed") as embed,
+        ):
+            with self.assertRaises(rag.HTTPException) as error:
+                rag.index(self.request())
+            self.assertEqual(error.exception.status_code, 409)
+            embed.assert_not_called()
+
+    def test_corrupt_pdf_is_a_permanent_file_error(self):
+        from unittest.mock import MagicMock
+
+        group, document = uuid4(), uuid4()
+        content = b"%PDF-1.4 malformed fixture"
+        response = MagicMock()
+        response.headers = {"content-type": "application/pdf"}
+        response.iter_bytes.return_value = iter([content])
+        client = MagicMock()
+        client.stream.return_value.__enter__.return_value = response
+        with patch.object(rag.httpx, "Client") as factory:
+            factory.return_value.__enter__.return_value = client
+            with self.assertRaisesRegex(ValueError, "INVALID_PDF"):
+                rag.load_pages(
+                    {
+                        "kind": "pdf",
+                        "group_id": group,
+                        "id": document,
+                        "storage_path": f"{group}/{document}.pdf",
+                        "size_bytes": len(content),
+                    }
+                )

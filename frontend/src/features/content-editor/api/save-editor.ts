@@ -5,6 +5,20 @@ import { api } from "@/shared/api";
 import { koreaDateKey, koreaLocalInputToUtc } from "@/shared/lib/form";
 
 import type { Modal } from "../model/types";
+export class UploadInterruptedError extends Error {
+  constructor(
+    public document: Document,
+    reason?: string,
+  ) {
+    super(
+      document.upload_completed
+        ? "파일은 저장했어요. " +
+            (reason ||
+              "AI 반영을 시작하지 못했어요. 자료 상세에서 다시 처리해 주세요.")
+        : "업로드를 완료하지 못했어요. 같은 자료에서 파일을 다시 선택해 이어서 진행해 주세요.",
+    );
+  }
+}
 type Input = {
   active: Modal;
   fields: Record<string, string>;
@@ -66,7 +80,7 @@ export async function saveEditor({
         kind: "memo",
         text: b.text,
       });
-      await api(`${base}/documents/${d.id}/index`, "POST", {});
+      void d;
       break;
     }
     case "pdf": {
@@ -78,7 +92,9 @@ export async function saveEditor({
       )
         throw new Error("20MB 이하 PDF를 선택해 주세요");
       const u = await api<{ document: Document; upload_url: string }>(
-        `${base}/documents/uploads`,
+        active.item
+          ? `${base}/documents/${active.item.id}/upload-url`
+          : `${base}/documents/uploads`,
         "POST",
         {
           title: b.title,
@@ -87,16 +103,26 @@ export async function saveEditor({
           size: file.size,
         },
       );
-      const response = await fetch(u.upload_url, {
-        method: "PUT",
-        headers: { "Content-Type": "application/pdf" },
-        body: file,
-      });
-      if (!response.ok)
-        throw new Error(
-          "파일 업로드 실패. 대기 자료를 삭제하고 다시 시도해 주세요.",
+      try {
+        const response = await fetch(u.upload_url, {
+          method: "PUT",
+          headers: { "Content-Type": "application/pdf" },
+          body: file,
+        });
+        if (!response.ok)
+          throw new Error(
+            "파일 업로드 실패. 대기 자료를 삭제하고 다시 시도해 주세요.",
+          );
+        await api(`${base}/documents/${u.document.id}/complete`, "POST", {});
+      } catch (cause) {
+        const saved = await api<Document>(
+          `${base}/documents/${u.document.id}`,
+        ).catch(() => u.document);
+        throw new UploadInterruptedError(
+          saved,
+          cause instanceof Error ? cause.message : undefined,
         );
-      await api(`${base}/documents/${u.document.id}/complete`, "POST", {});
+      }
       break;
     }
   }

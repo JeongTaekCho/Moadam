@@ -164,6 +164,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/groups/{g}/documents/{id}/upload-url": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["resume"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/groups/{g}/documents/{id}/complete": {
         parameters: {
             query?: never;
@@ -386,6 +402,38 @@ export interface paths {
         options?: never;
         head?: never;
         patch: operations["updateDocument"];
+        trace?: never;
+    };
+    "/readyz": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["ready"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/healthz": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["live"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
         trace?: never;
     };
     "/api/v1/profiles/{id}/avatar": {
@@ -656,6 +704,8 @@ export interface components {
             /** @enum {string} */
             status: "pending" | "processing" | "ready" | "failed";
             error_code: string | null;
+            upload_completed: boolean;
+            processing_active: boolean;
             /** Format: int32 */
             version: number;
             /** Format: int64 */
@@ -665,18 +715,18 @@ export interface components {
             /** Format: date-time */
             updated_at: string;
         };
+        Upload: {
+            document: components["schemas"]["Document"];
+            upload_url: string;
+            /** Format: int32 */
+            expires_in: number;
+        };
         UploadInput: {
             title: string;
             filename: string;
             mime: string;
             /** Format: int64 */
             size?: number;
-        };
-        Upload: {
-            document: components["schemas"]["Document"];
-            upload_url: string;
-            /** Format: int32 */
-            expires_in: number;
         };
         SessionInput: {
             title: string;
@@ -1365,6 +1415,29 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["Document"];
+                };
+            };
+        };
+    };
+    resume: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                g: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["Upload"];
                 };
             };
         };
@@ -2071,6 +2144,50 @@ export interface operations {
                 };
                 content: {
                     "*/*": components["schemas"]["Document"];
+                };
+            };
+        };
+    };
+    ready: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": {
+                        [key: string]: string;
+                    };
+                };
+            };
+        };
+    };
+    live: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": {
+                        [key: string]: string;
+                    };
                 };
             };
         };

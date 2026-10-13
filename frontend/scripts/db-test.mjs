@@ -377,4 +377,98 @@ console.log(
   "PASS: daily AI quota 30/31 boundary, queued requests, user/date isolation and client denial",
 );
 
+await db.exec(
+  await readFile(
+    new URL(
+      "../../backend/src/main/resources/db/migration/V4__durable_document_jobs.sql",
+      import.meta.url,
+    ),
+    "utf8",
+  ),
+);
+const jobSource = await readFile(
+  new URL(
+    "../../backend/src/main/java/com/moadam/note/repository/DocumentJobRepository.java",
+    import.meta.url,
+  ),
+  "utf8",
+);
+const jobSql = (name) => {
+  const body = jobSource.split(`${name}(`)[1].split(/\n  public /)[0];
+  return [...body.matchAll(/"([^"\n]*)"/g)]
+    .map((match) => JSON.parse(`"${match[1]}"`))
+    .join("")
+    .replaceAll("?", "$PARAM")
+    .replace(
+      /\$PARAM/g,
+      (() => {
+        let n = 0;
+        return () => `$${++n}`;
+      })(),
+    );
+};
+const job = id(),
+  jobDocument = id(),
+  leaseA = id(),
+  leaseB = id();
+await query(
+  "insert into document_jobs(id,kind,group_id,document_id,version) values($1,'index',$2,$3,1)",
+  [job, g1, jobDocument],
+);
+assert.equal((await query(jobSql("claim"), [leaseA])).rows.length, 1);
+assert.equal((await query(jobSql("claim"), [leaseB])).rows.length, 0);
+await query(
+  "update document_jobs set lease_until=now()-interval '1 second' where id=$1",
+  [job],
+);
+assert.equal((await query(jobSql("claim"), [leaseB])).rows[0].attempts, 2);
+await query(jobSql("finish"), [job, leaseA]);
+assert.equal(
+  (await query("select status from document_jobs where id=$1", [job])).rows[0]
+    .status,
+  "running",
+);
+await query(jobSql("finish"), [job, leaseB]);
+assert.equal(
+  (await query("select status from document_jobs where id=$1", [job])).rows[0]
+    .status,
+  "done",
+);
+await db.exec("set role authenticated");
+await assert.rejects(query("select * from document_jobs"));
+await assert.rejects(query("select * from document_daily_usage"));
+await db.exec("reset role");
+console.log(
+  "PASS: durable job claim exclusivity, expired lease recovery, stale worker fencing and RLS denial",
+);
+await db.exec(
+  "create table storage.objects(bucket_id text,name text,created_at timestamptz)",
+);
+const orphanPath = `${id()}/${id()}.pdf`;
+await query(
+  "insert into storage.objects values('group-documents',$1,now()-interval '25 hours')",
+  [orphanPath],
+);
+await query(jobSql("registerOrphanFiles"));
+const orphan = (
+  await query(
+    "select run_after>now()+interval '2 hours' as delayed from document_jobs where storage_path=$1",
+    [orphanPath],
+  )
+).rows;
+assert.equal(orphan.length, 1);
+assert.equal(orphan[0].delayed, true);
+await query(jobSql("registerOrphanFiles"));
+assert.equal(
+  (
+    await query(
+      "select count(*)::int as count from document_jobs where storage_path=$1",
+      [orphanPath],
+    )
+  ).rows[0].count,
+  1,
+);
+console.log(
+  "PASS: conservative orphan discovery, signed URL expiry delay and idempotent registration",
+);
 await db.close();

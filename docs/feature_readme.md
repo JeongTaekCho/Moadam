@@ -113,7 +113,7 @@ PDF와 메모는 1,000자 청크와 150자 겹침으로 분할하고 `text-embed
 | [NoteResponse](../backend/src/main/java/com/moadam/note/dto/NoteResponse.java), [AiAnswerResponse](../backend/src/main/java/com/moadam/ai/dto/AiAnswerResponse.java)      | 문서·대화·인용·답변의 외부 계약                                                                                                                                                       |
 | [초기 DB migration](../backend/src/main/resources/db/migration/V1__community.sql)                                                                                         | `documents`, `document_chunks`, `chat_sessions`, `chat_messages`, FK·인덱스·RLS·버킷                                                                                                  |
 | [Next proxy route](../frontend/app/api/proxy/[...path]/route.ts)                                                                                                          | 쿠키 → Bearer, Origin 검증, 스트림을 버퍼링 없이 전달                                                                                                                                 |
-| [save-editor.ts](../frontend/src/features/content-editor/api/save-editor.ts)                                                                                              | 메모 생성 후 색인, PDF 서명 URL PUT 후 complete                                                                                                                                       |
+| [save-editor.ts](../frontend/src/features/content-editor/api/save-editor.ts)                                                                                              | 메모 저장 API, PDF 서명 URL PUT 후 비동기 complete                                                                                                                                       |
 | [use-workspace.ts](../frontend/src/_pages/workspace/model/use-workspace.ts)                                                                                               | `sendQuestion`, 세션 생성, 초안 메시지, RAF 표시, 그룹 scope, 취소, `openSession`                                                                                                     |
 | [chat-stream.ts](../frontend/src/shared/api/chat-stream.ts)                                                                                                               | `streamQuestion`, `consumeChatStream`, UTF-8/라인 경계 복원, 완료 확인                                                                                                                |
 | [chat-view.tsx](../frontend/src/_pages/workspace/ui/chat-view.tsx)                                                                                                        | 대화 선택, 최신 메시지 스크롤, 화면 크기 감지, 출처 클릭                                                                                                                              |
@@ -160,12 +160,12 @@ PDF와 메모는 1,000자 청크와 150자 겹침으로 분할하고 `text-embed
 
 1. 프론트 `saveEditor()`가 `POST /groups/{g}/documents`에 `{title, kind:'memo', text}`를 보낸다.
 2. Spring은 관리자/소유자 권한을 확인하고 `documents`에 본문을 저장한다. 기본 상태는 `pending`, 버전은 `1`이다.
-3. 프론트가 이어서 `POST /documents/{id}/index`를 호출한다.
-4. Spring은 DB에서 문서의 실제 버전·ID를 읽고 내부 토큰과 함께 RAG `/index`로 전달한다.
+3. Spring이 문서 저장과 같은 트랜잭션에 `document_jobs` 색인 작업을 기록하고 빠르게 응답한다.
+4. 백그라운드 작업자가 DB lease로 작업을 획득하고 실제 문서 버전·ID를 내부 토큰과 함께 RAG `/index`로 전달한다.
 5. RAG는 관리자 권한과 문서 버전을 다시 검사하고 `processing`으로 표시한다.
 6. DB의 `text_content`를 청킹·임베딩하고, 새 청크 저장과 ready 전환을 한 트랜잭션에서 처리한다.
 
-메모 생성 API 자체가 자동 색인하는 것은 아니다. **프론트가 생성 API 다음에 색인 API를 호출하는 구성**이다. 생성과 색인은 하나의 전역 트랜잭션이 아니므로, 색인이 실패해도 문서 행은 남아 상태를 확인하고 재처리할 수 있다.
+메모 생성·수정 API가 자동 색인을 예약한다. 문서와 작업 등록은 함께 커밋하지만 외부 임베딩은 별도 작업에서 수행한다. 실패 시 문서를 유지하고 명시적인 실패·재시도 상태를 표시한다. 작업 lease, 중복 방지와 제한 정책은 [자료 처리 운영 가이드](document_operations.md)를 참고한다.
 
 ### 6.2 PDF 등록
 
@@ -176,9 +176,9 @@ PDF와 메모는 1,000자 청크와 150자 겹침으로 분할하고 `text-embed
 5. Spring이 비공개 `group-documents` 버킷의 서명된 업로드 URL을 발급하고 pending 문서 행을 저장한다. 응답 계약의 업로드 유효기간은 7,200초다.
 6. 브라우저가 그 URL에 **PUT**으로 파일을 직접 전송한다. PDF 바이너리는 Next/Spring 본문 프록시를 통과하지 않는다.
 7. 업로드 성공 후 `POST /documents/{id}/complete`를 호출한다. `/complete`와 `/index`는 같은 Spring 메서드에 매핑된다.
-8. RAG가 Storage에서 원본을 읽어 텍스트를 추출하고 색인한다.
+8. Spring이 Storage HEAD로 실제 파일과 크기를 검증하고 업로드 완료 상태를 저장한 뒤 색인을 예약한다. RAG가 원본 텍스트 추출·색인을 수행한다.
 
-업로드에 실패하면 프론트는 pending 자료를 삭제하고 다시 시도하라는 안내를 한다. 만료 업로드·미완료 문서를 정리하는 주기적 작업은 현재 없다.
+업로드 실패 시 같은 자료의 `/upload-url`로 서명 URL을 재발급해 이어서 진행한다. 미완료 업로드는 유효기간 이후 주기적으로 정리하고 파일 삭제는 durable 작업으로 재시도한다.
 
 ### 6.3 RAG의 원본 검증
 
@@ -198,9 +198,9 @@ PDF와 메모는 1,000자 청크와 150자 겹침으로 분할하고 `text-embed
 
 ### 6.4 문서 수정·삭제
 
-- 메모의 제목/본문을 수정하면 `version + 1`, `pending`, `error_code=null`이 된다. 수정 API 뒤에 자동 색인 호출은 없으며 “다시 처리”로 색인을 실행한다.
+- 메모의 제목/본문을 수정하면 `version + 1`, `pending`, `error_code=null`이 된다. 수정 API가 같은 트랜잭션에서 자동 색인을 예약하며 실패 시 상세 화면에서 다시 처리할 수 있다.
 - PDF 수정 화면은 제목만 변경한다. 원본 PDF 교체와 버전 증가는 현재 제공하지 않는다. 검색 SQL이 문서 제목을 조인하므로 제목 변경은 재색인 없이 인용 제목에 반영된다.
-- 문서를 삭제하면 FK cascade로 해당 청크도 삭제된다. PDF 원본은 Storage 삭제 API도 호출한다. Storage와 DB를 묶는 분산 트랜잭션은 없다.
+- 문서를 삭제하면 FK cascade로 해당 청크도 삭제된다. PDF 원본 삭제는 DB와 같은 트랜잭션에 outbox 작업으로 기록한다. 기존 서명 URL의 유효기간이 지난 후 Storage 삭제를 재시도한다.
 - PDF 다운로드는 멤버 권한 검사 후 60초짜리 서명 URL을 발급한다.
 
 ## 7. 청킹과 임베딩
@@ -270,7 +270,7 @@ RAG의 `db()`는 psycopg connection context를 사용한다. 성공하면 커밋
 
 같은 버전 재색인에서 청크 교체가 실패하면 기존 청크 삭제도 롤백돼 해당 버전의 청크를 보존할 수 있다. 이 경우 ready 상태와 오류 코드를 함께 남길 수 있다. 본문 수정으로 새 버전이 된 문서에서 색인이 실패하면 과거 버전 청크만으로 ready 처리하지 않는다.
 
-문서를 잠근 뒤 요청 버전과 현재 버전이 다르면 교체하지 않는다. 삭제·수정·재색인 중 오래된 작업이 새 상태를 덮어쓰지 않도록 복구 UPDATE에도 요청 버전을 적용한다. 서로 다른 프로세스의 복잡한 작업 상태 전체를 조정하는 작업 ID/분산 잠금은 현재 없다.
+문서를 잠근 뒤 요청 버전과 현재 버전이 다르면 교체하지 않는다. 삭제·수정·재색인 중 오래된 작업이 새 상태를 덮어쓰지 않도록 복구 UPDATE에도 요청 버전을 적용한다. Spring의 durable 작업 ID·lease token과 RAG의 문서별 트랜잭션 advisory lock으로 여러 프로세스의 중복 처리와 오래된 작업의 완료 기록을 보호한다.
 
 `processing` 문서는 검색에서 제외된다. 같은 버전의 기존 청크가 남아 있어도 재처리 중에는 잠시 검색 대상에서 빠질 수 있다.
 
@@ -632,7 +632,7 @@ RAG 색인 API는 처리 실패를 status='failed' 결과로 반환할 수 있�
 | RAG POST 본문            | 1MiB                                                                        |
 | 허용 문서 ID             | RAG 모델 최대 10,000개                                                      |
 | PDF                      | 20MiB, 최대 200쪽, 페이지 10만자/전체 100만자                               |
-| 청크                     | 문서당 최대 1,000개                                                         |
+| 청크                     | 문서당 기본 최대 200개 (`MAX_CHUNKS`)                                                         |
 | 임베딩 batch             | 32개씩 순차 호출                                                            |
 | RAG 동시 작업            | 프로세스당 BoundedSemaphore 4개; index/query/stream이 공유                  |
 | Spring streaming 실행 풀 | core 4, max 8, queue 8                                                      |
@@ -643,14 +643,14 @@ RAG 색인 API는 처리 실패를 status='failed' 결과로 반환할 수 있�
 | Spring → RAG stream      | 요청 timeout 100초 + 응답 body 읽기 시작 후 100초에 close하는 timer         |
 | Spring async             | 기본 120초                                                                  |
 | Next → Spring            | 120초 제한과 요청 취소 signal 결합                                          |
-| 기존 비스트리밍 RAG 호출 | Spring 내부 요청 timeout 90초                                               |
+| 기존 비스트리밍 RAG 호출 | 질문 요청 90초 / 백그라운드 색인 요청 300초                                               |
 | 모델 출력                | max_tokens 1,200; 원본 JSON 50,000자/최종 answer 10,000자                   |
 | Spring stream 누적       | 읽은 라인의 Java 문자열 length 누적 250,000 제한; 엄밀한 바이트 제한은 아님 |
 | 브라우저 parser          | 아직 처리하지 않은 문자열 buffer 100,000자                                  |
 
 스트림 전체의 서버 제한은 서로 다른 시작점과 의미를 갖는다. 정확히 100초 한 번으로 모든 구간을 감싸는 deadline이라고 설명하지 않는다. Spring 타이머는 취소된 작업을 큐에서 즉시 제거해 완료 후 참조가 남는 것을 줄인다.
 
-semaphore는 프로세스별이다. 여러 worker/replica를 실행하면 전체 동시 요청 수가 4보다 많아질 수 있다. 사용자별 분당 제한, 전역 rate limiter, 계정별 토큰 budget, 자동 재시도/backoff, circuit breaker는 현재 없다.
+semaphore는 프로세스별이다. 여러 worker/replica를 실행하면 전체 동시 요청 수가 4보다 많아질 수 있다. 질문에는 사용자별 하루 통합 30회 제한이 있고 자료 작업에는 별도 일일 한도·중복 방지·최대 5회 backoff 재시도가 있다. 질문 생성의 자동 재시도, 사용자별 분당 제한, 전역 rate limiter, 실제 달러 기반 예산 제어, circuit breaker는 현재 없다.
 
 ## 17. API와 환경변수
 
@@ -761,7 +761,7 @@ mvn -f backend/pom.xml test
 | 단절 감지 전 외부 연산이 지속될 수 있음   | 취소 전파·deadline·작업 상태 보강                      | 취소 지연, 불필요 토큰, 자원 회수             |
 | 일부 추적 정보가 최종 기록에 없음         | request/trace ID, provider/model/usage 메타데이터 저장 | 장애 연결 추적, 개인정보 최소화               |
 | 프로세스별 semaphore만 있음               | 사용자별/global limiter, 예산 제한                     | 비용·남용·공정성·부하                         |
-| 모델 오류 자동 재시도 없음                | 제한된 backoff·circuit breaker                         | 중복 출력 방지, 제한 시간, provider 429/5xx   |
+| 질문 생성 오류 자동 재시도 없음                | 제한된 backoff·circuit breaker                         | 중복 출력 방지, 제한 시간, provider 429/5xx   |
 | 벡터에 사용 모델/청킹 설정 이력이 없음    | embedding/인덱스 버전 명시 저장                        | 안전한 모델 교체, 혼합 벡터 방지              |
 
 개선 목록은 제안이며 완료된 기능이 아니다. 작은 자료 규모에서는 현재 단순한 흐름을 유지하고, 측정한 병목/품질 문제에 맞춰 변경하는 접근으로 설명할 수 있다.
@@ -906,3 +906,8 @@ python3 -m venv /tmp/moadam-docs-render
 모아AI는 모든 모임과 개인 대화를 합쳐 사용자당 하루 30회 질문을 접수합니다. 기준 시간은 Asia/Seoul이며 자정에 새로운 날짜의 한도를 사용합니다. 권한·입력 검사를 통과한 요청은 답변 실패나 중지 시에도 1회로 계산합니다. 횟수는 대화 메시지와 별도의 DB 카운터에 저장하며 삭제·새 대화·서버 재시작으로 초기화되지 않습니다.
 
 Spring은 질문 전에 횟수를 원자적으로 차감하고 31번째 요청을 HTTP 429로 차단합니다. 스트리밍 시작 시 `usage` 이벤트를 전달하고, 인증 전용 `GET /api/v1/me/ai-usage`로 남은 횟수와 초기화 시간을 조회합니다. 모달 입력창 위에서 횟수를 표시하고 소진 시 전송을 막습니다. 스키마·동작·검증·운영 적용 순서는 [일일 한도 작업 기록](issue/2026-10-13_모아AI_일일_30회_제한.md)을 참고하세요.
+
+
+## 자료 처리와 운영 안정화
+
+자료 작업은 DB 큐에서 백그라운드로 실행하며, 처리 중인 자료에만 화면에서 상태를 갱신합니다. 기본 제한은 모임당 자료 100개·할당 용량 200MiB, 사용자당 하루 업로드 20회·색인 접수 20회입니다. PDF는 한 파일에 20MiB를 확보하며 삭제 정리 중인 파일도 용량에 포함합니다. RAG의 기본 문서당 청크 한도는 200개입니다. 질문의 사용자별 통합 30회 한도와 별도 정책입니다. 배포 순서·재시도·정리 및 실제 검증 결과는 [운영 가이드](document_operations.md)와 [이슈 기록](issue/2026-10-13_자료_처리_운영안정화.md)에 있습니다.

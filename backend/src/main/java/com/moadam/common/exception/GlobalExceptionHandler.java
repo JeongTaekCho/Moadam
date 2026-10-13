@@ -50,15 +50,21 @@ public class GlobalExceptionHandler {
     String message =
         e instanceof GroupLimitException
             ? GroupLimitException.MESSAGE
-            : status == 403
-                ? "이 작업을 수행할 권한이 없습니다"
-                : status == 404
-                    ? "요청한 항목을 찾을 수 없습니다"
-                    : status == 400
-                        ? "입력 값을 확인해 주세요"
-                        : status == 429
-                            ? "오늘의 모아AI 질문 30회를 모두 사용했어요. 한국 시간 자정 이후 다시 질문해 주세요."
-                            : status == 503 ? "서비스를 사용할 수 없습니다. 잠시 후 다시 시도해 주세요" : "요청을 처리하지 못했습니다";
+            : (status == 409 || status == 429)
+                    && e instanceof org.springframework.web.server.ResponseStatusException reason
+                    && reason.getReason() != null
+                ? reason.getReason()
+                : status == 403
+                    ? "이 작업을 수행할 권한이 없습니다"
+                    : status == 404
+                        ? "요청한 항목을 찾을 수 없습니다"
+                        : status == 400
+                            ? "입력 값을 확인해 주세요"
+                            : status == 429
+                                ? "오늘의 모아AI 질문 30회를 모두 사용했어요. 한국 시간 자정 이후 다시 질문해 주세요."
+                                : status == 503
+                                    ? "서비스를 사용할 수 없습니다. 잠시 후 다시 시도해 주세요"
+                                    : "요청을 처리하지 못했습니다";
     return ResponseEntity.status(status)
         .body(
             Map.of(

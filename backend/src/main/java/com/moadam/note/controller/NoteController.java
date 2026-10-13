@@ -77,6 +77,12 @@ public class NoteController {
     return service.index(j, g, id);
   }
 
+  @PostMapping("/groups/{g}/documents/{id}/upload-url")
+  public NoteUploadResponse resume(
+      @AuthenticationPrincipal Jwt j, @PathVariable UUID g, @PathVariable UUID id) {
+    return service.resumeUpload(j, g, id);
+  }
+
   @GetMapping("/groups/{g}/documents/{id}/download")
   public Map<String, String> download(
       @AuthenticationPrincipal Jwt j, @PathVariable UUID g, @PathVariable UUID id) {

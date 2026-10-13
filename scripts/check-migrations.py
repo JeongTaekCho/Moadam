@@ -13,4 +13,9 @@ assert (
 ).read_text() == next((root / "supabase/migrations").glob("*_ai_daily_usage.sql")).read_text(), (
     "AI usage migration copies differ"
 )
+assert (
+    root / "backend/src/main/resources/db/migration/V4__durable_document_jobs.sql"
+).read_text() == next(
+    (root / "supabase/migrations").glob("*_durable_document_jobs.sql")
+).read_text(), "Document job migrations differ"
 print("Migration copies and embedding dimensions match")

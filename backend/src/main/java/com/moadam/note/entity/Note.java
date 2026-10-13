@@ -20,6 +20,8 @@ public record Note(
     int version,
     String status,
     String errorCode,
+    boolean uploadCompleted,
+    Instant uploadExpiresAt,
     Long sizeBytes,
     Instant createdAt,
     Instant updatedAt) {
@@ -35,6 +37,8 @@ public record Note(
         ((Number) row.get("version")).intValue(),
         (String) row.get("status"),
         (String) row.get("error_code"),
+        !Boolean.FALSE.equals(row.get("upload_completed")),
+        instant(row.get("upload_expires_at")),
         row.get("size_bytes") == null ? null : ((Number) row.get("size_bytes")).longValue(),
         instant(row.get("created_at")),
         instant(row.get("updated_at")));
@@ -56,6 +60,8 @@ public record Note(
     row.put("version", version);
     row.put("status", status);
     row.put("error_code", errorCode);
+    row.put("upload_completed", uploadCompleted);
+    row.put("upload_expires_at", uploadExpiresAt);
     row.put("size_bytes", sizeBytes);
     row.put("created_at", createdAt);
     row.put("updated_at", updatedAt);

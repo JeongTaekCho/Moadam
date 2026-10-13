@@ -9,7 +9,10 @@ import {
 } from "@/entities/event/schedule";
 import type { Group, Invite, Member } from "@/entities/group";
 import type { Post } from "@/entities/post";
-import { saveEditor } from "@/features/content-editor/api/save-editor";
+import {
+  saveEditor,
+  UploadInterruptedError,
+} from "@/features/content-editor/api/save-editor";
 import type { Modal } from "@/features/content-editor/model/types";
 import type { Page, MyProfile, MyActivity, AiUsage } from "@/shared/api";
 
@@ -562,6 +565,15 @@ export function useWorkspace(initialView: View = "홈", hasSession = false) {
         fields: b,
         file,
         base,
+      }).catch(async (error: unknown) => {
+        if (error instanceof UploadInterruptedError) {
+          await load();
+          if (error.document.upload_completed) {
+            setModal(null);
+            setDocument(error.document);
+          } else setModal({ kind: "pdf", item: error.document });
+        }
+        throw error;
       });
       if (saved.group) {
         await loadGroups();
@@ -580,10 +592,16 @@ export function useWorkspace(initialView: View = "홈", hasSession = false) {
       if (active.kind === "documentEdit" && active.item)
         await openDocument(active.item.id);
       if (active.kind === "memo" || active.kind === "pdf")
-        notify("자료를 등록했습니다. 처리 상태를 확인해 주세요.");
+        notify(
+          "자료를 저장했어요. AI 반영 상태는 자료 목록에서 확인해 주세요.",
+        );
+      if (active.kind === "documentEdit")
+        notify("변경사항을 저장했어요. AI 반영 상태를 확인해 주세요.");
       setModal(null);
       if (active.kind !== "group" && active.kind !== "join") await load();
-      if (!["memo", "pdf", "group", "join"].includes(active.kind))
+      if (
+        !["memo", "pdf", "group", "join", "documentEdit"].includes(active.kind)
+      )
         notify("저장했습니다");
     });
   }

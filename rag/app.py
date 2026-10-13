@@ -23,6 +23,7 @@ from psycopg.rows import dict_row
 from pydantic import BaseModel, Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from pypdf import PdfReader
+from pypdf.errors import PyPdfError
 from starlette.concurrency import run_in_threadpool
 
 
@@ -42,6 +43,7 @@ class Settings(BaseSettings):
     top_k: int = Field(default=5, ge=1, le=10)
     similarity_threshold: float = Field(default=0.3, ge=0, le=1)
     max_pages: int = 200
+    max_chunks: int = Field(default=200, ge=1, le=1000)
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
 
@@ -262,13 +264,19 @@ def load_pages(doc):
                     raise ValueError("FILE_TOO_LARGE")
     if len(content) != doc["size_bytes"] or not content.startswith(b"%PDF-"):
         raise ValueError("INVALID_PDF")
-    reader = PdfReader(io.BytesIO(content))
+    try:
+        reader = PdfReader(io.BytesIO(content))
+    except PyPdfError as exc:
+        raise ValueError("INVALID_PDF") from exc
     if reader.is_encrypted or len(reader.pages) > settings.max_pages:
         raise ValueError("PDF_LIMIT")
     pages = []
     total = 0
     for i, page in enumerate(reader.pages):
-        text = page.extract_text() or ""
+        try:
+            text = page.extract_text() or ""
+        except PyPdfError as exc:
+            raise ValueError("INVALID_PDF") from exc
         total += len(text)
         if len(text) > 100000 or total > 1000000:
             raise ValueError("TEXT_LIMIT")
@@ -280,6 +288,18 @@ def load_pages(doc):
     "/index", response_model=IndexResult, dependencies=[Depends(authorize), Depends(capacity)]
 )
 def index(req: IndexRequest):
+    # Keep a transaction-scoped lease during external work, including retries after HTTP timeout.
+    with db() as lease:
+        locked = lease.execute(
+            "select pg_try_advisory_xact_lock(hashtextextended(%s,0)) as locked",
+            ("moadam:index:" + str(req.document_id),),
+        ).fetchone()
+        if not locked["locked"]:
+            raise HTTPException(409, "Index already running")
+        return index_document(req)
+
+
+def index_document(req: IndexRequest):
     # Mark processing separately, while replacement and version checks remain atomic.
     with db() as conn:
         member(conn, req.group_id, req.user_id, True)
@@ -288,6 +308,15 @@ def index(req: IndexRequest):
         ).fetchone()
         if not doc or doc["version"] != req.version:
             raise HTTPException(404, "Document not found")
+        if not doc.get("upload_completed", True):
+            raise HTTPException(409, "Upload incomplete")
+        if doc["status"] == "ready":
+            count = conn.execute(
+                "select count(*) as count from document_chunks where group_id=%s and document_id=%s and version=%s",
+                (req.group_id, req.document_id, req.version),
+            ).fetchone()["count"]
+            if count:
+                return IndexResult(status="ready", chunks=count, request_id=req.request_id)
         conn.execute(
             "update documents set status='processing',error_code=null where group_id=%s and id=%s",
             (req.group_id, req.document_id),
@@ -296,7 +325,7 @@ def index(req: IndexRequest):
         pieces = list(chunks(load_pages(doc)))
         if not pieces:
             raise ValueError("NO_TEXT_OCR_UNSUPPORTED")
-        if len(pieces) > 1000:
+        if len(pieces) > settings.max_chunks:
             raise ValueError("CHUNK_LIMIT")
         vectors = embed([text for _, text in pieces])
         with db() as conn:
@@ -331,7 +360,15 @@ def index(req: IndexRequest):
         return IndexResult(status="ready", chunks=len(pieces), request_id=req.request_id)
     except Exception as exc:
         code = (
-            "EMBEDDING_UNAVAILABLE"
+            (
+                "PROVIDER_AUTH_FAILED"
+                if exc.response.status_code in (401, 403)
+                else "PROVIDER_RATE_LIMITED"
+                if exc.response.status_code == 429
+                else "PROVIDER_UNAVAILABLE"
+            )
+            if isinstance(exc, httpx.HTTPStatusError)
+            else "EMBEDDING_UNAVAILABLE"
             if settings.rag_provider == "degraded"
             else str(exc)
             if isinstance(exc, ValueError)

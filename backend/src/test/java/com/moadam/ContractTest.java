@@ -13,6 +13,7 @@ import org.springframework.http.HttpStatus;
     webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
     properties = {
       "spring.flyway.enabled=false",
+      "app.document-jobs.enabled=false",
       "spring.datasource.url=jdbc:postgresql://127.0.0.1:1/postgres",
       "spring.datasource.username=test",
       "spring.datasource.password=test",
@@ -59,6 +60,7 @@ class ContractTest {
       Files.createDirectories(Path.of("../docs"));
       Files.writeString(Path.of("../docs/openapi.json"), json.writeValueAsString(specification));
     }
+    assertEquals(HttpStatus.OK, http.getForEntity("/healthz", String.class).getStatusCode());
     var denied = http.getForEntity("/api/v1/groups", String.class);
     assertEquals(HttpStatus.UNAUTHORIZED, denied.getStatusCode());
     assertTrue(denied.getBody().contains("UNAUTHENTICATED"));

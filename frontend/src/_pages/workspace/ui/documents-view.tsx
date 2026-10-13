@@ -4,7 +4,8 @@ import {
   StatusBadge,
   documentErrorMessage,
 } from "@/entities/document";
-import { api } from "@/shared/api";
+import type { Document } from "@/entities/document";
+import { api, type Page } from "@/shared/api";
 import {
   UserIdentity,
   Button,
@@ -15,7 +16,7 @@ import {
   ListSearch,
   MoaAiIcon,
 } from "@/shared/ui";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type { WorkspaceModel } from "../model/use-workspace";
 export function DocumentsView({ model }: { model: WorkspaceModel }) {
   const {
@@ -36,6 +37,57 @@ export function DocumentsView({ model }: { model: WorkspaceModel }) {
   } = model;
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("all");
+  const pending = (document ? [document] : documents).some(
+    (item) =>
+      item.upload_completed !== false &&
+      item.processing_active !== false &&
+      ["pending", "processing"].includes(item.status),
+  );
+  const setDocuments = model.setDocuments;
+  const page = model.page;
+  const detailId = document?.id;
+  useEffect(() => {
+    if (!pending || view !== "자료") return;
+    const controller = new AbortController();
+    let running = false;
+    const refresh = async () => {
+      if (running || globalThis.document.visibilityState !== "visible") return;
+      running = true;
+      try {
+        if (detailId)
+          setDocument(
+            await api<Document>(
+              `${base}/documents/${detailId}?status_poll=1`,
+              "GET",
+              undefined,
+              controller.signal,
+            ),
+          );
+        else
+          setDocuments(
+            (
+              await api<Page<Document>>(
+                `${base}/documents?page=${page}&size=20&status_poll=1`,
+                "GET",
+                undefined,
+                controller.signal,
+              )
+            ).items,
+          );
+      } catch {
+        /* Keep the current content; manual retry remains available. */
+      } finally {
+        running = false;
+      }
+    };
+    const timer = window.setInterval(() => void refresh(), 5000);
+    globalThis.document.addEventListener("visibilitychange", refresh);
+    return () => {
+      controller.abort();
+      clearInterval(timer);
+      globalThis.document.removeEventListener("visibilitychange", refresh);
+    };
+  }, [pending, view, base, page, detailId, setDocument, setDocuments]);
   const filteredDocuments = documents.filter(
     (d) =>
       (filter === "all" || d.kind === filter || d.status === filter) &&
@@ -49,7 +101,11 @@ export function DocumentsView({ model }: { model: WorkspaceModel }) {
             <Button variant="ghost" onClick={goBackFromDetail}>
               ← 이전 페이지
             </Button>
-            <StatusBadge status={document.status} />
+            <StatusBadge
+              status={document.status}
+              uploadCompleted={document.upload_completed !== false}
+              processingActive={document.processing_active !== false}
+            />
             <h1>{document.title}</h1>
             <UserIdentity
               profile={document.author}
@@ -100,6 +156,17 @@ export function DocumentsView({ model }: { model: WorkspaceModel }) {
                   >
                     수정
                   </Button>
+                  {document.kind === "pdf" &&
+                    document.upload_completed === false && (
+                      <Button
+                        variant="secondary"
+                        onClick={() =>
+                          setModal({ kind: "pdf", item: document })
+                        }
+                      >
+                        업로드 이어하기
+                      </Button>
+                    )}
                   <Button
                     variant="secondary"
                     loading={busy}
@@ -115,7 +182,9 @@ export function DocumentsView({ model }: { model: WorkspaceModel }) {
                       })
                     }
                   >
-                    다시 처리
+                    {document.upload_completed === false
+                      ? "업로드 완료 확인"
+                      : "AI 반영 다시 시도"}
                   </Button>
                   <Button
                     variant="ghost"

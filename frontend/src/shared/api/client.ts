@@ -48,6 +48,7 @@ function cacheLifetime(path: string) {
   if (
     path === "me" ||
     path === "me/ai-usage" ||
+    path.includes("status_poll=1") ||
     /\/(download[^/?]*|upload[^/?]*|avatar|attendance|messages)(\?|$|\/)/.test(
       path,
     )

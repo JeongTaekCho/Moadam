@@ -30,6 +30,8 @@ public record NoteResponse(
             requiredMode = Schema.RequiredMode.REQUIRED,
             types = {"string", "null"})
         String error_code,
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED) boolean upload_completed,
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED) boolean processing_active,
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED) int version,
     @Schema(
             requiredMode = Schema.RequiredMode.REQUIRED,

@@ -2,7 +2,15 @@
 import type { Document } from "./model";
 
 import { Badge, Icon, UserIdentity } from "@/shared/ui";
-export function StatusBadge({ status }: { status: Document["status"] }) {
+export function StatusBadge({
+  status,
+  uploadCompleted = true,
+  processingActive = true,
+}: {
+  status: Document["status"];
+  uploadCompleted?: boolean;
+  processingActive?: boolean;
+}) {
   return (
     <Badge
       tone={
@@ -15,9 +23,13 @@ export function StatusBadge({ status }: { status: Document["status"] }) {
     >
       {
         {
-          pending: "등록 대기",
-          processing: "자료를 읽는 중",
-          ready: "도우미 사용 가능",
+          pending: !uploadCompleted
+            ? "업로드 대기"
+            : processingActive
+              ? "AI 반영 대기"
+              : "AI 반영 필요",
+          processing: "AI 반영 중",
+          ready: "AI 반영 완료",
           failed: "처리 실패",
         }[status]
       }
@@ -52,7 +64,11 @@ export function DocumentRow({
       <time className="document-date" dateTime={document.created_at}>
         {new Date(document.created_at).toLocaleDateString("ko-KR")}
       </time>
-      <StatusBadge status={document.status} />
+      <StatusBadge
+        status={document.status}
+        uploadCompleted={document.upload_completed !== false}
+        processingActive={document.processing_active !== false}
+      />
       {document.error_code && (
         <span className="document-error">
           {document.error_code === "NO_TEXT_OCR_UNSUPPORTED"
