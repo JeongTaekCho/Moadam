@@ -26,6 +26,7 @@ class AiStreamingTest {
   OpenAiClient client;
   PlatformTransactionManager transactions;
   AiService service;
+  com.moadam.ai.service.AiUsageService usage;
   Jwt jwt;
   UUID group = UUID.randomUUID(), user = UUID.randomUUID(), session = UUID.randomUUID();
 
@@ -35,8 +36,22 @@ class AiStreamingTest {
     client = mock(OpenAiClient.class);
     transactions = mock(PlatformTransactionManager.class);
     when(transactions.getTransaction(any())).thenReturn(new SimpleTransactionStatus());
+    usage = mock(com.moadam.ai.service.AiUsageService.class);
+    when(usage.consume(user))
+        .thenReturn(
+            new com.moadam.ai.dto.AiUsageResponse(
+                30, 1, 29, java.time.OffsetDateTime.parse("2026-10-14T00:00:00+09:00")));
     service =
-        spy(new AiService(repository, null, null, null, new ObjectMapper(), client, transactions));
+        spy(
+            new AiService(
+                repository,
+                null,
+                null,
+                null,
+                new ObjectMapper().findAndRegisterModules(),
+                client,
+                transactions,
+                usage));
     jwt = mock(Jwt.class);
     when(jwt.getSubject()).thenReturn(user.toString());
     doReturn(null).when(service).session(jwt, group, session);
@@ -76,6 +91,36 @@ class AiStreamingTest {
   }
 
   @Test
+  void rejectsThirtyFirstQuestionBeforeStreamingOrProviderCall() {
+    doThrow(new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS)).when(usage).consume(user);
+    var streamError =
+        assertThrows(
+            ResponseStatusException.class,
+            () -> service.openStream(jwt, group, session, new AiQuestionRequest("질문")));
+    assertEquals(429, streamError.getStatusCode().value());
+    var syncError =
+        assertThrows(
+            ResponseStatusException.class,
+            () -> service.ask(jwt, group, session, new AiQuestionRequest("질문")));
+    assertEquals(429, syncError.getStatusCode().value());
+    verifyNoInteractions(client, repository, transactions);
+  }
+
+  @Test
+  void unauthorizedSessionDoesNotConsumeAllowance() {
+    doThrow(new ResponseStatusException(HttpStatus.NOT_FOUND))
+        .when(service)
+        .session(jwt, group, session);
+    assertThrows(
+        ResponseStatusException.class,
+        () -> service.openStream(jwt, group, session, new AiQuestionRequest("질문")));
+    assertThrows(
+        ResponseStatusException.class,
+        () -> service.ask(jwt, group, session, new AiQuestionRequest("질문")));
+    verifyNoInteractions(usage, client);
+  }
+
+  @Test
   void sendsActionableRagErrorWithoutSavingMessages() throws Exception {
     doThrow(
             new com.moadam.ai.client.RagUnavailableException(
@@ -85,6 +130,8 @@ class AiStreamingTest {
     var body = stream().toString(StandardCharsets.UTF_8);
     assertTrue(body.contains("AI_CONNECTION_FAILED"));
     assertTrue(body.contains("AI 서비스에 연결할 수 없어요."));
+    assertTrue(body.contains("\"remaining\":29"));
+    verify(usage).consume(user);
     verifyNoInteractions(transactions);
     verify(repository, never()).insertUserMessageReturning(any(), any(), any());
   }

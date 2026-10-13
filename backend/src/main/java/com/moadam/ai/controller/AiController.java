@@ -32,6 +32,11 @@ public class AiController {
     this.service = service;
   }
 
+  @GetMapping("/me/ai-usage")
+  public com.moadam.ai.dto.AiUsageResponse usage(@AuthenticationPrincipal Jwt jwt) {
+    return service.usage(jwt);
+  }
+
   @GetMapping("/groups/{g}/chat/sessions")
   public Page<AiSessionResponse> sessions(
       @AuthenticationPrincipal Jwt j,

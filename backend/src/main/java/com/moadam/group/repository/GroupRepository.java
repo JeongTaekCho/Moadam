@@ -14,6 +14,22 @@ public class GroupRepository {
     this.db = db;
   }
 
+  public void lockMembershipChanges(UUID user) {
+    // Transaction-scoped account lock also covers concurrent create/join requests on other
+    // instances.
+    db.queryForList(
+        "select pg_advisory_xact_lock(hashtextextended('moadam:group-limit:'||?::text,0))", user);
+  }
+
+  public boolean hasMembership(UUID group, UUID user) {
+    return Boolean.TRUE.equals(
+        db.queryForObject(
+            "select exists(select 1 from group_members where group_id=? and user_id=?)",
+            Boolean.class,
+            group,
+            user));
+  }
+
   public List<Map<String, Object>> lockActiveInvite(String hash) {
     return db.queryForList(
         "select * from group_invites where token_hash=? and expires_at>now() and used_at is"

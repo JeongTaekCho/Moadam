@@ -13,6 +13,7 @@ import com.moadam.group.dto.InviteJoinRequest;
 import com.moadam.group.dto.InviteResponse;
 import com.moadam.group.dto.MemberResponse;
 import com.moadam.group.dto.MemberRoleRequest;
+import com.moadam.group.exception.GroupLimitException;
 import com.moadam.group.repository.GroupRepository;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -57,14 +58,20 @@ public class GroupService extends DomainService {
         GroupResponse.class);
   }
 
-  @Transactional
+  @Transactional(isolation = org.springframework.transaction.annotation.Isolation.READ_COMMITTED)
   public GroupResponse createGroup(Jwt j, GroupCreateRequest b) {
     if (!ZoneId.getAvailableZoneIds().contains(b.timezone())) throw new IllegalArgumentException();
+    repository.lockMembershipChanges(user(j));
+    checkGroupLimit(user(j));
     UUID g = UUID.randomUUID();
     repository.insertGroup(g, b.name(), b.timezone());
     repository.insertOwner(g, user(j));
     audit(g, user(j), "group.create", g);
     return group(j, g);
+  }
+
+  private void checkGroupLimit(UUID user) {
+    if (repository.countMembershipGroups(user) >= 3) throw new GroupLimitException();
   }
 
   public GroupResponse group(Jwt j, UUID g) {
@@ -167,11 +174,14 @@ public class GroupService extends DomainService {
     return Map.of("deleted", true);
   }
 
-  @Transactional
+  @Transactional(isolation = org.springframework.transaction.annotation.Isolation.READ_COMMITTED)
   public GroupResponse join(Jwt j, InviteJoinRequest b) {
+    repository.lockMembershipChanges(user(j));
     var rows = repository.lockActiveInvite(hash(b.token()));
     if (rows.isEmpty()) throw new ResponseStatusException(HttpStatus.NOT_FOUND);
     UUID g = (UUID) rows.getFirst().get("group_id");
+    if (repository.hasMembership(g, user(j))) return group(j, g);
+    checkGroupLimit(user(j));
     repository.insertMember(g, user(j));
     repository.markInviteUsed((UUID) rows.getFirst().get("id"));
     audit(g, user(j), "invite.join", user(j));

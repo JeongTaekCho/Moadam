@@ -1,6 +1,7 @@
-import { ApiError, getApiScope, type Message } from "./client";
+import { ApiError, getApiScope, type Message, type AiUsage } from "./client";
 
 export type ChatStreamEvent =
+  | { type: "usage"; usage: AiUsage }
   | { type: "status"; stage: "retrieving" | "generating" | "saving" }
   | { type: "delta"; text: string }
   | { type: "done"; user: Message; assistant: Message }

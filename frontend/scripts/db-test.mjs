@@ -303,7 +303,78 @@ assert.equal(
   false,
 );
 checks++;
-await db.close();
 console.log(
   `${checks} PostgreSQL/pgvector migration and isolation checks passed (PGlite; Supabase auth/storage tables stubbed).`,
 );
+
+// Exercise the production JDBC quota SQL in isolated PostgreSQL (PGlite).
+await db.exec(
+  await readFile(
+    new URL(
+      "../../backend/src/main/resources/db/migration/V3__ai_daily_usage.sql",
+      import.meta.url,
+    ),
+    "utf8",
+  ),
+);
+const quotaSource = await readFile(
+  new URL(
+    "../../backend/src/main/java/com/moadam/ai/repository/AiUsageRepository.java",
+    import.meta.url,
+  ),
+  "utf8",
+);
+const consumeBody = quotaSource.split(
+  "public List<Map<String, Object>> consume",
+)[1];
+const quotaSql = [...consumeBody.matchAll(/"([^"\n]*)"/g)]
+  .map((match) => match[1])
+  .join("")
+  .replace("?", "$1");
+const readBody = quotaSource
+  .split("public Map<String, Object> current")[1]
+  .split("public List")[0];
+const readSql = [...readBody.matchAll(/"([^"\n]*)"/g)]
+  .map((match) => match[1])
+  .join("")
+  .replace("?", "$1");
+for (const [instant, expected] of [
+  ["2026-10-13T14:59:59Z", "2026-10-13"],
+  ["2026-10-13T15:00:00Z", "2026-10-14"],
+]) {
+  const frozenSql = readSql.replaceAll(
+    "current_timestamp",
+    `timestamptz '${instant}'`,
+  );
+  assert.equal(
+    (await query(frozenSql, [u1])).rows[0].usage_date
+      .toISOString()
+      .slice(0, 10),
+    expected,
+  );
+}
+const quotaAttempts = await Promise.all(
+  Array.from({ length: 40 }, () => query(quotaSql, [u1])),
+);
+assert.equal(quotaAttempts.filter((result) => result.rows.length).length, 30);
+assert.equal(
+  (await query("select used from ai_daily_usage where user_id=$1", [u1]))
+    .rows[0].used,
+  30,
+);
+assert.equal((await query(quotaSql, [u2])).rows[0].used, 1);
+// A previous day's exhausted row cannot affect today's allowance.
+await query(
+  "update ai_daily_usage set usage_date=usage_date-1 where user_id=$1",
+  [u1],
+);
+assert.equal((await query(quotaSql, [u1])).rows[0].used, 1);
+await db.exec("set role authenticated");
+await assert.rejects(query("select * from ai_daily_usage"));
+await assert.rejects(query(quotaSql, [u1]));
+await db.exec("reset role");
+console.log(
+  "PASS: daily AI quota 30/31 boundary, queued requests, user/date isolation and client denial",
+);
+
+await db.close();

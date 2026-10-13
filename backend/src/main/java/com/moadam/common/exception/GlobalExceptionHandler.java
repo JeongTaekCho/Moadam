@@ -1,13 +1,14 @@
 package com.moadam.common.exception;
 
+import com.moadam.group.exception.GroupLimitException;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import org.springframework.web.server.ResponseStatusException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -18,7 +19,7 @@ public class GlobalExceptionHandler {
   ResponseEntity<Map<String, String>> handle(
       Exception e, jakarta.servlet.http.HttpServletRequest request) {
     int status =
-        e instanceof ResponseStatusException r
+        e instanceof ErrorResponse r
             ? r.getStatusCode().value()
             : e instanceof MethodArgumentNotValidException
                     || e instanceof java.time.DateTimeException
@@ -47,14 +48,25 @@ public class GlobalExceptionHandler {
           e);
     }
     String message =
-        status == 403
-            ? "이 작업을 수행할 권한이 없습니다"
-            : status == 404
-                ? "요청한 항목을 찾을 수 없습니다"
-                : status == 400
-                    ? "입력 값을 확인해 주세요"
-                    : status == 503 ? "서비스를 사용할 수 없습니다. 잠시 후 다시 시도해 주세요" : "요청을 처리하지 못했습니다";
+        e instanceof GroupLimitException
+            ? GroupLimitException.MESSAGE
+            : status == 403
+                ? "이 작업을 수행할 권한이 없습니다"
+                : status == 404
+                    ? "요청한 항목을 찾을 수 없습니다"
+                    : status == 400
+                        ? "입력 값을 확인해 주세요"
+                        : status == 429
+                            ? "오늘의 모아AI 질문 30회를 모두 사용했어요. 한국 시간 자정 이후 다시 질문해 주세요."
+                            : status == 503 ? "서비스를 사용할 수 없습니다. 잠시 후 다시 시도해 주세요" : "요청을 처리하지 못했습니다";
     return ResponseEntity.status(status)
-        .body(Map.of("code", "HTTP_" + status, "message", message, "requestId", requestId));
+        .body(
+            Map.of(
+                "code",
+                e instanceof GroupLimitException ? GroupLimitException.CODE : "HTTP_" + status,
+                "message",
+                message,
+                "requestId",
+                requestId));
   }
 }

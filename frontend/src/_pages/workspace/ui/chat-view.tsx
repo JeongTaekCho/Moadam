@@ -2,13 +2,55 @@
 import type { Message } from "@/entities/chat";
 import { ChatMessage } from "@/entities/chat";
 import { QuestionComposer } from "@/features/ask-question";
-import { api, type Page } from "@/shared/api";
+import { api, type Page, type AiUsage } from "@/shared/api";
 
 import { Button, Icon, MoaAiIcon, PageIllustration } from "@/shared/ui";
-import { useCallback, useEffect, useLayoutEffect, useRef } from "react";
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
 import { ContentSkeleton } from "@/shared/ui/skeleton";
 import type { WorkspaceModel } from "../model/use-workspace";
 export function ChatView({ model: m }: { model: WorkspaceModel }) {
+  const [usageError, setUsageError] = useState(false);
+  const [usageReload, setUsageReload] = useState(0);
+  const setUsage = m.setAiUsage;
+  useEffect(() => {
+    if (!m.signed || !m.me || m.busy) return;
+    const controller = new AbortController();
+    const refresh = () => {
+      void api<AiUsage>("me/ai-usage", "GET", undefined, controller.signal)
+        .then((usage) => {
+          setUsage(usage);
+          setUsageError(false);
+        })
+        .catch(() => {
+          if (!controller.signal.aborted) setUsageError(true);
+        });
+    };
+    refresh();
+    window.addEventListener("focus", refresh);
+    return () => {
+      controller.abort();
+      window.removeEventListener("focus", refresh);
+    };
+  }, [m.signed, m.me, m.busy, usageReload, setUsage]);
+  useEffect(() => {
+    if (!m.aiUsage?.resets_at) return;
+    const delay = Math.max(
+      1000,
+      Date.parse(m.aiUsage.resets_at) - Date.now() + 1000,
+    );
+    const timer = window.setTimeout(
+      () => setUsageReload((value) => value + 1),
+      delay,
+    );
+    return () => window.clearTimeout(timer);
+  }, [m.aiUsage?.resets_at, usageReload]);
+  const exhausted = m.aiUsage?.remaining === 0;
   const viewport = useRef<HTMLDivElement>(null);
   const follow = useRef(true);
   const openDocument = useRef(m.openDocument);
@@ -197,6 +239,42 @@ export function ChatView({ model: m }: { model: WorkspaceModel }) {
             )}
         </div>
         <div className="chat-composer-area">
+          <div className={`chat-usage${exhausted ? " is-exhausted" : ""}`}>
+            <span className="chat-usage-count" role="status" aria-live="polite">
+              <MoaAiIcon size={16} />
+              {usageError ? (
+                "횟수를 확인하지 못했어요"
+              ) : m.aiUsage ? (
+                <>
+                  오늘 <strong>{m.aiUsage.remaining}</strong>
+                  <span>/ {m.aiUsage.limit}회 남음</span>
+                </>
+              ) : (
+                "오늘의 질문 횟수 확인 중…"
+              )}
+            </span>
+            {usageError ? (
+              <Button
+                variant="ghost"
+                size="small"
+                onClick={() => setUsageReload((value) => value + 1)}
+              >
+                다시 확인
+              </Button>
+            ) : (
+              <span className="chat-usage-reset">
+                {exhausted
+                  ? "내일 다시 만나요"
+                  : "매일 00:00 초기화 · 한국 시간"}
+              </span>
+            )}
+          </div>
+          {exhausted && (
+            <p className="chat-usage-notice">
+              오늘의 질문을 모두 사용했어요. 한국 시간 자정 이후 다시 질문해
+              주세요.
+            </p>
+          )}
           {m.error && (
             <div className="chat-stream-error" role="alert">
               <Icon name="close" size={18} />
@@ -213,6 +291,7 @@ export function ChatView({ model: m }: { model: WorkspaceModel }) {
           )}
           <QuestionComposer
             busy={m.busy}
+            disabled={!m.aiUsage || usageError || exhausted}
             groupName={m.group?.name}
             onSend={m.sendQuestion}
             onStop={m.streamingId ? m.cancelAnswer : undefined}

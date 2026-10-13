@@ -242,6 +242,27 @@ export function WorkspacePage({
           }
         />
       )}
+      {m.groupLimitOpen && (
+        <Dialog
+          title="모임 이용 한도에 도달했어요"
+          onClose={() => m.setGroupLimitOpen(false)}
+        >
+          <div className="group-limit-notice">
+            <span className="group-limit-symbol" aria-hidden="true">
+              <Icon name="people" size={28} />
+            </span>
+            <p>
+              만든 모임과 참여한 모임을 합쳐 <strong>최대 3개</strong>까지
+              이용할 수 있어요.
+            </p>
+            <p>
+              더 이상 모임을 만들거나 참여할 수 없습니다. 기존 모임에서 나가거나
+              소유한 모임을 삭제한 뒤 다시 시도해 주세요.
+            </p>
+            <Button onClick={() => m.setGroupLimitOpen(false)}>확인</Button>
+          </div>
+        </Dialog>
+      )}
       <Toast message={m.toast} />
     </>
   );

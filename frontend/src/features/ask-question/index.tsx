@@ -3,11 +3,13 @@ import { Button, Icon } from "@/shared/ui";
 import { useRef, useState } from "react";
 export function QuestionComposer({
   busy,
+  disabled = false,
   groupName,
   onSend,
   onStop,
 }: {
   busy: boolean;
+  disabled?: boolean;
   groupName?: string;
   onSend: (question: string) => Promise<boolean>;
   onStop?: () => void;
@@ -21,7 +23,7 @@ export function QuestionComposer({
       onSubmit={async (e) => {
         e.preventDefault();
         const text = question.trim();
-        if (!text || busy) return;
+        if (!text || busy || disabled) return;
         if (await onSend(text)) setQuestion("");
       }}
     >
@@ -61,7 +63,11 @@ export function QuestionComposer({
             답변 중지
           </Button>
         ) : (
-          <Button type="submit" disabled={!question.trim()} loading={busy}>
+          <Button
+            type="submit"
+            disabled={disabled || !question.trim()}
+            loading={busy}
+          >
             <Icon name="arrow" size={17} />
             <span>질문 보내기</span>
           </Button>

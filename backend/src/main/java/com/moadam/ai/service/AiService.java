@@ -33,6 +33,7 @@ public class AiService extends DomainService {
   private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(AiService.class);
   private final org.springframework.transaction.support.TransactionTemplate transaction;
   private final OpenAiClient openAi;
+  private final AiUsageService usage;
 
   public AiService(
       AiRepository repository,
@@ -41,11 +42,17 @@ public class AiService extends DomainService {
       MembershipPolicy policy,
       ObjectMapper json,
       OpenAiClient openAi,
-      org.springframework.transaction.PlatformTransactionManager manager) {
+      org.springframework.transaction.PlatformTransactionManager manager,
+      AiUsageService usage) {
     super(resources, mapper, policy, json);
     this.repository = repository;
     this.openAi = openAi;
+    this.usage = usage;
     this.transaction = new org.springframework.transaction.support.TransactionTemplate(manager);
+  }
+
+  public com.moadam.ai.dto.AiUsageResponse usage(Jwt jwt) {
+    return usage.current(user(jwt));
   }
 
   public Page<AiSessionResponse> sessions(Jwt j, UUID g, int page, int size) {
@@ -93,6 +100,7 @@ public class AiService extends DomainService {
   @Transactional
   public AiAnswerResponse ask(Jwt j, UUID g, UUID id, AiQuestionRequest b) {
     session(j, g, id);
+    usage.consume(user(j));
     var result = openAi.query(g, user(j), id, b.question());
     session(j, g, id);
     repository.insertUserMessage(g, id, b.question());
@@ -145,8 +153,10 @@ public class AiService extends DomainService {
 
   public StreamingResponseBody openStream(Jwt jwt, UUID g, UUID id, AiQuestionRequest body) {
     session(jwt, g, id);
+    var remaining = usage.consume(user(jwt));
     return output -> {
       try {
+        event(output, Map.of("type", "usage", "usage", remaining));
         event(output, Map.of("type", "status", "stage", "retrieving"));
         var result =
             openAi.queryStream(

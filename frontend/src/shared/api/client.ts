@@ -11,6 +11,7 @@ export type Document = components["schemas"]["Document"];
 export type Citation = components["schemas"]["Citation"];
 export type Message = components["schemas"]["Message"];
 export type Session = components["schemas"]["Session"];
+export type AiUsage = components["schemas"]["AiUsageResponse"];
 export type Member = components["schemas"]["Member"];
 export type Invite = components["schemas"]["Invite"];
 export type Role = Group["role"];
@@ -24,6 +25,7 @@ export class ApiError extends Error {
   constructor(
     public status: number,
     message: string,
+    public code?: string,
   ) {
     super(message);
   }
@@ -45,6 +47,7 @@ function cacheLifetime(path: string) {
   // Session validation, signed URLs and conversation messages stay fresh.
   if (
     path === "me" ||
+    path === "me/ai-usage" ||
     /\/(download[^/?]*|upload[^/?]*|avatar|attendance|messages)(\?|$|\/)/.test(
       path,
     )
@@ -101,6 +104,7 @@ export async function api<T>(
       throw new ApiError(
         response.status,
         data.message || "요청을 처리하지 못했습니다",
+        data.code,
       );
     }
     if (method !== "GET") invalidateApiCache();

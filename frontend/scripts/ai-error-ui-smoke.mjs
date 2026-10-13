@@ -42,15 +42,34 @@ try {
       { name: "access", value: "ai-error-fixture", url: app, httpOnly: true },
     ]);
     let attempts = 0;
+    let used = 28;
+    const quota = () => ({
+      limit: 30,
+      used,
+      remaining: 30 - used,
+      resets_at: new Date(Date.now() + 86400000).toISOString(),
+    });
     await context.route("**/api/proxy/**", async (route) => {
       const path = new URL(route.request().url()).pathname.replace(
           "/api/proxy/",
           "",
         ),
         method = route.request().method();
+      if ((path === "groups" || path === "invites/join") && method === "POST") {
+        await route.fulfill({
+          status: 409,
+          json: {
+            code: "GROUP_LIMIT_REACHED",
+            message: "모임은 최대 3개까지 이용할 수 있어요.",
+            requestId: "quota-qa",
+          },
+        });
+        return;
+      }
       let data;
       if (path.endsWith("/messages/stream")) {
         attempts++;
+        used++;
         const events =
           attempts === 1
             ? [
@@ -90,11 +109,14 @@ try {
               ];
         await route.fulfill({
           contentType: "application/x-ndjson",
-          body: events.map((event) => JSON.stringify(event) + "\n").join(""),
+          body: [{ type: "usage", usage: quota() }, ...events]
+            .map((event) => JSON.stringify(event) + "\n")
+            .join(""),
         });
         return;
       }
-      if (path === "me") data = profile;
+      if (path === "me/ai-usage") data = quota();
+      else if (path === "me") data = profile;
       else if (path === "groups")
         data = paged([
           {
@@ -127,6 +149,7 @@ try {
       input = dialog.getByLabel("모임에 대해 모아AI에 질문하기", {
         exact: true,
       });
+    await dialog.getByText("2", { exact: true }).waitFor();
     await input.fill("모임 자료가 있나요?");
     await dialog
       .getByRole("button", { name: "질문 보내기", exact: true })
@@ -161,6 +184,61 @@ try {
     );
     assert.equal(await input.inputValue(), "");
     assert.equal(attempts, 2);
+    await dialog.getByText("0", { exact: true }).waitFor();
+    await input.fill("한도 이후 질문");
+    assert(
+      await dialog
+        .getByRole("button", { name: "질문 보내기", exact: true })
+        .isDisabled(),
+    );
+    assert.equal(attempts, 2);
+    await dialog.getByText(/오늘의 질문을 모두 사용했어요/).waitFor();
+    await page.screenshot({
+      path: `/tmp/moadam-ai-error-qa/quota-${width}.png`,
+    });
+    used = 0;
+    await page.evaluate(() => window.dispatchEvent(new Event("focus")));
+    await dialog.getByText("30", { exact: true }).waitFor();
+    assert(
+      await dialog
+        .getByRole("button", { name: "질문 보내기", exact: true })
+        .isEnabled(),
+    );
+    await dialog.getByRole("button", { name: "닫기", exact: true }).click();
+    if (width === 390)
+      await page
+        .getByRole("button", { name: "모임 메뉴 열기", exact: true })
+        .click();
+    for (const kind of ["create", "join"]) {
+      await page
+        .getByRole("button", {
+          name: kind === "create" ? "모임 만들기" : "초대 참여",
+          exact: true,
+        })
+        .click();
+      const editor = page.getByRole("dialog", {
+        name: kind === "create" ? "모임 만들기" : "초대 참여",
+        exact: true,
+      });
+      await editor
+        .getByLabel(kind === "create" ? "모임 이름" : "초대 코드", {
+          exact: true,
+        })
+        .fill("quota-qa");
+      await editor.getByRole("button", { name: "저장", exact: true }).click();
+      const limit = page.getByRole("dialog", {
+        name: "모임 이용 한도에 도달했어요",
+        exact: true,
+      });
+      await limit
+        .getByText(/더 이상 모임을 만들거나 참여할 수 없습니다/)
+        .waitFor();
+      assert.equal(await editor.count(), 0);
+      await page.screenshot({
+        path: `/tmp/moadam-ai-error-qa/group-limit-${kind}-${width}.png`,
+      });
+      await limit.getByRole("button", { name: "확인", exact: true }).click();
+    }
     assert.deepEqual(errors, []);
     assert(
       await page.evaluate(
@@ -169,7 +247,7 @@ try {
     );
     await context.close();
     console.log(
-      `PASS: visible in-dialog AI failure, preserved retry draft and recovered streaming answer ${width}`,
+      `PASS: visible in-dialog AI failure, preserved retry draft and recovered streaming answer, create/join limit dialogs ${width}`,
     );
   }
 } finally {

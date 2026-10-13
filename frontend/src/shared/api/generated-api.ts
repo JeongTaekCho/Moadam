@@ -404,6 +404,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/me/ai-usage": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["usage"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/me/activity": {
         parameters: {
             query?: never;
@@ -711,6 +727,16 @@ export interface components {
         DocumentInput: {
             title: string;
             text?: string;
+        };
+        AiUsageResponse: {
+            /** Format: int32 */
+            limit: number;
+            /** Format: int32 */
+            used: number;
+            /** Format: int32 */
+            remaining: number;
+            /** Format: date-time */
+            resets_at: string;
         };
         MyActivity: {
             /** Format: uuid */
@@ -2067,6 +2093,26 @@ export interface operations {
                 };
                 content: {
                     "*/*": string;
+                };
+            };
+        };
+    };
+    usage: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description OK */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "*/*": components["schemas"]["AiUsageResponse"];
                 };
             };
         };

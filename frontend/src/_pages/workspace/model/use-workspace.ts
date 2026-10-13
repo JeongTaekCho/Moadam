@@ -11,7 +11,7 @@ import type { Group, Invite, Member } from "@/entities/group";
 import type { Post } from "@/entities/post";
 import { saveEditor } from "@/features/content-editor/api/save-editor";
 import type { Modal } from "@/features/content-editor/model/types";
-import type { Page, MyProfile, MyActivity } from "@/shared/api";
+import type { Page, MyProfile, MyActivity, AiUsage } from "@/shared/api";
 
 import {
   api,
@@ -57,6 +57,8 @@ export function useWorkspace(initialView: View = "홈", hasSession = false) {
   const sessionVersion = useRef(0);
   const [streamingId, setStreamingId] = useState<string | null>(null);
   const [streamStage, setStreamStage] = useState("retrieving");
+  const [aiUsage, setAiUsage] = useState<AiUsage | null>(null);
+  const [groupLimitOpen, setGroupLimitOpen] = useState(false);
   useEffect(() => () => streamAbort.current?.abort(), []);
   const [loadedKey, setLoadedKey] = useState("");
   const busyRef = useRef(false);
@@ -115,6 +117,12 @@ export function useWorkspace(initialView: View = "홈", hasSession = false) {
   };
   const fail = useCallback((e: unknown) => {
     if (e instanceof DOMException && e.name === "AbortError") return;
+    if (e instanceof ApiError && e.code === "GROUP_LIMIT_REACHED") {
+      setModal(null);
+      setError("");
+      setGroupLimitOpen(true);
+      return;
+    }
     setError(e instanceof Error ? e.message : "요청을 처리하지 못했습니다");
     if (e instanceof ApiError && e.status === 401) setSigned(false);
   }, []);
@@ -130,6 +138,7 @@ export function useWorkspace(initialView: View = "홈", hasSession = false) {
     }
     const g = { ...first, items };
     setGroups(g.items);
+    setAiUsage(null);
     setMe(u.id);
     setProfile(u);
     const requested =
@@ -714,6 +723,7 @@ export function useWorkspace(initialView: View = "홈", hasSession = false) {
           `${base}/chat/sessions/${id}/messages/stream`,
           question.trim(),
           (event) => {
+            if (event.type === "usage") setAiUsage(event.usage);
             if (event.type === "status") setStreamStage(event.stage);
             if (event.type === "delta") {
               chars.push(...Array.from(event.text));
@@ -785,6 +795,10 @@ export function useWorkspace(initialView: View = "홈", hasSession = false) {
     assistantLoading,
     messageLoading,
     streamingId,
+    aiUsage,
+    groupLimitOpen,
+    setGroupLimitOpen,
+    setAiUsage,
     streamStage,
     cancelAnswer: () => streamAbort.current?.abort(),
     loadAssistant,
