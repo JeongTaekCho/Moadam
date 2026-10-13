@@ -2,6 +2,7 @@ package com.moadam.ai.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.moadam.ai.client.OpenAiClient;
+import com.moadam.ai.client.RagUnavailableException;
 import com.moadam.ai.dto.AiAnswerResponse;
 import com.moadam.ai.dto.AiMessageResponse;
 import com.moadam.ai.dto.AiQuestionRequest;
@@ -158,12 +159,16 @@ public class AiService extends DomainService {
         event(output, Map.of("type", "status", "stage", "saving"));
         event(output, save(jwt, g, id, body.question(), result));
       } catch (Exception e) {
+        String code = e instanceof RagUnavailableException rag ? rag.code() : "AI_STREAM_FAILED";
+        String message =
+            e instanceof RagUnavailableException ? e.getMessage() : "답변을 완료하지 못했습니다. 다시 시도해 주세요.";
         log.warn(
-            "Chat stream failed: {} (cause: {})",
+            "Chat stream failed: code={} failure={} cause={}",
+            code,
             e.getClass().getSimpleName(),
             e.getCause() == null ? "none" : e.getCause().getClass().getSimpleName());
         try {
-          event(output, Map.of("type", "error", "message", "답변을 완료하지 못했습니다. 다시 시도해 주세요."));
+          event(output, Map.of("type", "error", "code", code, "message", message));
         } catch (IOException disconnected) {
           /* Closing the upstream reader cancels generation. */
         }

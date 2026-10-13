@@ -333,3 +333,5 @@ python -m unittest discover -s tests -v
 에이전트의 시작 문서는 [AGENTS.md](AGENTS.md)입니다. 각 서비스의 하위 AGENTS.md, [코드/폴더 규칙](docs/development/conventions.md), [변경별 검증](docs/development/verification.md), [디자인 시스템](frontend/DESIGN_SYSTEM.md)을 연결했습니다.
 
 루트에서 `make setup`, `make format`, `make check`, `make test`, `make qa`를 사용합니다. 형식·린트·타입·구조·격리 테스트는 `.github/workflows/quality.yml`에서도 검사합니다. 구성 이유와 이번 정리 결과는 [하네스 설정 보고서](docs/development/harness_setup.md)에 있습니다.
+
+모아AI의 Vercel/Render 운영 연결은 [배포 진단·RAG 설정 가이드](docs/ai_production_troubleshooting.md)를 참고하세요. 별도 Python 서비스용 [Render Blueprint](render.yaml)와 읽기 전용 `scripts/check-ai-deployment.mjs`를 제공합니다.

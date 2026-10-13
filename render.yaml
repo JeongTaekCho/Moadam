@@ -1,0 +1,26 @@
+# RAG service for the existing Vercel frontend + Render Spring backend.
+# Reuse the backend's RAG_INTERNAL_TOKEN; never commit its value.
+services:
+  - type: web
+    name: moadam-rag
+    runtime: docker
+    rootDir: rag
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    plan: free
+    healthCheckPath: /healthz
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: RAG_PROVIDER
+        value: openai
+      - key: DATABASE_URL
+        sync: false
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: RAG_INTERNAL_TOKEN
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false

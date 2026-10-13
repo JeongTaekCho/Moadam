@@ -130,6 +130,12 @@ def member(conn, group_id, user_id, admin=False):
         raise HTTPException(403, "Access denied")
 
 
+@app.get("/healthz")
+def liveness():
+    # Render probes cannot supply the internal bearer. Expose no configuration or data.
+    return {"status": "ok"}
+
+
 @app.get("/health", dependencies=[Depends(authorize)])
 def health():
     return {"status": "ok", "provider": settings.rag_provider}

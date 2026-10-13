@@ -197,6 +197,20 @@ export function ChatView({ model: m }: { model: WorkspaceModel }) {
             )}
         </div>
         <div className="chat-composer-area">
+          {m.error && (
+            <div className="chat-stream-error" role="alert">
+              <Icon name="close" size={18} />
+              <span>{m.error}</span>
+              <Button
+                variant="ghost"
+                size="small"
+                aria-label="AI 오류 안내 닫기"
+                onClick={() => m.setError("")}
+              >
+                닫기
+              </Button>
+            </div>
+          )}
           <QuestionComposer
             busy={m.busy}
             groupName={m.group?.name}

@@ -1,3 +1,5 @@
+export const maxDuration = 180;
+export const runtime = "nodejs";
 import { failure, limitedBody, limitedBytes } from "@/shared/lib/server";
 import { NextRequest, NextResponse } from "next/server";
 async function proxy(

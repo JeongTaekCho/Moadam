@@ -895,3 +895,7 @@ python3 -m venv /tmp/moadam-docs-render
 - [FastAPI StreamingResponse](https://fastapi.tiangolo.com/advanced/custom-response/#streamingresponse): 생성기 기반 응답 전달.
 - [Spring MVC 반환 타입](https://docs.spring.io/spring-framework/reference/web/webmvc/mvc-controller/ann-methods/return-types.html): StreamingResponseBody 기반 응답.
 - [모아AI 스트리밍 구현 안내](../frontend/STREAMING_AI.md), [기존 아키텍처](architecture.md), [이전 검증 기록](verification.md).
+
+## 배포 장애 진단 보완 (2026-10-13)
+
+[운영 AI 연결 복구 가이드](ai_production_troubleshooting.md)에 실측 결과, Render의 별도 Python RAG 배포와 Spring 연결 설정, 읽기 전용 readiness 진단 명령을 정리했습니다. Spring 스트림 오류는 연결·시간 초과·인증·경로·수용량 실패 code를 포함하며 모아AI 내부에도 표시합니다. `/healthz`는 공개 liveness만 제공하고 기존 내부 인증 API는 유지합니다.

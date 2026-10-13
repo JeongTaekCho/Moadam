@@ -76,6 +76,20 @@ class AiStreamingTest {
   }
 
   @Test
+  void sendsActionableRagErrorWithoutSavingMessages() throws Exception {
+    doThrow(
+            new com.moadam.ai.client.RagUnavailableException(
+                "AI_CONNECTION_FAILED", "AI 서비스에 연결할 수 없어요.", new IOException()))
+        .when(client)
+        .queryStream(eq(group), eq(user), eq(session), eq("질문"), any());
+    var body = stream().toString(StandardCharsets.UTF_8);
+    assertTrue(body.contains("AI_CONNECTION_FAILED"));
+    assertTrue(body.contains("AI 서비스에 연결할 수 없어요."));
+    verifyNoInteractions(transactions);
+    verify(repository, never()).insertUserMessageReturning(any(), any(), any());
+  }
+
+  @Test
   void interruptedGenerationNeverSavesDrafts() throws Exception {
     doAnswer(
             call -> {

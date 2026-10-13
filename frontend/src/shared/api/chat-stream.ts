@@ -4,7 +4,7 @@ export type ChatStreamEvent =
   | { type: "status"; stage: "retrieving" | "generating" | "saving" }
   | { type: "delta"; text: string }
   | { type: "done"; user: Message; assistant: Message }
-  | { type: "error"; message: string };
+  | { type: "error"; code?: string; message: string };
 
 export async function consumeChatStream(
   stream: ReadableStream<Uint8Array>,

@@ -4709,3 +4709,31 @@
     }
   }
 }
+
+@layer components {
+  .chat-stream-error {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 12px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--warning-soft);
+    color: var(--text);
+    font-size: 13px;
+    line-height: 1.6;
+    margin-bottom: 12px;
+  }
+  .chat-stream-error > svg {
+    flex-shrink: 0;
+    margin-top: 3px;
+    color: var(--warning);
+  }
+  .chat-stream-error > span {
+    flex: 1;
+    overflow-wrap: anywhere;
+  }
+  .chat-stream-error .button {
+    flex-shrink: 0;
+  }
+}

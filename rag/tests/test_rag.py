@@ -84,6 +84,7 @@ class RagTests(unittest.TestCase):
         self.conn = FakeConnection(self.g, self.u, self.s, self.d)
 
     def test_internal_auth_required(self):
+        self.assertEqual(self.client.get("/healthz").json(), {"status": "ok"})
         self.assertEqual(self.client.get("/health").status_code, 401)
         self.assertEqual(
             self.client.get("/health", headers={"Authorization": "Bearer wrong"}).status_code, 401

@@ -36,7 +36,7 @@ public class RagClient {
     this.json = json;
     this.notes = notes;
     this.retriever = retriever;
-    this.rag = rag;
+    this.rag = rag.strip().replaceAll("/+$", "");
     this.token = token;
   }
 
@@ -156,7 +156,16 @@ public class RagClient {
             .POST(HttpRequest.BodyPublishers.ofString(json.writeValueAsString(payload)))
             .build();
     try {
-      var response = http.send(request, HttpResponse.BodyHandlers.ofInputStream());
+      HttpResponse<java.io.InputStream> response;
+      try {
+        response = http.send(request, HttpResponse.BodyHandlers.ofInputStream());
+      } catch (java.net.http.HttpTimeoutException error) {
+        throw new RagUnavailableException(
+            "AI_TIMEOUT", "AI 서비스 연결이 지연되고 있어요. 잠시 후 다시 시도해 주세요.", error);
+      } catch (java.io.IOException error) {
+        throw new RagUnavailableException(
+            "AI_CONNECTION_FAILED", "AI 서비스에 연결할 수 없어요. 관리자에게 AI 연결 설정 확인을 요청해 주세요.", error);
+      }
       var deadline =
           streamTimer.schedule(
               () -> {
@@ -171,7 +180,8 @@ public class RagClient {
           var reader =
               new java.io.BufferedReader(
                   new java.io.InputStreamReader(input, java.nio.charset.StandardCharsets.UTF_8))) {
-        if (response.statusCode() != 200) throw new java.io.IOException("RAG unavailable");
+        if (response.statusCode() != 200)
+          throw RagUnavailableException.status(response.statusCode());
         String line;
         int bytes = 0;
         while ((line = reader.readLine()) != null) {

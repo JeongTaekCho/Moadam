@@ -23,7 +23,8 @@
     "check": "pnpm format:check && pnpm lint && pnpm typecheck",
     "test:events": "node scripts/event-calendar-smoke.mjs",
     "test:events-ui": "node scripts/event-calendar-ui-smoke.mjs",
-    "test:discussion-ui": "node scripts/discussion-ui-smoke.mjs"
+    "test:discussion-ui": "node scripts/discussion-ui-smoke.mjs",
+    "test:ai-errors": "node scripts/ai-error-ui-smoke.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "2.117.2",
