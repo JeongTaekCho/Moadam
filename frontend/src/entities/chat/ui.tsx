@@ -47,13 +47,13 @@ export const ChatMessage = memo(function ChatMessage({
             ? " · 자료에서 확인 필요"
             : ""}
       </small>
-      {streaming ? (
-        <p className="streaming-answer">
-          {message.content}
-          <span className="streaming-cursor" aria-hidden="true" />
-        </p>
-      ) : message.role === "assistant" ? (
-        <Markdown text={message.content} />
+      {message.role === "assistant" ? (
+        <>
+          <Markdown text={message.content} />
+          {streaming && (
+            <span className="streaming-cursor" aria-hidden="true" />
+          )}
+        </>
       ) : (
         <p className="body">{message.content}</p>
       )}

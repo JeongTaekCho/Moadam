@@ -1207,28 +1207,70 @@
     overflow-wrap: anywhere;
   }
   .markdown {
+    min-width: 0;
+    font-size: 14px;
     overflow-wrap: anywhere;
-    line-height: 1.85;
+    line-height: 1.8;
   }
   .markdown p {
-    margin-bottom: 12px;
+    margin: 0 0 12px;
   }
-  .markdown h3 {
-    font-size: 14px;
-    margin: 18px 0 8px;
+  .markdown :is(h1, h2, h3, h4, h5, h6) {
+    font-size: 15px;
+    font-weight: 650;
+    line-height: 1.5;
+    margin: 20px 0 8px;
+  }
+  .markdown :is(ul, ol) {
+    padding-left: 24px;
+    margin: 8px 0 16px;
   }
   .markdown ul {
-    padding-left: 20px;
-    margin: 8px 0 14px;
+    list-style: disc;
+  }
+  .markdown ol {
+    list-style: decimal;
   }
   .markdown li {
-    margin-bottom: 5px;
+    padding-left: 4px;
+    margin-bottom: 6px;
   }
   .markdown code {
     border-radius: 4px;
     background: var(--brand-soft);
     padding: 2px 4px;
+    font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
     font-size: 12px;
+  }
+  .markdown pre {
+    max-width: 100%;
+    overflow-x: auto;
+    white-space: pre;
+    overflow-wrap: normal;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--canvas);
+    padding: 16px;
+    margin: 12px 0 16px;
+    line-height: 1.65;
+  }
+  .markdown pre code {
+    background: none;
+    padding: 0;
+    border-radius: 0;
+    white-space: pre;
+  }
+  .markdown blockquote {
+    border-left: 3px solid var(--border);
+    margin: 12px 0 16px;
+    padding-left: 16px;
+    color: var(--muted);
+  }
+  .markdown > :first-child {
+    margin-top: 0;
+  }
+  .markdown > :last-child {
+    margin-bottom: 0;
   }
   .citation-list {
     border-top: 1px solid var(--border);
@@ -3018,11 +3060,6 @@
 }
 
 @layer components {
-  .streaming-answer {
-    white-space: pre-wrap;
-    overflow-wrap: anywhere;
-    line-height: 1.8;
-  }
   .streaming-cursor {
     display: inline-block;
     width: 3px;

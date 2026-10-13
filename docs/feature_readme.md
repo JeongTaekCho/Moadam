@@ -41,7 +41,7 @@ PDF와 메모는 1,000자 청크와 150자 겹침으로 분할하고 `text-embed
 
 모델은 답변과 근거 청크 ID를 JSON으로 출력합니다. JSON의 답변 문자열만 점진적으로 추출해 NDJSON으로 전달하고, 브라우저는 한글 바이트 경계를 복원해 프레임마다 빠르게 표시합니다. 최종적으로 검색된 실제 청크인지, 문서가 삭제되거나 재색인되지 않았는지 확인하고 질문·답변을 원자적으로 저장합니다.
 
-현재는 작은 모임 자료를 대상으로 하는 단순 RAG입니다. 대화 기록은 저장하지만 이전 대화를 모델에 보내지는 않습니다. 하이브리드 검색·재순위화·OCR·작업 큐·대규모 검색 인덱스·품질 평가셋은 개선 단계로 구분하고 있습니다.”
+현재는 작은 모임 자료를 대상으로 하는 단순 RAG입니다. 같은 개인 세션의 최근 대화를 제한된 길이로 모델에 전달하고 후속 질문에만 검색 질문 보완을 적용합니다. 하이브리드 검색·재순위화·OCR·작업 큐·대규모 검색 인덱스·품질 평가셋은 개선 단계로 구분하고 있습니다.”
 
 ### 용어를 프로젝트에 연결해서 이해하기
 
@@ -89,11 +89,11 @@ PDF와 메모는 1,000자 청크와 150자 겹침으로 분할하고 `text-embed
 
 - 커뮤니티 글·댓글, 모임 일정, 멤버 프로필. 별도의 색인 연결이 없다.
 - 타 모임의 문서와 검색 청크.
-- 사용자의 저장된 이전 채팅 메시지. 현재 `generation_payload()`는 system 메시지 1개와 **현재 질문 + 발췌**를 담은 user 메시지 1개만 만든다.
+- 타인의 채팅과 다른 개인 세션의 메시지. 동일 개인 세션의 최근 대화만 제한된 길이로 참고한다.
 - PDF 전체를 매 질문마다 모델에 보내는 방식. 색인할 때 처리한 청크 중 상위 후보만 전달한다.
 - 일반 웹 검색, 외부 사이트 검색, 인터넷 브라우징 도구.
 
-**“개인 대화를 저장한다”와 “멀티턴 문맥을 모델이 기억한다”는 별개의 기능이다.** 현재는 전자를 구현했다. “방금 답변을 더 설명해줘”처럼 이전 답변을 가리키는 질문은 모델 입력에 그 답변이 없어 기대와 다르게 동작할 수 있다.
+**같은 개인 세션의 최근 대화를 참고하는 멀티턴 흐름을 지원한다.** 최근 12개 메시지를 조회해 메시지당 1,200자·총 6,000자로 제한하고, 근거 없는 이전 assistant 답변은 제외한다. “방금 답변을 더 설명해줘” 같은 후속 질문에는 검색 질문을 보완한다. 이전 대화는 의도 파악용이며 사실과 인용은 현재 문서에서 확인한다.
 
 자료 상세의 “이 자료에 질문하기”는 제목을 포함한 질문을 만든다. 해당 문서 ID만 검색하도록 강제하는 필터를 보내지는 않으므로, 실제 검색 범위는 여전히 현재 모임의 모든 ready 문서다.
 
@@ -113,11 +113,11 @@ PDF와 메모는 1,000자 청크와 150자 겹침으로 분할하고 `text-embed
 | [NoteResponse](../backend/src/main/java/com/moadam/note/dto/NoteResponse.java), [AiAnswerResponse](../backend/src/main/java/com/moadam/ai/dto/AiAnswerResponse.java)      | 문서·대화·인용·답변의 외부 계약                                                                                                                                                       |
 | [초기 DB migration](../backend/src/main/resources/db/migration/V1__community.sql)                                                                                         | `documents`, `document_chunks`, `chat_sessions`, `chat_messages`, FK·인덱스·RLS·버킷                                                                                                  |
 | [Next proxy route](../frontend/app/api/proxy/[...path]/route.ts)                                                                                                          | 쿠키 → Bearer, Origin 검증, 스트림을 버퍼링 없이 전달                                                                                                                                 |
-| [save-editor.ts](../frontend/src/features/content-editor/api/save-editor.ts)                                                                                              | 메모 저장 API, PDF 서명 URL PUT 후 비동기 complete                                                                                                                                       |
+| [save-editor.ts](../frontend/src/features/content-editor/api/save-editor.ts)                                                                                              | 메모 저장 API, PDF 서명 URL PUT 후 비동기 complete                                                                                                                                    |
 | [use-workspace.ts](../frontend/src/_pages/workspace/model/use-workspace.ts)                                                                                               | `sendQuestion`, 세션 생성, 초안 메시지, RAF 표시, 그룹 scope, 취소, `openSession`                                                                                                     |
 | [chat-stream.ts](../frontend/src/shared/api/chat-stream.ts)                                                                                                               | `streamQuestion`, `consumeChatStream`, UTF-8/라인 경계 복원, 완료 확인                                                                                                                |
 | [chat-view.tsx](../frontend/src/_pages/workspace/ui/chat-view.tsx)                                                                                                        | 대화 선택, 최신 메시지 스크롤, 화면 크기 감지, 출처 클릭                                                                                                                              |
-| [ChatMessage](../frontend/src/entities/chat/ui.tsx)                                                                                                                       | 작성 중 일반 텍스트, 완료 후 Markdown, 인용 링크, memo                                                                                                                                |
+| [ChatMessage](../frontend/src/entities/chat/ui.tsx)                                                                                                                       | 작성 중/완료 후 Markdown, 인용 링크, memo                                                                                                                                             |
 | [QuestionComposer](../frontend/src/features/ask-question/index.tsx)                                                                                                       | 입력 길이, Ctrl/Cmd+Enter, 실패 시 질문 유지, 답변 중지                                                                                                                               |
 | [Markdown](../frontend/src/shared/ui/markdown.tsx)                                                                                                                        | 제한된 안전한 텍스트 포맷; raw HTML을 실행하지 않음                                                                                                                                   |
 
@@ -287,8 +287,8 @@ RAG의 `db()`는 psycopg connection context를 사용한다. 성공하면 커밋
 5. Spring `AiController.askStream() → AiService.openStream()`가 `AiService.session()`으로 모임 가입 여부와 세션 소유자를 검사한다.
 6. `OpenAiClient.queryStream() → RagClient.queryStream()`이 현재 모임의 ready 문서 ID를 DB에서 조회하고 내부 RAG에 질문·사용자·모임·세션·허용 ID·request ID를 보낸다.
 7. RAG `prepare_query()`가 멤버십과 개인 세션을 다시 검사한다. 금지 범위 요청, provider 비활성, 문서 없음은 안내 결과로 분기한다.
-8. 질문 임베딩을 생성하고 권한/현재 버전 조건이 적용된 SQL에서 가까운 청크를 찾는다.
-9. `generation_payload()`가 현재 질문과 청크 발췌를 모델 입력으로 만든다.
+8. 같은 개인 세션의 최근 대화를 제한된 길이로 조회한다. 후속 질문이면 검색 질문을 보완하고, 질문 임베딩을 생성한 뒤 권한/현재 버전 조건이 적용된 SQL에서 가까운 청크를 찾는다.
+9. `generation_payload()`가 현재 질문·검색 질문·최근 대화·청크 발췌를 모델 입력으로 만든다.
 10. OpenAI가 JSON 답변을 SSE로 출력한다. `AnswerDecoder`가 answer 문자열만 즉시 추출한다.
 11. 생성이 끝나면 `finish_query()`가 인용 ID와 현재 자료 상태를 다시 확인한다.
 12. Spring이 세션 권한을 다시 확인하고 질문·assistant 답변을 하나의 트랜잭션에 저장한다.
@@ -349,7 +349,7 @@ OpenAI 정책은 recall에 유리할 수 있지만 관련성이 낮은 청크도
 }
 ```
 
-실제 user `content`는 질문과 발췌를 `json.dumps(..., ensure_ascii=False)`한 문자열이다. 발췌마다 청크 ID·제목·페이지·텍스트를 포함한다. 현재는 JSON 객체 형식 지정이며 엄격한 JSON Schema Structured Outputs를 사용하지 않는다. `temperature`를 별도로 지정하지 않는다.
+실제 user `content`는 원래 질문(`question`), 검색 질문(`search_question`), 최근 대화(`untrusted_history`), 발췌(`untrusted_excerpts`)를 `json.dumps(..., ensure_ascii=False)`한 문자열이다. 위 예시는 입력의 발췌 부분을 간략히 보여 준다. 최근 대화는 같은 개인 세션의 최근 12개 메시지를 조회한 뒤 메시지당 1,200자·총 6,000자로 제한하며, 근거 없는 이전 assistant 답변을 제외한다. 지시어·재설명·짧은 후속 질문에만 최대 200토큰의 검색 질문 보완을 추가하고 실패 시 제한된 대화 주제를 붙인다. DB 연결은 보완·임베딩 호출 동안 닫는다. 대화는 맥락용이며 사실과 인용은 현재 발췌로 확인한다. 발췌마다 청크 ID·제목·페이지·텍스트를 포함한다. 현재는 JSON 객체 형식 지정이며 엄격한 JSON Schema Structured Outputs를 사용하지 않는다. `temperature`를 별도로 지정하지 않는다.
 
 ### 11.2 system 지시의 핵심
 
@@ -374,7 +374,7 @@ OpenAI 정책은 recall에 유리할 수 있지만 관련성이 낮은 청크도
 
 선택한 청크에 대해 DB에서 다시 확인한다.
 
-1. 사용자가 아직 모임 멤버인지.
+1. 사용자가 아직 모임 멤버이며 해당 개인 세션을 소유하는지.
 2. 청크가 여전히 존재하는지.
 3. 동일 모임의 문서에 연결돼 있는지.
 4. 문서 현재 version과 청크 version이 일치하는지.
@@ -510,10 +510,10 @@ Spring은 streaming Content-Type을 명시하고 이벤트마다 flush한다. Ne
 ### 13.3 렌더링과 추가 요청 최적화
 
 - `ChatMessage`를 memo로 감싸고 출처 콜백을 안정화해 이전 메시지의 반복 렌더링을 줄인다.
-- 작성 중에는 일반 텍스트로 표시하고 완료 후 제한된 Markdown을 처리한다.
+- 작성 중과 완료 후 모두 제한된 Markdown으로 문단·목록·코드블록을 표시한다.
 - 성공 done이 실제 저장된 메시지를 포함하므로 매 답변 후 전체 메시지 기록을 다시 GET하지 않는다.
 - 새 세션도 생성 응답을 목록에 넣어 화면을 갱신한다.
-- 작은 글자마다 별도의 React update나 전체 Markdown 재파싱을 하지 않는다.
+- 문자마다 별도의 React update를 만들지 않고 RAF 단위로 반영한다. 작성 중인 메시지는 갱신 시 Markdown을 다시 해석하며 이전 메시지는 memo로 유지한다.
 
 프레임 갱신은 화면 최적화이고 실제 모델 속도를 증가시키는 것은 아니다. 검색·임베딩이 끝나기 전에는 생성할 답변 delta가 없다.
 
@@ -632,7 +632,7 @@ RAG 색인 API는 처리 실패를 status='failed' 결과로 반환할 수 있�
 | RAG POST 본문            | 1MiB                                                                        |
 | 허용 문서 ID             | RAG 모델 최대 10,000개                                                      |
 | PDF                      | 20MiB, 최대 200쪽, 페이지 10만자/전체 100만자                               |
-| 청크                     | 문서당 기본 최대 200개 (`MAX_CHUNKS`)                                                         |
+| 청크                     | 문서당 기본 최대 200개 (`MAX_CHUNKS`)                                       |
 | 임베딩 batch             | 32개씩 순차 호출                                                            |
 | RAG 동시 작업            | 프로세스당 BoundedSemaphore 4개; index/query/stream이 공유                  |
 | Spring streaming 실행 풀 | core 4, max 8, queue 8                                                      |
@@ -643,7 +643,7 @@ RAG 색인 API는 처리 실패를 status='failed' 결과로 반환할 수 있�
 | Spring → RAG stream      | 요청 timeout 100초 + 응답 body 읽기 시작 후 100초에 close하는 timer         |
 | Spring async             | 기본 120초                                                                  |
 | Next → Spring            | 120초 제한과 요청 취소 signal 결합                                          |
-| 기존 비스트리밍 RAG 호출 | 질문 요청 90초 / 백그라운드 색인 요청 300초                                               |
+| 기존 비스트리밍 RAG 호출 | 질문 요청 90초 / 백그라운드 색인 요청 300초                                 |
 | 모델 출력                | max_tokens 1,200; 원본 JSON 50,000자/최종 answer 10,000자                   |
 | Spring stream 누적       | 읽은 라인의 Java 문자열 length 누적 250,000 제한; 엄밀한 바이트 제한은 아님 |
 | 브라우저 parser          | 아직 처리하지 않은 문자열 buffer 100,000자                                  |
@@ -761,7 +761,7 @@ mvn -f backend/pom.xml test
 | 단절 감지 전 외부 연산이 지속될 수 있음   | 취소 전파·deadline·작업 상태 보강                      | 취소 지연, 불필요 토큰, 자원 회수             |
 | 일부 추적 정보가 최종 기록에 없음         | request/trace ID, provider/model/usage 메타데이터 저장 | 장애 연결 추적, 개인정보 최소화               |
 | 프로세스별 semaphore만 있음               | 사용자별/global limiter, 예산 제한                     | 비용·남용·공정성·부하                         |
-| 질문 생성 오류 자동 재시도 없음                | 제한된 backoff·circuit breaker                         | 중복 출력 방지, 제한 시간, provider 429/5xx   |
+| 질문 생성 오류 자동 재시도 없음           | 제한된 backoff·circuit breaker                         | 중복 출력 방지, 제한 시간, provider 429/5xx   |
 | 벡터에 사용 모델/청킹 설정 이력이 없음    | embedding/인덱스 버전 명시 저장                        | 안전한 모델 교체, 혼합 벡터 방지              |
 
 개선 목록은 제안이며 완료된 기능이 아니다. 작은 자료 규모에서는 현재 단순한 흐름을 유지하고, 측정한 병목/품질 문제에 맞춰 변경하는 접근으로 설명할 수 있다.
@@ -818,7 +818,7 @@ mvn -f backend/pom.xml test
 
 ### Q13. 한 글자씩 보이게 하면 렌더링이 느려지지 않나요?
 
-“문자마다 setState 타이머를 두지 않고 delta를 누적해 RAF당 한 번 갱신합니다. 표시량은 시간과 대기 문자 수에 따라 조절합니다. 이전 메시지는 memo로 유지하고 작성 중 Markdown 파싱을 미뤘습니다. 최종 메시지가 응답에 있어 전체 채팅을 다시 GET하는 요청도 줄였습니다.”
+“문자마다 setState 타이머를 두지 않고 delta를 누적해 RAF당 한 번 갱신합니다. 표시량은 시간과 대기 문자 수에 따라 조절합니다. 이전 메시지는 memo로 유지하고 작성 중인 메시지에도 RAF 갱신 단위로 Markdown을 적용했습니다. 최종 메시지가 응답에 있어 전체 채팅을 다시 GET하는 요청도 줄였습니다.”
 
 ### Q14. 응답 중 자료를 수정하거나 삭제하면 어떻게 되나요?
 
@@ -834,7 +834,7 @@ mvn -f backend/pom.xml test
 
 ### Q17. 대화 기록이 있으니 멀티턴 AI인가요?
 
-“개인 대화 저장과 조회는 있지만 현재 LLM 입력에는 이전 기록이 포함되지 않습니다. 현재 질문과 검색 발췌만 전달합니다. 최근 기록·요약·질문 재작성 등은 권한과 토큰 budget을 포함해 추가할 개선 기능입니다.”
+“같은 개인 세션의 최근 대화를 길이 제한과 함께 모델에 전달하고, 후속 질문에만 검색 질문 보완을 추가합니다. 과거 답변을 사실로 확정하지 않고 현재 문서 근거와 인용을 다시 확인합니다. 오래된 대화의 자동 요약과 장기 기억은 구현하지 않았습니다.”
 
 ### Q18. 실제로 무엇을 테스트했나요?
 
@@ -900,13 +900,11 @@ python3 -m venv /tmp/moadam-docs-render
 
 [운영 AI 연결 복구 가이드](ai_production_troubleshooting.md)에 실측 결과, Render의 별도 Python RAG 배포와 Spring 연결 설정, 읽기 전용 readiness 진단 명령을 정리했습니다. Spring 스트림 오류는 연결·시간 초과·인증·경로·수용량 실패 code를 포함하며 모아AI 내부에도 표시합니다. `/healthz`는 공개 liveness만 제공하고 기존 내부 인증 API는 유지합니다.
 
-
 ## 사용자별 일일 질문 한도
 
 모아AI는 모든 모임과 개인 대화를 합쳐 사용자당 하루 30회 질문을 접수합니다. 기준 시간은 Asia/Seoul이며 자정에 새로운 날짜의 한도를 사용합니다. 권한·입력 검사를 통과한 요청은 답변 실패나 중지 시에도 1회로 계산합니다. 횟수는 대화 메시지와 별도의 DB 카운터에 저장하며 삭제·새 대화·서버 재시작으로 초기화되지 않습니다.
 
 Spring은 질문 전에 횟수를 원자적으로 차감하고 31번째 요청을 HTTP 429로 차단합니다. 스트리밍 시작 시 `usage` 이벤트를 전달하고, 인증 전용 `GET /api/v1/me/ai-usage`로 남은 횟수와 초기화 시간을 조회합니다. 모달 입력창 위에서 횟수를 표시하고 소진 시 전송을 막습니다. 스키마·동작·검증·운영 적용 순서는 [일일 한도 작업 기록](issue/2026-10-13_모아AI_일일_30회_제한.md)을 참고하세요.
-
 
 ## 자료 처리와 운영 안정화
 

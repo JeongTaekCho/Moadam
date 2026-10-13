@@ -22,6 +22,25 @@ const profile = {
   created_at: stamp,
   updated_at: stamp,
 };
+const markdownAnswer = [
+  "연결을 복구한 답변이에요.",
+  "",
+  "## 확인 순서",
+  "1. **자료** 확인",
+  "2. `설정` 확인",
+  "",
+  "- 문단 간격 확인",
+  "- 코드 예시 확인",
+  "",
+  "```python",
+  "def hello():",
+  '    print("안녕하세요")',
+  "",
+  `    # ${"긴 코드 ".repeat(35)}`,
+  "```",
+  "",
+  '<script>alert("실행 금지")</script>',
+].join("\n");
 const paged = (items) => ({ items, total: items.length, page: 0, size: 100 });
 try {
   for (let i = 0; i < 80; i++) {
@@ -82,7 +101,7 @@ try {
                 },
               ]
             : [
-                { type: "delta", text: "연결을 복구한 답변이에요." },
+                { type: "delta", text: markdownAnswer },
                 {
                   type: "done",
                   user: {
@@ -100,7 +119,7 @@ try {
                     group_id: group,
                     session_id: session,
                     role: "assistant",
-                    content: "연결을 복구한 답변이에요.",
+                    content: markdownAnswer,
                     citations: [],
                     grounded: false,
                     created_at: stamp,
@@ -178,6 +197,34 @@ try {
     await dialog
       .getByText("연결을 복구한 답변이에요.", { exact: true })
       .waitFor();
+    const markdown = dialog.locator(".message.assistant .markdown");
+    await markdown
+      .locator("h2")
+      .getByText("확인 순서", { exact: true })
+      .waitFor();
+    await dialog.locator('.message.assistant[aria-busy="false"]').waitFor();
+    assert.equal(await markdown.locator("ol > li").count(), 2);
+    assert.equal(await markdown.locator("ul > li").count(), 2);
+    assert.equal(await markdown.locator("strong").innerText(), "자료");
+    assert.equal(
+      await markdown.locator("pre code").textContent(),
+      markdownAnswer.split("```python\n")[1].split("\n```")[0],
+    );
+    assert.equal(await markdown.locator("script").count(), 0);
+    assert.equal(
+      await markdown
+        .locator("ol")
+        .evaluate((node) => getComputedStyle(node).listStyleType),
+      "decimal",
+    );
+    assert(
+      await markdown
+        .locator("pre")
+        .evaluate((node) => node.scrollWidth > node.clientWidth),
+    );
+    assert(
+      await dialog.evaluate((node) => node.scrollWidth <= node.clientWidth),
+    );
     assert.equal(await dialog.getByRole("alert").count(), 0);
     await page.waitForFunction(
       () => document.querySelector("#chat-question")?.value === "",
