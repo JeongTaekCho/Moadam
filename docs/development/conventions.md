@@ -54,3 +54,4 @@ snake_case 함수·변수, PascalCase Pydantic 모델, Python 3.12 타입을 사
 - SQL은 기존 migration 형식을 따릅니다. 적용된 migration을 고치지 않고 새로운 migration을 추가합니다. 초기 Flyway/Supabase 복사본 일치 검사를 유지합니다.
 - 스타일 토큰 원본은 `frontend/src/shared/styles/tokens.css`입니다. UI 색상 규칙은 디자인 시스템 문서와 구조 검사로 연결됩니다.
 - 기술 문서는 확인된 현재 동작을 설명합니다. 긴 기능 설명을 AGENTS.md마다 복사하지 말고 원본 문서에 링크합니다.
+- 이슈 수정 기록은 `docs/issue/YYYY-MM-DD_이슈명.md`에 한국어로 남깁니다. 작성 형식과 완료 상태 기준은 [이슈 기록 규칙](../issue/README.md)을 따릅니다.
