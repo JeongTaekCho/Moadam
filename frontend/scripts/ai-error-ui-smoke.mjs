@@ -41,11 +41,7 @@ const profile = {
   updated_at: stamp,
 };
 const markdownAnswer = [
-  "연결을 복구한 답변이에요.",
-  "",
-  "## 확인 순서",
-  "1. **자료** 확인",
-  "2. `설정` 확인",
+  "연결을 복구한 답변이에요.\\n\\n## 확인 순서\\n1. **자료** 확인\\n2. `설정` 확인",
   "",
   "- 문단 간격 확인",
   "- 코드 예시 확인",
@@ -53,6 +49,7 @@ const markdownAnswer = [
   "```python",
   "def hello():",
   '    print("안녕하세요")',
+  '    pattern = r"\\n\\n"',
   "",
   `    # ${"긴 코드 ".repeat(35)}`,
   "```",

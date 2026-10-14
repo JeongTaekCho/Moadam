@@ -25,9 +25,47 @@ function startsBlock(line: string) {
   );
 }
 
+function proseNewlines(text: string) {
+  return text
+    .replace(/(?<!\\)(?:\\n){2,}/g, (match) => "\n".repeat(match.length / 2))
+    .replace(/(?<!\\)\\n(?= {0,3}(?:#{1,6}\s|[-*+]\s|\d+[.)]\s|>\s))/g, "\n");
+}
+
+function displayNewlines(text: string) {
+  let fence: string | undefined;
+  return text
+    .replace(/\r\n?/g, "\n")
+    .split("\n")
+    .map((line) => {
+      const marker = line.match(fencePattern)?.[1];
+      if (fence) {
+        const closing = line.match(/^ {0,3}(`+|~+)\s*$/)?.[1];
+        if (closing?.[0] === fence[0] && closing.length >= fence.length)
+          fence = undefined;
+        return line;
+      }
+      if (marker) {
+        fence = marker;
+        return line;
+      }
+      // An escaped or unfinished code fence is ambiguous; preserve its contents.
+      if (line.includes("```") || line.includes("~~~")) return line;
+      const output: string[] = [];
+      let start = 0;
+      const code = /(`+)[\s\S]*?\1|`+[\s\S]*$/g;
+      for (const match of line.matchAll(code)) {
+        output.push(proseNewlines(line.slice(start, match.index)), match[0]);
+        start = match.index + match[0].length;
+      }
+      output.push(proseNewlines(line.slice(start)));
+      return output.join("");
+    })
+    .join("\n");
+}
+
 /** Safe Markdown subset; code stays literal and raw HTML is never parsed. */
 export function Markdown({ text }: { text: string }) {
-  const lines = text.replace(/\r\n?/g, "\n").split("\n");
+  const lines = displayNewlines(text).split("\n");
   const blocks: ReactNode[] = [];
   let index = 0;
 

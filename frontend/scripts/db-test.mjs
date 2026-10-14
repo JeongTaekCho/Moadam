@@ -527,4 +527,44 @@ assert.equal(
 console.log(
   "PASS: conservative orphan discovery, signed URL expiry delay and idempotent registration",
 );
+const foreignKeyIndexes = await readFile(
+  new URL(
+    "../../backend/src/main/resources/db/migration/V6__foreign_key_indexes.sql",
+    import.meta.url,
+  ),
+  "utf8",
+);
+await db.exec(foreignKeyIndexes);
+await db.exec(foreignKeyIndexes);
+const indexedKeys = await query(`
+  select c.conname, exists (
+    select 1 from pg_index i
+    where i.indrelid=c.conrelid and i.indisvalid and i.indpred is null
+      and c.conkey <@ array(
+        select key from unnest(i.indkey) with ordinality as k(key,position)
+        where position <= cardinality(c.conkey)
+      )
+  ) as covered
+  from pg_constraint c
+  join pg_namespace n on n.oid=c.connamespace
+  where c.contype='f' and n.nspname='public'
+    and c.conname in (
+      'chat_sessions_user_id_fkey', 'comments_author_id_fkey',
+      'event_attendees_group_id_user_id_fkey', 'event_attendees_user_id_fkey',
+      'events_author_id_fkey', 'group_invites_created_by_fkey'
+    )
+`);
+assert.equal(indexedKeys.rows.length, 6);
+assert(indexedKeys.rows.every((key) => key.covered));
+assert.equal(
+  (
+    await query(
+      "select has_table_privilege('authenticated','events','select') allowed",
+    )
+  ).rows[0].allowed,
+  false,
+);
+console.log(
+  "PASS: six reported foreign keys covered, repeatable index migration and unchanged client denial",
+);
 await db.close();

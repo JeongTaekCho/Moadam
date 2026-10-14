@@ -23,4 +23,9 @@ assert (
 ).read_text() == next((root / "supabase/migrations").glob("*_ai_token_budget.sql")).read_text(), (
     "Token budget migrations differ"
 )
+assert (
+    root / "backend/src/main/resources/db/migration/V6__foreign_key_indexes.sql"
+).read_text() == next(
+    (root / "supabase/migrations").glob("*_foreign_key_indexes.sql")
+).read_text(), "Foreign key index migration copies differ"
 print("Migration copies and embedding dimensions match")

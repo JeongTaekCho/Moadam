@@ -84,6 +84,7 @@ public class SecurityConfig {
                     .authenticationEntryPoint(
                         (r, s, e) -> {
                           s.setStatus(401);
+                          s.setCharacterEncoding(java.nio.charset.StandardCharsets.UTF_8.name());
                           s.setContentType("application/json");
                           s.getWriter()
                               .write(

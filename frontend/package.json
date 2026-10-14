@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "next build --webpack",
     "start": "next start",
     "typecheck": "tsc --noEmit",
     "api:types": "openapi-typescript ../docs/openapi.json -o src/shared/api/generated-api.ts",
@@ -14,6 +14,7 @@
     "test:oauth": "node scripts/oauth-smoke.mjs",
     "test:profile": "node --env-file=../.env scripts/profile-smoke.mjs",
     "test:chat-stream": "node scripts/chat-stream-smoke.mjs",
+    "test:markdown": "node scripts/markdown-smoke.mjs",
     "test:ai-usage": "node scripts/ai-usage-smoke.mjs",
     "test:chat-live": "node --env-file=../.env scripts/chat-live-smoke.mjs",
     "test:cache": "node scripts/cache-smoke.mjs",

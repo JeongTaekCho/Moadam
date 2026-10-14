@@ -14,6 +14,8 @@ pnpm build
 pnpm start
 ```
 
+`pnpm build`는 Webpack을 명시해 로컬·CI에서 같은 production 번들을 검증합니다. Turbopack의 PostCSS 하위 프로세스 포트 바인딩 오류를 피하기 위한 설정이며, 개발 서버 명령은 그대로 유지합니다.
+
 ## 기능 배치
 
 | 위치            | 역할                                                                                               |

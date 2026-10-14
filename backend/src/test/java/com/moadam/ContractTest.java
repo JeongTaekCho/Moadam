@@ -64,6 +64,9 @@ class ContractTest {
     var denied = http.getForEntity("/api/v1/groups", String.class);
     assertEquals(HttpStatus.UNAUTHORIZED, denied.getStatusCode());
     assertTrue(denied.getBody().contains("UNAUTHENTICATED"));
+    assertEquals(
+        java.nio.charset.StandardCharsets.UTF_8, denied.getHeaders().getContentType().getCharset());
+    assertEquals("로그인이 필요합니다", mapper.readTree(denied.getBody()).path("message").asText());
   }
 
   @Test
