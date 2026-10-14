@@ -2539,8 +2539,10 @@
   }
   .picker-control {
     position: relative;
+    min-width: 0;
   }
   .picker-control input {
+    min-width: 0;
     padding-right: 46px;
     font-variant-numeric: tabular-nums;
   }
@@ -4264,7 +4266,8 @@
   .event-date-inputs,
   .event-time-inputs {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    align-items: start;
     gap: 12px;
   }
   .event-options {
@@ -4296,6 +4299,14 @@
     color: var(--danger);
     font-size: 12px;
     margin: 12px 0 0;
+    overflow-wrap: anywhere;
+  }
+  .event-date-inputs .picker-field {
+    align-content: start;
+  }
+  .event-date-inputs small[role="alert"] {
+    overflow-wrap: anywhere;
+    line-height: 1.6;
   }
   .event-detail {
     display: grid;

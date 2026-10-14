@@ -39,7 +39,9 @@ export function EventFields({
   if (startDate && effectiveEnd) {
     try {
       if (startDate < today)
-        throw new Error("오늘 이전 날짜로 일정을 만들 수 없습니다");
+        throw new Error(
+          "시작일이 오늘보다 전입니다. 시작일을 오늘 또는 이후 날짜로 수정해 주세요.",
+        );
       timestamps = buildEventTimeRange(
         startDate,
         effectiveEnd,
@@ -69,6 +71,7 @@ export function EventFields({
             }}
             required
             disabled={busy}
+            error={startDate && startDate < today ? error : undefined}
           />
           <DatePicker
             label="종료일"
@@ -116,13 +119,14 @@ export function EventFields({
             ? "선택한 시간에 맞춰 진행되는 일정이에요. 한국 시간 기준으로 표시됩니다."
             : "시간 없이 선택한 날짜 전체에 표시되는 일정이에요."}
         </p>
-        {error && (
+        {error && !(startDate && startDate < today) && (
           <p className="event-date-error" role="alert">
             {error}
           </p>
         )}
       </fieldset>
       <input type="hidden" name="starts_at" value={timestamps.starts_at} />
+      <input type="hidden" name="event_date_error" value={error} />
       <input type="hidden" name="ends_at" value={timestamps.ends_at} />
       <TextField
         label="일정 제목"

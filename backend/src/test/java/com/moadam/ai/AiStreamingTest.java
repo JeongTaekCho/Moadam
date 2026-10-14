@@ -37,16 +37,26 @@ class AiStreamingTest {
     transactions = mock(PlatformTransactionManager.class);
     when(transactions.getTransaction(any())).thenReturn(new SimpleTransactionStatus());
     usage = mock(com.moadam.ai.service.AiUsageService.class);
-    when(usage.consume(user))
+    when(usage.reserve(user))
+        .thenReturn(new com.moadam.ai.dto.AiTokenReservation(UUID.randomUUID(), 20000));
+    when(usage.current(user))
         .thenReturn(
             new com.moadam.ai.dto.AiUsageResponse(
-                30, 1, 29, java.time.OffsetDateTime.parse("2026-10-14T00:00:00+09:00")));
+                120000,
+                4000,
+                0,
+                116000,
+                116000,
+                3.3,
+                96.7,
+                java.time.OffsetDateTime.parse("2026-10-14T00:00:00+09:00")));
     service =
         spy(
             new AiService(
                 repository,
                 null,
-                null,
+                new com.moadam.common.dto.DtoMapper(
+                    new ObjectMapper().findAndRegisterModules(), null),
                 null,
                 new ObjectMapper().findAndRegisterModules(),
                 client,
@@ -70,12 +80,12 @@ class AiStreamingTest {
   void answer() throws IOException {
     doAnswer(
             call -> {
-              RagClient.StreamConsumer consumer = call.getArgument(4);
+              RagClient.StreamConsumer consumer = call.getArgument(5);
               consumer.accept(Map.of("type", "delta", "text", "한글 답변"));
               return Map.of("answer", "한글 답변", "citations", List.of(), "grounded", false);
             })
         .when(client)
-        .queryStream(eq(group), eq(user), eq(session), eq("질문"), any());
+        .queryStream(eq(group), eq(user), eq(session), eq("질문"), any(), any());
   }
 
   Map<String, Object> row(String role) {
@@ -91,8 +101,8 @@ class AiStreamingTest {
   }
 
   @Test
-  void rejectsThirtyFirstQuestionBeforeStreamingOrProviderCall() {
-    doThrow(new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS)).when(usage).consume(user);
+  void rejectsExhaustedTokenBudgetBeforeStreamingOrProviderCall() {
+    doThrow(new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS)).when(usage).reserve(user);
     var streamError =
         assertThrows(
             ResponseStatusException.class,
@@ -126,26 +136,46 @@ class AiStreamingTest {
             new com.moadam.ai.client.RagUnavailableException(
                 "AI_CONNECTION_FAILED", "AI 서비스에 연결할 수 없어요.", new IOException()))
         .when(client)
-        .queryStream(eq(group), eq(user), eq(session), eq("질문"), any());
+        .queryStream(eq(group), eq(user), eq(session), eq("질문"), any(), any());
     var body = stream().toString(StandardCharsets.UTF_8);
     assertTrue(body.contains("AI_CONNECTION_FAILED"));
     assertTrue(body.contains("AI 서비스에 연결할 수 없어요."));
-    assertTrue(body.contains("\"remaining\":29"));
-    verify(usage).consume(user);
+    assertTrue(body.contains("\"remaining_percent\":96.7"));
+    verify(usage).reserve(user);
+    verify(usage).cancel(eq(user), any());
     verifyNoInteractions(transactions);
     verify(repository, never()).insertUserMessageReturning(any(), any(), any());
+  }
+
+  @Test
+  void timeoutsCancelOnlyUnstartedReservationsAndNeverForceReleaseActiveWork() throws Exception {
+    doThrow(
+            new com.moadam.ai.client.RagUnavailableException(
+                "AI_TIMEOUT", "지연 중", new java.net.http.HttpTimeoutException("fixture")))
+        .when(client)
+        .queryStream(eq(group), eq(user), eq(session), eq("질문"), any(), any());
+    assertTrue(stream().toString(StandardCharsets.UTF_8).contains("AI_TIMEOUT"));
+    verify(usage).cancel(eq(user), any());
+    verify(usage, never()).finish(eq(user), any());
+    when(client.query(eq(group), eq(user), eq(session), eq("질문"), any()))
+        .thenThrow(new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "AI_TIMEOUT"));
+    assertThrows(
+        ResponseStatusException.class,
+        () -> service.ask(jwt, group, session, new AiQuestionRequest("질문")));
+    verify(usage, times(2)).cancel(eq(user), any());
+    verify(usage, never()).finish(eq(user), any());
   }
 
   @Test
   void interruptedGenerationNeverSavesDrafts() throws Exception {
     doAnswer(
             call -> {
-              RagClient.StreamConsumer consumer = call.getArgument(4);
+              RagClient.StreamConsumer consumer = call.getArgument(5);
               consumer.accept(Map.of("type", "delta", "text", "한글 부분 답변"));
               throw new IOException("Interrupted provider");
             })
         .when(client)
-        .queryStream(eq(group), eq(user), eq(session), eq("질문"), any());
+        .queryStream(eq(group), eq(user), eq(session), eq("질문"), any(), any());
     var text = stream().toString(StandardCharsets.UTF_8);
     assertTrue(text.contains("\"type\":\"delta\""));
     assertTrue(text.contains("\"type\":\"error\""));
@@ -170,6 +200,23 @@ class AiStreamingTest {
     order.verify(repository).insertAssistantMessageReturning(group, session, "한글 답변", "[]", false);
     order.verify(transactions).commit(any());
     verify(transactions, never()).rollback(any());
+  }
+
+  @Test
+  void synchronousQuestionPassesReservationAndCommitsThePair() {
+    when(client.query(eq(group), eq(user), eq(session), eq("질문"), any()))
+        .thenReturn(Map.of("answer", "한글 답변", "citations", List.of(), "grounded", false));
+    when(repository.insertUserMessageReturning(group, session, "질문")).thenReturn(row("user"));
+    when(repository.insertAssistantMessageReturning(group, session, "한글 답변", "[]", false))
+        .thenReturn(row("assistant"));
+    assertEquals("한글 답변", service.ask(jwt, group, session, new AiQuestionRequest("질문")).answer());
+    var order = inOrder(usage, client, repository, transactions);
+    order.verify(usage).reserve(user);
+    order.verify(client).query(eq(group), eq(user), eq(session), eq("질문"), any());
+    order.verify(usage).finish(eq(user), any());
+    order.verify(repository).insertUserMessageReturning(group, session, "질문");
+    order.verify(repository).insertAssistantMessageReturning(group, session, "한글 답변", "[]", false);
+    order.verify(transactions).commit(any());
   }
 
   @Test

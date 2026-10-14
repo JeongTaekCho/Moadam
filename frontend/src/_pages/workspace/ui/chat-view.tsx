@@ -1,8 +1,8 @@
 "use client";
-import type { Message } from "@/entities/chat";
+import type { Message, Citation } from "@/entities/chat";
 import { ChatMessage } from "@/entities/chat";
 import { QuestionComposer } from "@/features/ask-question";
-import { api, type Page, type AiUsage } from "@/shared/api";
+import { api, parseAiUsage, type Page } from "@/shared/api";
 
 import { Button, Icon, MoaAiIcon, PageIllustration } from "@/shared/ui";
 import {
@@ -22,13 +22,16 @@ export function ChatView({ model: m }: { model: WorkspaceModel }) {
     if (!m.signed || !m.me || m.busy) return;
     const controller = new AbortController();
     const refresh = () => {
-      void api<AiUsage>("me/ai-usage", "GET", undefined, controller.signal)
+      void api<unknown>("me/ai-usage", "GET", undefined, controller.signal)
         .then((usage) => {
-          setUsage(usage);
+          setUsage(parseAiUsage(usage));
           setUsageError(false);
         })
         .catch(() => {
-          if (!controller.signal.aborted) setUsageError(true);
+          if (!controller.signal.aborted) {
+            setUsage(null);
+            setUsageError(true);
+          }
         });
     };
     refresh();
@@ -50,15 +53,15 @@ export function ChatView({ model: m }: { model: WorkspaceModel }) {
     );
     return () => window.clearTimeout(timer);
   }, [m.aiUsage?.resets_at, usageReload]);
-  const exhausted = m.aiUsage?.remaining === 0;
+  const exhausted = m.aiUsage?.remaining_tokens === 0;
   const viewport = useRef<HTMLDivElement>(null);
   const follow = useRef(true);
-  const openDocument = useRef(m.openDocument);
+  const openDocument = useRef(m.openAiSource);
   useEffect(() => {
-    openDocument.current = m.openDocument;
-  }, [m.openDocument]);
-  const onSource = useCallback((id: string) => {
-    void openDocument.current(id);
+    openDocument.current = m.openAiSource;
+  }, [m.openAiSource]);
+  const onSource = useCallback((source: Citation) => {
+    void openDocument.current(source);
   }, []);
   const scrollToLatest = useCallback(() => {
     if (follow.current && viewport.current)
@@ -216,7 +219,7 @@ export function ChatView({ model: m }: { model: WorkspaceModel }) {
               />
               <h2 className="sr-only">모아AI에 질문하기</h2>
               <p className="chat-welcome-copy">
-                {m.group?.name ?? "현재"} 모임에 대해 궁금한 점을
+                모임 자료부터 궁금한 질문까지
                 <br />
                 모아AI에 질문하세요.
               </p>
@@ -229,7 +232,7 @@ export function ChatView({ model: m }: { model: WorkspaceModel }) {
                 <MoaAiIcon size={20} />
                 <span>
                   {m.streamStage === "retrieving"
-                    ? "모임에 대해 확인하고 있어요"
+                    ? "질문을 확인하고 있어요"
                     : m.streamStage === "saving"
                       ? "답변을 마무리하고 있어요"
                       : "답변을 작성하고 있어요"}
@@ -243,14 +246,14 @@ export function ChatView({ model: m }: { model: WorkspaceModel }) {
             <span className="chat-usage-count" role="status" aria-live="polite">
               <MoaAiIcon size={16} />
               {usageError ? (
-                "횟수를 확인하지 못했어요"
+                "사용량을 확인하지 못했어요"
               ) : m.aiUsage ? (
                 <>
-                  오늘 <strong>{m.aiUsage.remaining}</strong>
-                  <span>/ {m.aiUsage.limit}회 남음</span>
+                  오늘 남은 사용량{" "}
+                  <strong>{m.aiUsage.remaining_percent}%</strong>
                 </>
               ) : (
-                "오늘의 질문 횟수 확인 중…"
+                "오늘의 사용량 확인 중…"
               )}
             </span>
             {usageError ? (
@@ -271,7 +274,7 @@ export function ChatView({ model: m }: { model: WorkspaceModel }) {
           </div>
           {exhausted && (
             <p className="chat-usage-notice">
-              오늘의 질문을 모두 사용했어요. 한국 시간 자정 이후 다시 질문해
+              오늘의 사용량을 모두 사용했어요. 한국 시간 자정 이후 다시 질문해
               주세요.
             </p>
           )}
@@ -296,7 +299,9 @@ export function ChatView({ model: m }: { model: WorkspaceModel }) {
             onSend={m.sendQuestion}
             onStop={m.streamingId ? m.cancelAnswer : undefined}
           />
-          <p className="chat-disclaimer">답변의 출처를 함께 확인해 주세요.</p>
+          <p className="chat-disclaimer">
+            자료에 근거한 답변은 출처도 함께 확인할 수 있어요.
+          </p>
         </div>
       </div>
     </section>

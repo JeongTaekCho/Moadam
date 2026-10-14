@@ -9,6 +9,24 @@ const server = spawn(
   ["node_modules/next/dist/bin/next", "start", "--port", "3115"],
   { stdio: "ignore" },
 );
+const liveReport = process.env.MOADAM_MARKDOWN_REPORT
+  ? JSON.parse(await fs.readFile(process.env.MOADAM_MARKDOWN_REPORT, "utf8"))
+  : null;
+const liveCases = liveReport
+  ? [
+      ...liveReport.cases,
+      ...(liveReport.streaming
+        ? [
+            {
+              kind: "streaming_general",
+              question: "광합성이 무엇인지 쉬운 말로 설명해줘.",
+              ...liveReport.streaming,
+              strong_count: 1,
+            },
+          ]
+        : []),
+    ]
+  : [];
 let browser;
 const group = "11111111-1111-4111-8111-111111111111",
   user = "22222222-2222-4222-8222-222222222222",
@@ -61,11 +79,15 @@ try {
       { name: "access", value: "ai-error-fixture", url: app, httpOnly: true },
     ]);
     let attempts = 0;
-    let used = 28;
+    let used = 116000;
+    let legacyUsage = true;
     const quota = () => ({
-      limit: 30,
-      used,
-      remaining: 30 - used,
+      limit_tokens: 120000,
+      used_tokens: used,
+      reserved_tokens: 0,
+      remaining_tokens: 120000 - used,
+      available_tokens: 120000 - used,
+      used_percent: Math.round((used / 1200) * 10) / 10,
       resets_at: new Date(Date.now() + 86400000).toISOString(),
     });
     await context.route("**/api/proxy/**", async (route) => {
@@ -88,7 +110,23 @@ try {
       let data;
       if (path.endsWith("/messages/stream")) {
         attempts++;
-        used++;
+        const sample = attempts > 2 ? liveCases[attempts - 3] : null;
+        const reply = sample?.answer ?? markdownAnswer;
+        if (attempts > 1) used += sample?.tokens ?? 4000;
+        const grounded =
+          sample?.grounded ?? sample?.kind.startsWith("document") ?? false;
+        const citations =
+          sample?.citations ??
+          (grounded
+            ? [
+                {
+                  document_id: session,
+                  chunk_id: session,
+                  title: "가상 모임 안내",
+                  page: 1,
+                },
+              ]
+            : []);
         const events =
           attempts === 1
             ? [
@@ -101,27 +139,27 @@ try {
                 },
               ]
             : [
-                { type: "delta", text: markdownAnswer },
+                { type: "delta", text: sample?.delta_answer ?? reply },
                 {
                   type: "done",
                   user: {
-                    id: "user-message",
+                    id: `user-message-${attempts}`,
                     group_id: group,
                     session_id: session,
                     role: "user",
-                    content: "모임 자료가 있나요?",
+                    content: route.request().postDataJSON().question,
                     citations: [],
                     grounded: false,
                     created_at: stamp,
                   },
                   assistant: {
-                    id: "assistant-message",
+                    id: `assistant-message-${attempts}`,
                     group_id: group,
                     session_id: session,
                     role: "assistant",
-                    content: markdownAnswer,
-                    citations: [],
-                    grounded: false,
+                    content: reply,
+                    citations,
+                    grounded,
                     created_at: stamp,
                   },
                 },
@@ -134,8 +172,36 @@ try {
         });
         return;
       }
-      if (path === "me/ai-usage") data = quota();
-      else if (path === "me") data = profile;
+      if (path === "me/ai-usage")
+        data = legacyUsage
+          ? { limit: 30, used: 1, remaining: 29, resets_at: quota().resets_at }
+          : quota();
+      else if (path.endsWith("/attendance")) data = [];
+      else if (/\/events\/[^/]+$/.test(path) || /\/posts\/[^/]+$/.test(path)) {
+        const id = path.split("/").at(-1);
+        const source = liveCases
+          .flatMap((sample) => sample.citations ?? [])
+          .find((source) => source.source_id === id);
+        data = {
+          id,
+          group_id: group,
+          author_id: user,
+          author: {
+            id: user,
+            display_name: profile.display_name,
+            avatar_url: null,
+          },
+          title: source?.title ?? "참조 원문",
+          description: "노트 준비",
+          location: "가상 회의실",
+          starts_at: "2026-10-14T00:00:00Z",
+          ends_at: "2026-10-14T02:00:00Z",
+          body: "회비는 5천원",
+          kind: "notice",
+          created_at: stamp,
+          updated_at: stamp,
+        };
+      } else if (path === "me") data = profile;
       else if (path === "groups")
         data = paged([
           {
@@ -168,7 +234,20 @@ try {
       input = dialog.getByLabel("모임에 대해 모아AI에 질문하기", {
         exact: true,
       });
-    await dialog.getByText("2", { exact: true }).waitFor();
+    await dialog
+      .getByText("사용량을 확인하지 못했어요", { exact: true })
+      .waitFor();
+    assert.equal(await dialog.locator(".chat-usage-count strong").count(), 0);
+    assert(
+      await dialog
+        .getByRole("button", { name: "질문 보내기", exact: true })
+        .isDisabled(),
+    );
+    legacyUsage = false;
+    await dialog
+      .getByRole("button", { name: "다시 확인", exact: true })
+      .click();
+    await dialog.getByText("3.3%", { exact: true }).waitFor();
     await input.fill("모임 자료가 있나요?");
     await dialog
       .getByRole("button", { name: "질문 보내기", exact: true })
@@ -231,7 +310,7 @@ try {
     );
     assert.equal(await input.inputValue(), "");
     assert.equal(attempts, 2);
-    await dialog.getByText("0", { exact: true }).waitFor();
+    await dialog.getByText("0%", { exact: true }).waitFor();
     await input.fill("한도 이후 질문");
     assert(
       await dialog
@@ -239,18 +318,90 @@ try {
         .isDisabled(),
     );
     assert.equal(attempts, 2);
-    await dialog.getByText(/오늘의 질문을 모두 사용했어요/).waitFor();
+    await dialog.getByText(/오늘의 사용량을 모두 사용했어요/).waitFor();
     await page.screenshot({
       path: `/tmp/moadam-ai-error-qa/quota-${width}.png`,
     });
     used = 0;
     await page.evaluate(() => window.dispatchEvent(new Event("focus")));
-    await dialog.getByText("30", { exact: true }).waitFor();
+    await dialog.getByText("100%", { exact: true }).waitFor();
     assert(
       await dialog
         .getByRole("button", { name: "질문 보내기", exact: true })
         .isEnabled(),
     );
+    for (const sample of liveCases) {
+      const previousCount = await dialog.locator(".message.assistant").count();
+      await input.fill(sample.question);
+      await dialog
+        .getByRole("button", { name: "질문 보내기", exact: true })
+        .click();
+      await page.waitForFunction(
+        (count) =>
+          document.querySelectorAll(".message.assistant").length > count,
+        previousCount,
+      );
+      await page.waitForFunction(() => {
+        const latest = [...document.querySelectorAll(".message.assistant")].at(
+          -1,
+        );
+        return (
+          latest?.getAttribute("aria-busy") === "false" &&
+          document.querySelector("#chat-question")?.value === ""
+        );
+      });
+      const answer = dialog.locator(".message.assistant .markdown").last();
+      if (sample.strong_count > 0) {
+        assert((await answer.locator("strong").count()) > 0, sample.kind);
+        assert(
+          await answer
+            .locator("strong")
+            .first()
+            .evaluate(
+              (node) => Number(getComputedStyle(node).fontWeight) >= 600,
+            ),
+        );
+      }
+      assert((await answer.locator("p, li, pre, h2, h3").count()) >= 1);
+      assert(!/\*\*/.test(await answer.innerText()), sample.kind);
+      if (sample.kind === "streaming_general")
+        assert((await answer.locator("p").count()) >= 2);
+      if (sample.kind === "code")
+        assert((await answer.locator("pre code").count()) > 0);
+      assert(
+        await dialog.evaluate((node) => node.scrollWidth <= node.clientWidth),
+        sample.kind,
+      );
+      await page.screenshot({
+        path: `/tmp/moadam-ai-error-qa/live-${sample.kind}-${width}.png`,
+      });
+      console.log(
+        `PASS: actual-model recorded answer ${sample.kind}, rendered strong/paragraphs/code ${width}`,
+      );
+      const groupSource = sample.citations?.find(
+        (source) =>
+          source.source_type === "event" || source.source_type === "notice",
+      );
+      if (groupSource) {
+        await dialog
+          .locator(".message.assistant")
+          .last()
+          .locator("button.citation")
+          .filter({ hasText: groupSource.title })
+          .click();
+        await dialog.waitFor({ state: "hidden" });
+        await page
+          .getByRole("heading", { name: groupSource.title, exact: true })
+          .waitFor();
+        console.log(
+          `PASS: ${groupSource.source_type} citation opens current source ${width}`,
+        );
+        await page
+          .getByRole("button", { name: "모아AI 열기", exact: true })
+          .click();
+        await dialog.waitFor();
+      }
+    }
     await dialog.getByRole("button", { name: "닫기", exact: true }).click();
     if (width === 390)
       await page

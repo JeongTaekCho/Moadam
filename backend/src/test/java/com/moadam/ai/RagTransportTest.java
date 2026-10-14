@@ -49,6 +49,7 @@ class RagTransportTest {
                         UUID.randomUUID(),
                         UUID.randomUUID(),
                         "fixture",
+                        new com.moadam.ai.dto.AiTokenReservation(UUID.randomUUID(), 20000),
                         event -> {}));
         assertTrue(error.code().startsWith("AI_"));
         assertFalse(error.getMessage().contains("private upstream"));
@@ -83,6 +84,7 @@ class RagTransportTest {
                       UUID.randomUUID(),
                       UUID.randomUUID(),
                       "fixture",
+                      new com.moadam.ai.dto.AiTokenReservation(UUID.randomUUID(), 20000),
                       event -> {}));
       assertEquals("AI_CONNECTION_FAILED", error.code());
       assertNotNull(error.getCause());

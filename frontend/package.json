@@ -14,6 +14,7 @@
     "test:oauth": "node scripts/oauth-smoke.mjs",
     "test:profile": "node --env-file=../.env scripts/profile-smoke.mjs",
     "test:chat-stream": "node scripts/chat-stream-smoke.mjs",
+    "test:ai-usage": "node scripts/ai-usage-smoke.mjs",
     "test:chat-live": "node --env-file=../.env scripts/chat-live-smoke.mjs",
     "test:cache": "node scripts/cache-smoke.mjs",
     "test:performance": "node scripts/performance-smoke.mjs",

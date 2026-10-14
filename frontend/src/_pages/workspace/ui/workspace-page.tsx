@@ -77,6 +77,10 @@ export function WorkspacePage({
       setAssistantOpen(false);
       return m.openDocument(id);
     },
+    openAiSource: (source: import("@/shared/api").Citation) => {
+      setAssistantOpen(false);
+      return m.openAiSource(source);
+    },
     sendQuestion: (question: string) => {
       setAssistantOpen(true);
       return m.sendQuestion(question);

@@ -9,6 +9,7 @@ import com.moadam.common.service.DomainService;
 import com.moadam.event.dto.AttendanceRequest;
 import com.moadam.event.dto.EventCreateRequest;
 import com.moadam.event.dto.EventResponse;
+import com.moadam.event.exception.PastEventDateException;
 import com.moadam.event.repository.EventRepository;
 import java.time.Instant;
 import java.util.List;
@@ -49,7 +50,7 @@ public class EventService extends DomainService {
 
   void validateEvent(EventCreateRequest b) {
     if (EventDatePolicy.isBeforeToday(b.starts_at(), Instant.now()))
-      throw new IllegalArgumentException("Past event date");
+      throw new PastEventDateException();
     if (!b.ends_at().isAfter(b.starts_at())) throw new IllegalArgumentException();
   }
 

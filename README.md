@@ -18,14 +18,14 @@
 
 새 개발 프로젝트를 기준으로 합니다. 프로젝트가 준비되면 아래 값을 확인하세요. 키나 비밀번호를 README 또는 채팅에 붙여 넣지 말고 아래 입력 파일에 저장하세요.
 
-|필요 값|찾는 위치 / 내용|입력할 파일|
-|---|---|---|
-|프로젝트 URL|프로젝트 API 설정의 `https://프로젝트REF.supabase.co`|세 파일의 `SUPABASE_URL`|
-|Publishable key|Settings → API Keys의 publishable key|루트 `.env`, `frontend/.env.local`|
-|Legacy service_role JWT|Settings → API Keys → Legacy 탭의 `service_role`|루트 `.env`, `rag/.env`|
-|DB host / port / username|프로젝트 상단 **Connect → Session pooler**에서 복사|루트 `.env`, `rag/.env`|
-|DB password|프로젝트 생성 시 정한 Database password; 모르면 DB 설정에서 재설정|루트 `.env`, Python DB URL|
-|JWT secret (조건부)|서명 방식이 기존 HS256일 때만 legacy JWT secret 사용|루트 `.env`만|
+| 필요 값                   | 찾는 위치 / 내용                                                   | 입력할 파일                        |
+| ------------------------- | ------------------------------------------------------------------ | ---------------------------------- |
+| 프로젝트 URL              | 프로젝트 API 설정의 `https://프로젝트REF.supabase.co`              | 세 파일의 `SUPABASE_URL`           |
+| Publishable key           | Settings → API Keys의 publishable key                              | 루트 `.env`, `frontend/.env.local` |
+| Legacy service_role JWT   | Settings → API Keys → Legacy 탭의 `service_role`                   | 루트 `.env`, `rag/.env`            |
+| DB host / port / username | 프로젝트 상단 **Connect → Session pooler**에서 복사                | 루트 `.env`, `rag/.env`            |
+| DB password               | 프로젝트 생성 시 정한 Database password; 모르면 DB 설정에서 재설정 | 루트 `.env`, Python DB URL         |
+| JWT secret (조건부)       | 서명 방식이 기존 HS256일 때만 legacy JWT secret 사용               | 루트 `.env`만                      |
 
 현재 Storage 호출은 **legacy service_role JWT**를 사용하도록 구현되어 있습니다. `sb_secret_...` 키로 임의 교체하지 마세요. Publishable key와 service_role은 서로 다른 값이고, DB 비밀번호와 JWT secret도 서로 다릅니다.
 
@@ -75,11 +75,11 @@ from storage.buckets where id = 'group-documents';
 
 ### 4. 환경변수 입력 — 파일이 준비되어 있습니다
 
-|실제 입력 파일|예시 원본|사용 서비스|
-|---|---|---|
-|[`.env`](.env)|[`.env.example`](.env.example)|로컬 Spring / Docker Compose|
-|[`frontend/.env.local`](frontend/.env.local)|[`frontend/.env.example`](frontend/.env.example)|Next.js 서버|
-|[`rag/.env`](rag/.env)|[`rag/.env.example`](rag/.env.example)|로컬 Python RAG|
+| 실제 입력 파일                               | 예시 원본                                        | 사용 서비스                  |
+| -------------------------------------------- | ------------------------------------------------ | ---------------------------- |
+| [`.env`](.env)                               | [`.env.example`](.env.example)                   | 로컬 Spring / Docker Compose |
+| [`frontend/.env.local`](frontend/.env.local) | [`frontend/.env.example`](frontend/.env.example) | Next.js 서버                 |
+| [`rag/.env`](rag/.env)                       | [`rag/.env.example`](rag/.env.example)           | 로컬 Python RAG              |
 
 실제 입력 파일은 기존 파일이 있으면 보존하고, 없으면 placeholder로 생성했습니다. `YOUR_*` 값을 실제 값으로 교체하세요. 실제 파일은 `.gitignore`로 제외되어 있습니다. 환경변수를 바꾼 뒤에는 해당 서비스를 재시작합니다.
 
@@ -159,17 +159,17 @@ pnpm dev
 
 ### 7. 설정 중 자주 만나는 오류
 
-|증상|확인할 설정|
-|---|---|
-|로그인/가입 503|Next의 Supabase URL / publishable key 입력 및 재시작|
-|로그인 후 API 401|같은 프로젝트인지, JWT ES256/RS256이면 secret이 비어 있는지|
-|`relation does not exist`|올바른 프로젝트에 migration을 적용했는지|
-|DB 연결 실패|Connect의 실제 host / username / password, 5432, SSL, URL 인코딩|
-|자료 업로드 실패|legacy service_role, 비공개 버킷 생성, PDF MIME / 20MB|
-|RAG 연결 실패|로컬 RAG_URL=localhost:8000, 서비스 실행, 내부 토큰 일치|
-|자료 상태 실패 / EMBEDDING_UNAVAILABLE|provider가 degraded인지; mock/openai를 명시적으로 선택|
-|OpenAI 색인 실패|API 키 / 계정 한도 / 모델 권한 / 서비스 재시작|
-|답변 유보 또는 검색 불일치|문서 ready 상태, provider 변경 후 재색인, 실제 자료 내용|
+| 증상                                   | 확인할 설정                                                      |
+| -------------------------------------- | ---------------------------------------------------------------- |
+| 로그인/가입 503                        | Next의 Supabase URL / publishable key 입력 및 재시작             |
+| 로그인 후 API 401                      | 같은 프로젝트인지, JWT ES256/RS256이면 secret이 비어 있는지      |
+| `relation does not exist`              | 올바른 프로젝트에 migration을 적용했는지                         |
+| DB 연결 실패                           | Connect의 실제 host / username / password, 5432, SSL, URL 인코딩 |
+| 자료 업로드 실패                       | legacy service_role, 비공개 버킷 생성, PDF MIME / 20MB           |
+| RAG 연결 실패                          | 로컬 RAG_URL=localhost:8000, 서비스 실행, 내부 토큰 일치         |
+| 자료 상태 실패 / EMBEDDING_UNAVAILABLE | provider가 degraded인지; mock/openai를 명시적으로 선택           |
+| OpenAI 색인 실패                       | API 키 / 계정 한도 / 모델 권한 / 서비스 재시작                   |
+| 답변 유보 또는 검색 불일치             | 문서 ready 상태, provider 변경 후 재색인, 실제 자료 내용         |
 
 이 문서는 설정 방법을 정리한 것이며, 실제 Supabase 프로젝트의 migration·키·Auth 설정은 아직 적용하지 않았습니다. 입력 후 외부 연동 확인이 필요합니다.
 
@@ -193,21 +193,21 @@ Node 22 이상, pnpm 12.5.1, Java 21, Maven 3.9 이상, Python 3.12, Supabase �
 
 환경 예시는 루트 `.env.example`, `frontend/.env.example`, `rag/.env.example`입니다. 비밀을 `NEXT_PUBLIC_*`에 넣지 마세요. `SUPABASE_SERVICE_ROLE_KEY`는 서버용 **legacy service_role JWT**를 사용합니다. 공개용 publishable 키는 Next 서버의 Auth 호출에서만 사용합니다. 서비스별 URL 형식은 다음과 같습니다.
 
-|변수|소비 서비스|값|
-|---|---|---|
-|DATABASE_URL|Spring|`jdbc:postgresql://HOST:5432/postgres?sslmode=require`|
-|DATABASE_USER / DATABASE_PASSWORD|Spring|Supabase Connect의 DB 자격증명|
-|RAG_DATABASE_URL|Compose|`postgresql://USER:URL_ENCODED_PASSWORD@HOST:5432/postgres?sslmode=require`|
-|DATABASE_URL|Python 단독 실행|위 libpq URL (`jdbc:` 없음)|
-|SUPABASE_URL|세 서비스|Auth 및 Storage API URL|
-|SUPABASE_PUBLISHABLE_KEY|Next 서버|publishable 또는 local anon 키|
-|SUPABASE_SERVICE_ROLE_KEY|Spring·Python|서버 전용 legacy service_role JWT|
-|SUPABASE_JWT_SECRET|Spring|local HS256일 때만 설정; 비대칭 키는 빈 값|
-|RAG_INTERNAL_TOKEN|Spring·Python|동일한 32자 이상 난수|
-|RAG_URL|Spring|단독 `http://localhost:8000`, Compose `http://rag:8000`|
-|BACKEND_URL|Next|단독 `http://localhost:8080`|
-|CORS_ORIGINS|Spring|쉼표로 구분한 허용 Origin|
-|FLYWAY_ENABLED|Spring|기본 false; migration 실행 주체를 하나만 사용|
+| 변수                              | 소비 서비스      | 값                                                                          |
+| --------------------------------- | ---------------- | --------------------------------------------------------------------------- |
+| DATABASE_URL                      | Spring           | `jdbc:postgresql://HOST:5432/postgres?sslmode=require`                      |
+| DATABASE_USER / DATABASE_PASSWORD | Spring           | Supabase Connect의 DB 자격증명                                              |
+| RAG_DATABASE_URL                  | Compose          | `postgresql://USER:URL_ENCODED_PASSWORD@HOST:5432/postgres?sslmode=require` |
+| DATABASE_URL                      | Python 단독 실행 | 위 libpq URL (`jdbc:` 없음)                                                 |
+| SUPABASE_URL                      | 세 서비스        | Auth 및 Storage API URL                                                     |
+| SUPABASE_PUBLISHABLE_KEY          | Next 서버        | publishable 또는 local anon 키                                              |
+| SUPABASE_SERVICE_ROLE_KEY         | Spring·Python    | 서버 전용 legacy service_role JWT                                           |
+| SUPABASE_JWT_SECRET               | Spring           | local HS256일 때만 설정; 비대칭 키는 빈 값                                  |
+| RAG_INTERNAL_TOKEN                | Spring·Python    | 동일한 32자 이상 난수                                                       |
+| RAG_URL                           | Spring           | 단독 `http://localhost:8000`, Compose `http://rag:8000`                     |
+| BACKEND_URL                       | Next             | 단독 `http://localhost:8080`                                                |
+| CORS_ORIGINS                      | Spring           | 쉼표로 구분한 허용 Origin                                                   |
+| FLYWAY_ENABLED                    | Spring           | 기본 false; migration 실행 주체를 하나만 사용                               |
 
 `openssl rand -hex 32`로 내부 토큰을 만들 수 있습니다. 루트 환경변수는 Spring이 자동으로 `.env`에서 읽지 않으므로 아래의 환경 로드 명령 또는 IDE run configuration이 필요합니다. 비밀번호 등 shell 특수 문자가 들어간 값은 `.env`에서 작은따옴표로 감싸고 Python DB URL의 비밀번호는 URL 인코딩하세요. 예제 placeholder를 실제 값으로 바꿔야 서비스 연결이 됩니다.
 
@@ -250,7 +250,7 @@ pip install -r requirements.lock
 uvicorn app:app --host 127.0.0.1 --port 8000 --no-access-log
 ```
 
-`예시 파일은 `RAG_PROVIDER=mock`으로 시작합니다. 변수 미설정 시 코드 기본값은 `degraded`입니다. `APP_ENV=development`와 `RAG_PROVIDER=mock`을 함께 사용하면 1536차원 결정적 테스트 임베딩과 **개발용 발췌 답변**을 사용합니다. 프로덕션 mock은 시작 단계에서 거부합니다. 실제 모델은 `RAG_PROVIDER=openai`, `OPENAI_API_KEY`를 설정합니다. 모델 기본값은 `text-embedding-3-small` / `gpt-4.1-mini`. 차원은 migration과 같은 1536으로 고정 검증합니다. provider 또는 embedding model 변경 시 **모든 자료를 재색인**하세요. 서로 다른 provider의 임베딩을 섞으면 검색 품질을 보장할 수 없습니다.
+`예시 파일은 `RAG_PROVIDER=mock`으로 시작합니다. 변수 미설정 시 코드 기본값은 `degraded`입니다. `APP_ENV=development`와 `RAG_PROVIDER=mock`을 함께 사용하면 1536차원 결정적 테스트 임베딩과 **개발용 발췌 답변**을 사용합니다. 프로덕션 mock은 시작 단계에서 거부합니다. 실제 모델은 `RAG_PROVIDER=openai`, `OPENAI_API_KEY`를 설정합니다. 모델 기본값은 `text-embedding-3-small`/`gpt-4.1-mini`. 차원은 migration과 같은 1536으로 고정 검증합니다. provider 또는 embedding model 변경 시 **모든 자료를 재색인**하세요. 서로 다른 provider의 임베딩을 섞으면 검색 품질을 보장할 수 없습니다.
 
 `CHUNK_SIZE=1000`, `CHUNK_OVERLAP=150`, `TOP_K=5`, `SIMILARITY_THRESHOLD=0.3`, `MAX_PAGES=200`을 환경변수로 조정할 수 있습니다. 청크는 페이지를 넘지 않고 실제 페이지 번호를 보존합니다. 유사도는 근거 품질을 완전히 보장하는 확률이 아닙니다. 모든 벡터 조회에 SQL 수준의 모임 및 document ID 조건을 적용합니다. 내부 토큰뿐 아니라 실제 DB 멤버십/개인 세션도 확인합니다.
 
@@ -335,3 +335,7 @@ python -m unittest discover -s tests -v
 루트에서 `make setup`, `make format`, `make check`, `make test`, `make qa`를 사용합니다. 형식·린트·타입·구조·격리 테스트는 `.github/workflows/quality.yml`에서도 검사합니다. 구성 이유와 이번 정리 결과는 [하네스 설정 보고서](docs/development/harness_setup.md)에 있습니다.
 
 모아AI의 Vercel/Render 운영 연결은 [배포 진단·RAG 설정 가이드](docs/ai_production_troubleshooting.md)를 참고하세요. 별도 Python 서비스용 [Render Blueprint](render.yaml)와 읽기 전용 `scripts/check-ai-deployment.mjs`를 제공합니다.
+
+## 모아AI 토큰 예산
+
+하루 질문 횟수 대신 사용자별 입력·출력·검색·맥락 보완 토큰 사용량을 합산합니다. 초기 `AI_DAILY_TOKEN_BUDGET=120000`, 요청별 최대 `AI_REQUEST_TOKEN_BUDGET=20000`이며 화면에는 남은 사용량을 %로 표시합니다. 한국 시간 자정 기준입니다. 새 원장은 V5/Flyway와 대응 Supabase migration으로 준비하고 백엔드·RAG·프론트를 함께 배포해야 합니다. 일반 질문도 Markdown으로 답변하며 모임 내부 사실은 문서 근거로 확인합니다. [검증·운영 적용 기록](docs/issue/2026-10-13_모아AI_토큰_사용량_및_일반답변.md)을 참고하세요.

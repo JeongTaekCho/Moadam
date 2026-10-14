@@ -1,4 +1,5 @@
 import { ApiError, getApiScope, type Message, type AiUsage } from "./client";
+import { parseAiUsage } from "./ai-usage";
 
 export type ChatStreamEvent =
   | { type: "usage"; usage: AiUsage }
@@ -20,6 +21,14 @@ export async function consumeChatStream(
     if (!value.trim()) return;
     if (completed) throw new Error("완료 이후 잘못된 응답이 도착했습니다");
     const event = JSON.parse(value) as ChatStreamEvent;
+    if (event.type === "usage") {
+      try {
+        event.usage = parseAiUsage(event.usage);
+      } catch {
+        // A mismatched usage event must not discard an otherwise valid answer.
+        return;
+      }
+    }
     if (event.type === "error") throw new Error(event.message);
     if (event.type === "delta" && typeof event.text !== "string")
       throw new Error("잘못된 답변 형식입니다");

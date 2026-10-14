@@ -12,6 +12,7 @@ type PickerProps = {
   required?: boolean;
   disabled?: boolean;
   minDate?: string;
+  error?: string;
 };
 const datePattern = "[0-9]{4}-[0-9]{2}-[0-9]{2}";
 const timePattern = "([01][0-9]|2[0-3]):[0-5][0-9]";
@@ -30,6 +31,7 @@ function PickerValidation({
   valid,
   trigger,
   errorId,
+  errorMessage,
 }: {
   value: string;
   name?: string;
@@ -38,16 +40,17 @@ function PickerValidation({
   valid: boolean;
   trigger: RefObject<HTMLButtonElement | null>;
   errorId: string;
+  errorMessage?: string;
 }) {
   const ref = useRef<HTMLInputElement>(null);
   const [error, setError] = useState(false);
   useEffect(() => {
     ref.current?.setCustomValidity(
-      value && !valid ? "올바른 값을 선택해 주세요." : "",
+      errorMessage || (value && !valid ? "올바른 값을 선택해 주세요." : ""),
     );
     // eslint-disable-next-line react-hooks/set-state-in-effect -- Clear the native form validation error after the controlled picker value changes.
     setError(false);
-  }, [value, valid]);
+  }, [value, valid, errorMessage]);
   return (
     <>
       <input
@@ -66,9 +69,12 @@ function PickerValidation({
           trigger.current?.focus();
         }}
       />
-      {error && (
+      {(error || errorMessage) && (
         <small id={errorId} role="alert" className="text-negative">
-          {value ? "올바른 값을 선택해 주세요." : "필수 항목을 선택해 주세요."}
+          {errorMessage ||
+            (value
+              ? "올바른 값을 선택해 주세요."
+              : "필수 항목을 선택해 주세요.")}
         </small>
       )}
     </>
@@ -83,6 +89,7 @@ export function DatePicker({
   required,
   disabled,
   minDate,
+  error,
 }: PickerProps) {
   const id = useId();
   const popoverId = `${id}-calendar`;
@@ -152,6 +159,7 @@ export function DatePicker({
           aria-controls={popoverId}
           aria-describedby={`${id}-error`}
           aria-required={required}
+          aria-invalid={!!error}
           placeholder="YYYY-MM-DD"
           pattern={datePattern}
           maxLength={10}
@@ -176,6 +184,7 @@ export function DatePicker({
         </button>
       </div>
       <PickerValidation
+        errorMessage={error}
         value={value}
         name={name}
         required={required}

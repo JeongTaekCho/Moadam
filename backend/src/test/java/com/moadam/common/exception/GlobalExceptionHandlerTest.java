@@ -10,6 +10,18 @@ import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 class GlobalExceptionHandlerTest {
   @Test
+  void pastEventDateIdentifiesTheStartFieldInTheApiResponse() {
+    var response =
+        new GlobalExceptionHandler()
+            .handle(
+                new com.moadam.event.exception.PastEventDateException(),
+                new MockHttpServletRequest());
+    assertEquals(400, response.getStatusCode().value());
+    assertEquals("EVENT_START_BEFORE_TODAY", response.getBody().get("code"));
+    assertEquals("시작일이 오늘보다 전입니다. 시작일을 오늘 또는 이후 날짜로 수정해 주세요.", response.getBody().get("message"));
+  }
+
+  @Test
   void groupLimitReturnsMachineReadableCodeAndKoreanMessage() {
     var response =
         new GlobalExceptionHandler()

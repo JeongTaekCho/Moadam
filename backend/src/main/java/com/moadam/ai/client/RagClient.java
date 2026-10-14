@@ -1,6 +1,7 @@
 package com.moadam.ai.client;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.moadam.ai.dto.AiTokenReservation;
 import com.moadam.ai.retrieval.NoteRetriever;
 import com.moadam.note.repository.NoteRepository;
 import java.net.URI;
@@ -58,7 +59,7 @@ public class RagClient {
       r.method(method, HttpRequest.BodyPublishers.ofString(json.writeValueAsString(body)));
       var response = http.send(r.build(), HttpResponse.BodyHandlers.ofString());
       if (response.statusCode() < 200 || response.statusCode() >= 300)
-        throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE);
+        throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "AI_REJECTED");
       var value = json.readTree(response.body());
       return value.isObject()
           ? json.convertValue(
@@ -66,8 +67,12 @@ public class RagClient {
           : Map.of("result", value);
     } catch (ResponseStatusException e) {
       throw e;
+    } catch (java.net.ConnectException e) {
+      throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "AI_CONNECTION_FAILED");
+    } catch (java.net.http.HttpTimeoutException e) {
+      throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "AI_TIMEOUT");
     } catch (Exception e) {
-      throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE);
+      throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "AI_TRANSPORT_UNKNOWN");
     }
   }
 
@@ -112,7 +117,8 @@ public class RagClient {
     }
   }
 
-  public Map<String, Object> query(UUID g, UUID u, UUID session, String question) {
+  public Map<String, Object> query(
+      UUID g, UUID u, UUID session, String question, AiTokenReservation reservation) {
     var ids = retriever.readyDocumentIds(g);
     return request(
         rag + "/query",
@@ -129,7 +135,9 @@ public class RagClient {
             "allowed_document_ids",
             ids,
             "request_id",
-            UUID.randomUUID()));
+            reservation.requestId(),
+            "token_budget",
+            reservation.tokenBudget()));
   }
 
   @FunctionalInterface
@@ -138,7 +146,12 @@ public class RagClient {
   }
 
   public Map<String, Object> queryStream(
-      UUID g, UUID u, UUID session, String question, StreamConsumer consumer)
+      UUID g,
+      UUID u,
+      UUID session,
+      String question,
+      AiTokenReservation reservation,
+      StreamConsumer consumer)
       throws java.io.IOException {
     var ids = retriever.readyDocumentIds(g);
     var payload =
@@ -154,7 +167,9 @@ public class RagClient {
             "allowed_document_ids",
             ids,
             "request_id",
-            UUID.randomUUID());
+            reservation.requestId(),
+            "token_budget",
+            reservation.tokenBudget());
     var request =
         HttpRequest.newBuilder(URI.create(rag + "/query/stream"))
             .timeout(Duration.ofSeconds(100))

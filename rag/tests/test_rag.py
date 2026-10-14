@@ -23,6 +23,8 @@ class FakeConnection:
         self.group, self.user, self.session, self.document = group, user, session, document
         self.queries = []
         self.history = []
+        self.token_budget = None
+        self.charges = []
         self.depth = 0
 
     def execute(self, sql, args=()):
@@ -39,6 +41,17 @@ class FakeConnection:
                 if args[1:4] == (self.group, self.session, self.user)
                 else []
             )
+        elif "ai_token_requests" in sql:
+            self.result = (
+                [{"allocated_tokens": self.token_budget}]
+                if args[1] == self.user and self.token_budget
+                else []
+            )
+        elif "ai_charge_tokens" in sql:
+            self.charges.append(args)
+            self.result = []
+        elif "ai_finish_tokens" in sql:
+            self.result = []
         elif "select c.id from document_chunks" in sql:
             self.result = [{"id": chunk} for chunk in args[1]] if args[0] == self.group else []
         elif "from document_chunks" in sql:
@@ -134,7 +147,11 @@ class RagTests(unittest.TestCase):
 
     def test_recent_history_is_scoped_bounded_and_in_conversation_order(self):
         self.conn.history = [
-            {"role": "assistant", "content": "오류 안내", "grounded": False},
+            {
+                "role": "assistant",
+                "content": "현재 AI 서비스가 비활성화되어 있습니다.",
+                "grounded": False,
+            },
             {"role": "assistant", "content": "회의는 금요일입니다.", "grounded": True},
             {"role": "user", "content": "회의 일정을 알려줘", "grounded": False},
         ]
@@ -234,7 +251,10 @@ class RagTests(unittest.TestCase):
             result = rag.query(req)
         self.assertEqual(provider.call_count, 2)
         embed.assert_called_once_with(["장소는?\n검색 주제: 회의의 장소는 어디인가요?"])
-        self.assertEqual(result.answer, answer)
+        self.assertEqual(
+            result.answer,
+            "회의 장소는 회의실입니다.\n\n- **준비물**: 노트\n- **시간**: 자료 확인 필요",
+        )
         self.assertTrue(result.grounded)
 
     def test_rewrite_failures_fall_back_without_retries(self):
@@ -250,6 +270,7 @@ class RagTests(unittest.TestCase):
             ('{"question": 123}', "stop"),
         ]:
             response = MagicMock()
+            response.status_code = 200
             response.json.return_value = {
                 "choices": [{"finish_reason": finish_reason, "message": {"content": content}}]
             }
@@ -317,6 +338,191 @@ class RagTests(unittest.TestCase):
             r = self.client.post("/query", json=self.body, headers=self.headers)
         self.assertFalse(r.json()["grounded"])
         self.assertEqual(r.json()["citations"], [])
+
+    def test_general_question_without_documents_is_answered_and_metered(self):
+        self.conn.token_budget = 20000
+        req = rag.QueryRequest(
+            **{
+                **self.body,
+                "question": "광합성을 쉽게 설명해줘",
+                "allowed_document_ids": [],
+                "token_budget": 20000,
+            }
+        )
+        answer = "**광합성**은 식물이 빛으로 에너지를 만드는 과정입니다.\n\n물과 이산화탄소를 이용합니다."
+        response = rag.httpx.Response(
+            200,
+            request=rag.httpx.Request("POST", "https://provider.example.test"),
+            json={
+                "usage": {"total_tokens": 1500},
+                "choices": [
+                    {
+                        "message": {
+                            "content": json.dumps(
+                                {
+                                    "answer": answer,
+                                    "answer_kind": "general",
+                                    "grounded": False,
+                                    "chunk_ids": [],
+                                }
+                            )
+                        }
+                    }
+                ],
+            },
+        )
+        with (
+            patch.object(rag, "db", return_value=self.conn),
+            patch.object(rag.settings, "rag_provider", "openai"),
+            patch.object(rag.httpx.Client, "post", return_value=response) as provider,
+            patch.object(rag, "embed") as embedding,
+        ):
+            result = rag.query(req)
+        self.assertEqual(result.answer, answer)
+        self.assertFalse(result.grounded)
+        self.assertEqual(result.retrieval["reason"], "general")
+        self.assertEqual(self.conn.charges[-1][2:], (1500, False))
+        provider.assert_called_once()
+        embedding.assert_not_called()
+
+    def test_all_provider_operations_charge_one_cumulative_request(self):
+        self.conn.token_budget = 20000
+        self.conn.history = [{"role": "user", "content": "우리 모임의 회의 일정 알려줘"}]
+        req = rag.QueryRequest(**{**self.body, "question": "그건 언제야?", "token_budget": 20000})
+
+        def post(url, **kwargs):
+            self.assertEqual(self.conn.depth, 0)
+            if url.endswith("/embeddings"):
+                data = {
+                    "data": [{"index": 0, "embedding": [0.0] * 1536}],
+                    "usage": {"total_tokens": 40},
+                }
+            else:
+                payload = kwargs["json"]
+                content = json.loads(payload["messages"][1]["content"])
+                if payload["max_tokens"] == 200:
+                    data = {
+                        "choices": [
+                            {
+                                "finish_reason": "stop",
+                                "message": {
+                                    "content": json.dumps(
+                                        {"question": "우리 모임의 회의 일정은 언제인가요?"}
+                                    )
+                                },
+                            }
+                        ],
+                        "usage": {"total_tokens": 150},
+                    }
+                else:
+                    data = {
+                        "choices": [
+                            {
+                                "message": {
+                                    "content": json.dumps(
+                                        {
+                                            "answer": "**금요일**입니다.\n\n자료를 확인해 주세요.",
+                                            "grounded": True,
+                                            "chunk_ids": [
+                                                content["untrusted_excerpts"][0]["chunk_id"]
+                                            ],
+                                            "answer_kind": "documents",
+                                        }
+                                    )
+                                }
+                            }
+                        ],
+                        "usage": {"total_tokens": 1000},
+                    }
+            return rag.httpx.Response(200, request=rag.httpx.Request("POST", url), json=data)
+
+        with (
+            patch.object(rag, "db", return_value=self.conn),
+            patch.object(rag.settings, "rag_provider", "openai"),
+            patch.object(rag.httpx.Client, "post", side_effect=post),
+        ):
+            result = rag.query(req)
+        self.assertTrue(result.grounded)
+        self.assertEqual([args[2] for args in self.conn.charges], [150, 190, 1190])
+        self.assertTrue(
+            all(
+                args[0] == req.request_id and args[1] == req.user_id and args[3] is False
+                for args in self.conn.charges
+            )
+        )
+
+    def test_insufficient_budget_or_invalid_reservation_never_calls_provider(self):
+        self.conn.token_budget = 1
+        req = rag.QueryRequest(**{**self.body, "allowed_document_ids": [], "token_budget": 1})
+        with (
+            patch.object(rag, "db", return_value=self.conn),
+            patch.object(rag.settings, "rag_provider", "openai"),
+            patch.object(rag.httpx.Client, "post") as provider,
+        ):
+            result = rag.query(req)
+            self.assertEqual(result.retrieval["reason"], "token_budget")
+            req.token_budget = 2
+            with self.assertRaises(rag.HTTPException) as error:
+                rag.query(req)
+        self.assertEqual(error.exception.status_code, 403)
+        provider.assert_not_called()
+        self.assertEqual(self.conn.charges, [])
+
+    def test_general_answer_cannot_invent_internal_group_facts(self):
+        req = rag.QueryRequest(**{**self.body, "question": "우리 모임 회비 얼마야?"})
+        result = rag.finish_query(
+            req,
+            [],
+            {
+                "answer": "회비는 3만원입니다",
+                "grounded": False,
+                "chunk_ids": [],
+                "answer_kind": "general",
+            },
+        )
+        self.assertFalse(result.grounded)
+        self.assertNotIn("3만원", result.answer)
+
+    def test_general_followup_does_not_mistake_we_for_private_group_facts(self):
+        req = rag.QueryRequest(**{**self.body, "question": "광합성을 더 쉽게 설명해줘"})
+        req._retrieval_question = (
+            "광합성을 더 쉽게 설명해줘\n대화 주제: 우리가 숨 쉴 산소를 만듭니다."
+        )
+        self.assertFalse(rag.requires_document_evidence(req))
+        req._retrieval_question = "자료구조의 종류를 설명해줘"
+        self.assertFalse(rag.requires_document_evidence(req))
+
+    def test_group_activity_suggestions_are_general_but_actual_fees_require_evidence(self):
+        req = rag.QueryRequest(
+            **{**self.body, "question": "우리 모임에서 친해질 수 있는 활동을 추천해줘"}
+        )
+        self.assertFalse(rag.requires_document_evidence(req))
+        with patch.object(rag, "db", return_value=self.conn):
+            result = rag.finish_query(
+                req,
+                [],
+                {
+                    "answer": "**활동 추천**\n\n- 함께 산책하기\n- 책 이야기 나누기",
+                    "answer_kind": "general",
+                    "grounded": False,
+                    "chunk_ids": [],
+                },
+            )
+        self.assertEqual(result.retrieval["reason"], "general")
+        req.question = "우리 모임 실제 회비는 얼마야? 추천 금액이 아니라 실제 값을 알려줘"
+        req._retrieval_question = ""
+        self.assertTrue(rag.requires_document_evidence(req))
+
+    def test_general_answers_are_retained_as_untrusted_followup_context(self):
+        rows = [
+            {
+                "role": "assistant",
+                "content": "**광합성**은 빛을 이용하는 과정입니다.",
+                "grounded": False,
+            },
+            {"role": "user", "content": "광합성 알려줘", "grounded": False},
+        ]
+        self.assertEqual(len(rag.bounded_history(rows)), 2)
 
     def test_degraded_is_explicit(self):
         with (
@@ -481,6 +687,7 @@ class RagTests(unittest.TestCase):
                     }
                 )
                 finished = True
+                yield "data: " + json.dumps({"choices": [], "usage": {"total_tokens": 321}})
                 yield "data: [DONE]"
 
         class Client:
@@ -492,6 +699,7 @@ class RagTests(unittest.TestCase):
 
             def stream(inner, *args, **kwargs):
                 self.assertTrue(kwargs["json"]["stream"])
+                self.assertEqual(kwargs["json"]["stream_options"], {"include_usage": True})
                 data = json.loads(kwargs["json"]["messages"][1]["content"])
                 self.assertEqual(data["question"], "더 쉽게 설명해줘")
                 self.assertEqual(len(data["untrusted_history"]), 2)
@@ -511,10 +719,15 @@ class RagTests(unittest.TestCase):
                 ):
                     self.assertFalse(finished)
             self.assertEqual(events[-1]["type"], "done")
-            self.assertEqual(events[-1]["result"]["answer"], answer)
+            self.assertEqual(
+                events[-1]["result"]["answer"],
+                "회의는 금요일입니다.\n\n- **준비물**: 노트\n- **장소**: 회의실",
+            )
             self.assertEqual(
                 "".join(event["text"] for event in events if event["type"] == "delta"), answer
             )
+            self.assertEqual(req._meter.total, 321)
+            self.assertFalse(req._meter.estimated)
 
         with (
             patch.object(rag, "db", return_value=self.conn),
@@ -527,6 +740,8 @@ class RagTests(unittest.TestCase):
 
     def test_truncated_provider_stream_is_error_not_done(self):
         import json
+
+        include_usage = False
 
         class Response:
             def raise_for_status(self):
@@ -543,6 +758,13 @@ class RagTests(unittest.TestCase):
                     {"choices": [{"delta": {"content": '{"answer":"미완성'}}]}
                 )
 
+                if include_usage:
+                    yield "data: " + json.dumps(
+                        {"choices": [{"delta": {}, "finish_reason": "length"}]}
+                    )
+                    yield "data: " + json.dumps({"choices": [], "usage": {"total_tokens": 321}})
+                    yield "data: [DONE]"
+
         class Client:
             async def __aenter__(self):
                 return self
@@ -555,11 +777,68 @@ class RagTests(unittest.TestCase):
 
         async def check():
             self.assertTrue(rag.slots.acquire(blocking=False))
-            events = [
-                json.loads(line) async for line in rag.query_events(rag.QueryRequest(**self.body))
-            ]
+            req = rag.QueryRequest(**self.body)
+            events = [json.loads(line) async for line in rag.query_events(req)]
             self.assertEqual(events[-1]["type"], "error")
             self.assertFalse(any(e["type"] == "done" for e in events))
+            if include_usage:
+                self.assertEqual(req._meter.total, 321)
+                self.assertFalse(req._meter.estimated)
+            else:
+                self.assertTrue(req._meter.estimated)
+
+        with (
+            patch.object(rag, "db", return_value=self.conn),
+            patch.object(rag.settings, "rag_provider", "openai"),
+            patch.object(rag, "embed", return_value=[[0.0] * 1536]),
+            patch.object(rag.httpx, "AsyncClient", return_value=Client()),
+        ):
+            for include_usage in (False, True):
+                asyncio.run(check())
+
+    def test_canceled_stream_persists_estimated_usage_even_without_done(self):
+        self.conn.token_budget = 20000
+        req = rag.QueryRequest(**{**self.body, "token_budget": 20000})
+
+        class Response:
+            status_code = 200
+
+            def raise_for_status(self):
+                pass
+
+            async def __aenter__(self):
+                return self
+
+            async def __aexit__(self, *args):
+                pass
+
+            async def aiter_lines(self):
+                yield "data: " + json.dumps(
+                    {"choices": [{"delta": {"content": '{"answer":"**핵심** 부분 답변'}}]}
+                )
+                await asyncio.sleep(0)
+
+        class Client:
+            async def __aenter__(self):
+                return self
+
+            async def __aexit__(self, *args):
+                pass
+
+            def stream(self, *args, **kwargs):
+                return Response()
+
+        async def check():
+            self.assertTrue(rag.slots.acquire(blocking=False))
+            events = rag.query_events(req)
+            async for line in events:
+                if json.loads(line)["type"] == "delta":
+                    await events.aclose()
+                    break
+            self.assertTrue(req._meter.estimated)
+            self.assertGreater(req._meter.total, 0)
+            self.assertEqual(len(self.conn.charges), 1)
+            self.assertEqual(self.conn.charges[0][2:], (req._meter.total, True))
 
         with (
             patch.object(rag, "db", return_value=self.conn),
@@ -568,6 +847,31 @@ class RagTests(unittest.TestCase):
             patch.object(rag.httpx, "AsyncClient", return_value=Client()),
         ):
             asyncio.run(check())
+
+    def test_cancel_before_provider_request_does_not_charge_generation_input(self):
+        self.conn.token_budget = 20000
+        req = rag.QueryRequest(**{**self.body, "token_budget": 20000})
+
+        async def check():
+            self.assertTrue(rag.slots.acquire(blocking=False))
+            events = rag.query_events(req)
+            async for line in events:
+                event = json.loads(line)
+                if event.get("stage") == "generating":
+                    await events.aclose()
+                    break
+            self.assertEqual(req._meter.total, 0)
+            self.assertFalse(req._meter.estimated)
+            self.assertTrue(any("ai_finish_tokens" in sql for sql, _ in self.conn.queries))
+
+        with (
+            patch.object(rag, "db", return_value=self.conn),
+            patch.object(rag.settings, "rag_provider", "openai"),
+            patch.object(rag, "embed", return_value=[[0.0] * 1536]),
+            patch.object(rag.httpx, "AsyncClient") as provider,
+        ):
+            asyncio.run(check())
+        provider.assert_not_called()
 
 
 if __name__ == "__main__":

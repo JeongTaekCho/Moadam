@@ -8,19 +8,24 @@ export function CitationList({
   onOpen,
 }: {
   citations: Citation[];
-  onOpen: (id: string) => void;
+  onOpen: (source: Citation) => void;
 }) {
   if (!citations.length) return null;
   return (
     <div className="citation-list">
-      <p className="citation-label">답변의 근거 · 클릭해서 자료 확인</p>
+      <p className="citation-label">답변의 근거 · 클릭해서 원문 확인</p>
       {citations.map((c) => (
-        <button
-          className="citation"
-          key={c.chunk_id}
-          onClick={() => onOpen(c.document_id)}
-        >
-          <Icon name="file" size={13} /> {c.title}
+        <button className="citation" key={c.chunk_id} onClick={() => onOpen(c)}>
+          <Icon
+            name={c.source_type === "event" ? "calendar" : "file"}
+            size={13}
+          />
+          {c.source_type === "event"
+            ? "일정 · "
+            : c.source_type === "notice"
+              ? "공지 · "
+              : ""}
+          {c.title}
           {c.page ? ` · ${c.page}쪽` : ""}
         </button>
       ))}
@@ -33,7 +38,7 @@ export const ChatMessage = memo(function ChatMessage({
   streaming = false,
 }: {
   message: Message;
-  onSource: (id: string) => void;
+  onSource: (source: Citation) => void;
   streaming?: boolean;
 }) {
   return (
@@ -41,11 +46,7 @@ export const ChatMessage = memo(function ChatMessage({
       <small>
         {message.role === "assistant" && <MoaAiIcon size={20} />}{" "}
         {message.role === "user" ? "나" : "모아AI"}
-        {streaming
-          ? " · 답변 작성 중"
-          : message.role === "assistant" && !message.grounded
-            ? " · 자료에서 확인 필요"
-            : ""}
+        {streaming ? " · 답변 작성 중" : ""}
       </small>
       {message.role === "assistant" ? (
         <>

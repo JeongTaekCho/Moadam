@@ -5,10 +5,15 @@ import java.util.UUID;
 
 @Schema(name = "Citation")
 public record Citation(
-    @Schema(requiredMode = Schema.RequiredMode.REQUIRED) UUID document_id,
+    @Schema(
+            requiredMode = Schema.RequiredMode.REQUIRED,
+            types = {"string", "null"})
+        UUID document_id,
     @Schema(requiredMode = Schema.RequiredMode.REQUIRED) String title,
     @Schema(
             requiredMode = Schema.RequiredMode.REQUIRED,
             types = {"integer", "null"})
         Integer page,
-    @Schema(requiredMode = Schema.RequiredMode.REQUIRED) UUID chunk_id) {}
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED) UUID chunk_id,
+    @Schema(allowableValues = {"document", "event", "notice"}) String source_type,
+    UUID source_id) {}

@@ -36,8 +36,8 @@ export function QuestionComposer({
         onChange={(e) => setQuestion(e.target.value)}
         placeholder={
           groupName
-            ? `${groupName} 모임에 대해 무엇이 궁금하세요?`
-            : "모임에 대해 궁금한 점을 질문하세요."
+            ? `${groupName} 자료나 궁금한 내용을 물어보세요.`
+            : "자료 내용이나 궁금한 내용을 물어보세요."
         }
         maxLength={4000}
         required

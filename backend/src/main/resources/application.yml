@@ -31,6 +31,9 @@ spring:
       max-file-size: 20MB
       max-request-size: 20MB
 app:
+  ai:
+    daily-token-budget: ${AI_DAILY_TOKEN_BUDGET:120000}
+    request-token-budget: ${AI_REQUEST_TOKEN_BUDGET:20000}
   document-jobs:
     enabled: ${DOCUMENT_JOBS_ENABLED:true}
   documents:

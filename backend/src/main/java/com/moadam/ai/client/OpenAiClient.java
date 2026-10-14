@@ -1,5 +1,6 @@
 package com.moadam.ai.client;
 
+import com.moadam.ai.dto.AiTokenReservation;
 import java.io.IOException;
 import java.util.Map;
 import java.util.UUID;
@@ -17,13 +18,19 @@ public class OpenAiClient {
     this.rag = rag;
   }
 
-  public Map<String, Object> query(UUID group, UUID user, UUID session, String question) {
-    return rag.query(group, user, session, question);
+  public Map<String, Object> query(
+      UUID group, UUID user, UUID session, String question, AiTokenReservation reservation) {
+    return rag.query(group, user, session, question, reservation);
   }
 
   public Map<String, Object> queryStream(
-      UUID group, UUID user, UUID session, String question, RagClient.StreamConsumer consumer)
+      UUID group,
+      UUID user,
+      UUID session,
+      String question,
+      AiTokenReservation reservation,
+      RagClient.StreamConsumer consumer)
       throws IOException {
-    return rag.queryStream(group, user, session, question, consumer);
+    return rag.queryStream(group, user, session, question, reservation, consumer);
   }
 }

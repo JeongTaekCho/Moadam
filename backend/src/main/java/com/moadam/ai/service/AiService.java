@@ -23,7 +23,6 @@ import java.util.UUID;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 
@@ -97,21 +96,18 @@ public class AiService extends DomainService {
     return typed(result, AiMessageResponse.class);
   }
 
-  @Transactional
   public AiAnswerResponse ask(Jwt j, UUID g, UUID id, AiQuestionRequest b) {
     session(j, g, id);
-    usage.consume(user(j));
-    var result = openAi.query(g, user(j), id, b.question());
-    session(j, g, id);
-    repository.insertUserMessage(g, id, b.question());
-    String citations;
+    var reservation = usage.reserve(user(j));
+    Map<String, Object> result;
     try {
-      citations = json.writeValueAsString(result.getOrDefault("citations", List.of()));
-    } catch (Exception e) {
-      throw new IllegalStateException();
+      result = openAi.query(g, user(j), id, b.question(), reservation);
+    } catch (RuntimeException error) {
+      usage.cancel(user(j), reservation);
+      throw error;
     }
-    repository.insertAssistantMessage(
-        g, id, (String) result.get("answer"), citations, (Boolean) result.get("grounded"));
+    usage.finish(user(j), reservation);
+    save(j, g, id, b.question(), result);
     return dto(AiAnswerResponse.class, result);
   }
 
@@ -153,10 +149,11 @@ public class AiService extends DomainService {
 
   public StreamingResponseBody openStream(Jwt jwt, UUID g, UUID id, AiQuestionRequest body) {
     session(jwt, g, id);
-    var remaining = usage.consume(user(jwt));
+    var reservation = usage.reserve(user(jwt));
     return output -> {
+      boolean settled = false;
       try {
-        event(output, Map.of("type", "usage", "usage", remaining));
+        event(output, Map.of("type", "usage", "usage", usage.current(user(jwt))));
         event(output, Map.of("type", "status", "stage", "retrieving"));
         var result =
             openAi.queryStream(
@@ -164,9 +161,13 @@ public class AiService extends DomainService {
                 UUID.fromString(jwt.getSubject()),
                 id,
                 body.question(),
+                reservation,
                 value -> event(output, value));
         // Probe the connection before persisting a completed answer.
         event(output, Map.of("type", "status", "stage", "saving"));
+        usage.finish(user(jwt), reservation);
+        settled = true;
+        event(output, Map.of("type", "usage", "usage", usage.current(user(jwt))));
         event(output, save(jwt, g, id, body.question(), result));
       } catch (Exception e) {
         String code = e instanceof RagUnavailableException rag ? rag.code() : "AI_STREAM_FAILED";
@@ -182,6 +183,8 @@ public class AiService extends DomainService {
         } catch (IOException disconnected) {
           /* Closing the upstream reader cancels generation. */
         }
+      } finally {
+        if (!settled) usage.cancel(user(jwt), reservation);
       }
     };
   }

@@ -14,7 +14,13 @@ import {
   UploadInterruptedError,
 } from "@/features/content-editor/api/save-editor";
 import type { Modal } from "@/features/content-editor/model/types";
-import type { Page, MyProfile, MyActivity, AiUsage } from "@/shared/api";
+import type {
+  Page,
+  MyProfile,
+  MyActivity,
+  AiUsage,
+  Citation,
+} from "@/shared/api";
 
 import {
   api,
@@ -494,6 +500,19 @@ export function useWorkspace(initialView: View = "홈", hasSession = false) {
       if (version === detailVersion.current) setLoading(false);
     }
   }
+  async function openAiSource(source: Citation) {
+    const id = source.source_id || source.document_id;
+    if (!id) return;
+    try {
+      if (source.source_type === "event")
+        await openEvent(await api<Event>(`${base}/events/${id}`));
+      else if (source.source_type === "notice")
+        await openPost(await api<Post>(`${base}/posts/${id}`));
+      else await openDocument(id);
+    } catch (error) {
+      fail(error);
+    }
+  }
   async function openDocument(id: string) {
     const version = ++detailVersion.current;
     setLoading(true);
@@ -906,6 +925,7 @@ export function useWorkspace(initialView: View = "홈", hasSession = false) {
     openPost,
     openEvent,
     openDocument,
+    openAiSource,
     goBackFromDetail,
     openSession,
     submit,

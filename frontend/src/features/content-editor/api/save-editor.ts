@@ -51,8 +51,11 @@ export async function saveEditor({
       );
       break;
     case "event": {
+      if (b.event_date_error) throw new Error(b.event_date_error);
       if (b.starts_at.slice(0, 10) < koreaDateKey(new Date()))
-        throw new Error("오늘 이전 날짜로 일정을 만들 수 없습니다");
+        throw new Error(
+          "시작일이 오늘보다 전입니다. 시작일을 오늘 또는 이후 날짜로 수정해 주세요.",
+        );
       if (koreaLocalInputToUtc(b.ends_at) <= koreaLocalInputToUtc(b.starts_at))
         throw new Error("종료 시간은 시작 시간보다 늦어야 합니다");
       const event = await api<Event>(

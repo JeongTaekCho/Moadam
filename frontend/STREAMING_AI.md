@@ -1,5 +1,7 @@
 # 모아AI 스트리밍
 
+답변 출처에는 문서뿐 아니라 등록 일정과 커뮤니티 공지도 포함됩니다. 인용의 `source_type`은 `document/event/notice`, `source_id`는 해당 원문 ID입니다. 일정·공지의 `document_id`는 null이며 기존 문서 인용은 계속 지원합니다. 출처를 누르면 모아AI 창을 닫고 현재 권한으로 원문 상세를 조회합니다.
+
 질문과 답변 자리를 먼저 표시하고, 답변이 생성되는 대로 글자가 빠르게 이어집니다. `답변 중지`로 전송을 취소할 수 있습니다. 작성 중에도 Markdown을 적용하고 완료 후 검증된 자료 출처를 표시합니다.
 
 ## 경로와 최적화
@@ -32,3 +34,9 @@ pnpm test:chat-live
 RAG 테스트는 스트리밍 모델의 조각이 완료 전에 도착하는지, JSON 이스케이프가 복원되는지, 중단된 모델 응답이 완료로 처리되지 않는지도 확인합니다. Spring 테스트는 스트리밍 Content-Type 및 중단 시 저장하지 않는 동작을 검사합니다.
 
 참고: [OpenAI Chat API](https://developers.openai.com/api/reference/resources/chat), [FastAPI StreamingResponse](https://fastapi.tiangolo.com/advanced/custom-response/#streamingresponse), [Spring MVC 반환 타입](https://docs.spring.io/spring-framework/reference/web/webmvc/mvc-controller/ann-methods/return-types.html).
+
+## 토큰 사용량과 일반 답변
+
+사용자별 하루 토큰 예산의 남은 비율을 표시합니다. 초기 예산은 120,000토큰이며 질문 횟수와 별개입니다. 시작/완료의 usage 이벤트와 보호된 `me/ai-usage` 조회로 갱신합니다. 입력·출력·검색·맥락 보완 토큰이 포함되며 중단 시 최종 usage가 없으면 내부에서 추정 정산합니다.
+
+일반 질문도 Markdown으로 표시하고, 실제 문서에 근거한 답변에만 인용을 표시합니다. 일반 답변에 “자료에서 확인 필요” 배지를 붙이지 않습니다. 서버가 문단을 보완해 최종 답변이 달라지는 경우 기존 done 처리로 화면을 교체합니다. 실제 모델의 합성 질문 결과를 재생할 때는 `MOADAM_MARKDOWN_REPORT=/tmp/moadam-markdown-live-report.json pnpm test:ai-errors`를 사용합니다.

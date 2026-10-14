@@ -465,6 +465,46 @@ try {
         exact: true,
       })
       .waitFor();
+    await page.getByRole("button", { name: "수정", exact: true }).click();
+    const pastEditor = page.getByRole("dialog", {
+      name: "일정 수정",
+      exact: true,
+    });
+    const dateMessage =
+      "시작일이 오늘보다 전입니다. 시작일을 오늘 또는 이후 날짜로 수정해 주세요.";
+    await pastEditor.getByText(dateMessage, { exact: true }).waitFor();
+    const startControl = pastEditor.getByLabel("시작일 (년-월-일)", {
+      exact: true,
+    });
+    assert.equal(await startControl.getAttribute("aria-invalid"), "true");
+    for (const label of ["시작일", "종료일"]) {
+      const dateInput = pastEditor.getByLabel(`${label} (년-월-일)`, {
+        exact: true,
+      });
+      const calendarButton = pastEditor.getByRole("button", {
+        name: `${label} 달력 열기`,
+        exact: true,
+      });
+      const inputBox = await dateInput.boundingBox(),
+        buttonBox = await calendarButton.boundingBox();
+      assert(inputBox && buttonBox);
+      assert(buttonBox.height <= inputBox.height + 2);
+    }
+    assert(
+      await pastEditor.evaluate((node) => node.scrollWidth <= node.clientWidth),
+    );
+    await page.screenshot({ path: `${root}/past-date-error-${width}.png` });
+    await pastEditor
+      .getByRole("button", { name: "시작일 달력 열기", exact: true })
+      .click();
+    await page
+      .locator('.picker-popover:popover-open [data-day="2026-10-12"]')
+      .click();
+    assert.equal(
+      await pastEditor.getByText(dateMessage, { exact: true }).count(),
+      0,
+    );
+    await pastEditor.getByRole("button", { name: "닫기", exact: true }).click();
     assert.deepEqual(errors, []);
     await context.close();
     console.log(

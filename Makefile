@@ -35,7 +35,7 @@ conventions:
 	$(RAG_PYTHON) scripts/check-migrations.py
 
 test:
-	cd frontend && pnpm test:cache && pnpm test:db && pnpm test:events
+	cd frontend && pnpm test:cache && pnpm test:ai-usage && pnpm test:db && pnpm test:events
 	cd backend && $(MVN) verify
 	cd rag && $(RAG_PYTHON) -m unittest discover -s tests -v
 

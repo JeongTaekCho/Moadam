@@ -18,4 +18,9 @@ assert (
 ).read_text() == next(
     (root / "supabase/migrations").glob("*_durable_document_jobs.sql")
 ).read_text(), "Document job migrations differ"
+assert (
+    root / "backend/src/main/resources/db/migration/V5__ai_token_budget.sql"
+).read_text() == next((root / "supabase/migrations").glob("*_ai_token_budget.sql")).read_text(), (
+    "Token budget migrations differ"
+)
 print("Migration copies and embedding dimensions match")

@@ -307,74 +307,130 @@ console.log(
   `${checks} PostgreSQL/pgvector migration and isolation checks passed (PGlite; Supabase auth/storage tables stubbed).`,
 );
 
-// Exercise the production JDBC quota SQL in isolated PostgreSQL (PGlite).
-await db.exec(
-  await readFile(
-    new URL(
-      "../../backend/src/main/resources/db/migration/V3__ai_daily_usage.sql",
-      import.meta.url,
+// Exercise the token ledger in isolated PostgreSQL; no production DB connection.
+for (const migration of ["V3__ai_daily_usage.sql", "V5__ai_token_budget.sql"]) {
+  await db.exec(
+    await readFile(
+      new URL(
+        `../../backend/src/main/resources/db/migration/${migration}`,
+        import.meta.url,
+      ),
+      "utf8",
     ),
-    "utf8",
-  ),
-);
-const quotaSource = await readFile(
-  new URL(
-    "../../backend/src/main/java/com/moadam/ai/repository/AiUsageRepository.java",
-    import.meta.url,
-  ),
-  "utf8",
-);
-const consumeBody = quotaSource.split(
-  "public List<Map<String, Object>> consume",
-)[1];
-const quotaSql = [...consumeBody.matchAll(/"([^"\n]*)"/g)]
-  .map((match) => match[1])
-  .join("")
-  .replace("?", "$1");
-const readBody = quotaSource
-  .split("public Map<String, Object> current")[1]
-  .split("public List")[0];
-const readSql = [...readBody.matchAll(/"([^"\n]*)"/g)]
-  .map((match) => match[1])
-  .join("")
-  .replace("?", "$1");
+  );
+}
+const readSql =
+  "select (current_timestamp at time zone 'Asia/Seoul')::date as usage_date";
 for (const [instant, expected] of [
   ["2026-10-13T14:59:59Z", "2026-10-13"],
   ["2026-10-13T15:00:00Z", "2026-10-14"],
 ]) {
-  const frozenSql = readSql.replaceAll(
-    "current_timestamp",
-    `timestamptz '${instant}'`,
-  );
   assert.equal(
-    (await query(frozenSql, [u1])).rows[0].usage_date
+    (
+      await query(
+        readSql.replaceAll("current_timestamp", `timestamptz '${instant}'`),
+      )
+    ).rows[0].usage_date
       .toISOString()
       .slice(0, 10),
     expected,
   );
 }
-const quotaAttempts = await Promise.all(
-  Array.from({ length: 40 }, () => query(quotaSql, [u1])),
+const reserve = (user, request, budget = 120000, requestBudget = 20000) =>
+  query("select * from ai_reserve_tokens($1,$2,$3,$4)", [
+    user,
+    request,
+    budget,
+    requestBudget,
+  ]);
+const charge = (user, request, total, estimated = false) =>
+  query("select ai_charge_tokens($1,$2,$3,$4)", [
+    request,
+    user,
+    total,
+    estimated,
+  ]);
+const finish = (user, request) =>
+  query("select ai_finish_tokens($1,$2)", [request, user]);
+const balance = async (user) =>
+  (
+    await query(
+      "select * from ai_daily_token_usage where user_id=$1 and usage_date=(current_timestamp at time zone 'Asia/Seoul')::date",
+      [user],
+    )
+  ).rows[0];
+const tickets = Array.from({ length: 10 }, () => id());
+const reservations = await Promise.all(
+  tickets.map((request) => reserve(u1, request)),
 );
-assert.equal(quotaAttempts.filter((result) => result.rows.length).length, 30);
-assert.equal(
-  (await query("select used from ai_daily_usage where user_id=$1", [u1]))
-    .rows[0].used,
-  30,
-);
-assert.equal((await query(quotaSql, [u2])).rows[0].used, 1);
-// A previous day's exhausted row cannot affect today's allowance.
+assert.equal(reservations.filter((result) => result.rows.length).length, 6);
+assert.equal((await balance(u1)).reserved_tokens, 120000);
+assert.equal((await reserve(u1, tickets[0])).rows.length, 1);
+assert.equal((await balance(u1)).reserved_tokens, 120000);
+const startSql =
+  "update ai_token_requests set started=true where request_id=$1 and not started and not finished returning allocated_tokens";
+assert.equal((await query(startSql, [tickets[0]])).rows.length, 1);
+assert.equal((await query(startSql, [tickets[0]])).rows.length, 0);
+await query("select ai_finish_tokens($1,$2,true)", [tickets[0], u1]);
+assert.equal((await balance(u1)).reserved_tokens, 120000);
+await charge(u1, tickets[0], 2000);
+await charge(u1, tickets[0], 2000);
+assert.equal((await balance(u1)).used_tokens, 2000);
+await finish(u1, tickets[0]);
+await finish(u1, tickets[0]);
+assert.equal((await balance(u1)).reserved_tokens, 100000);
+// An error before a provider call releases all of its allocation.
+await query("select ai_finish_tokens($1,$2,true)", [tickets[1], u1]);
+assert.equal((await balance(u1)).used_tokens, 2000);
+assert.equal((await balance(u1)).reserved_tokens, 80000);
+// Corrected cumulative totals can refine a settled estimate without reserving again.
+await charge(u1, tickets[0], 2750, true);
+assert.equal((await balance(u1)).used_tokens, 2750);
+assert.equal((await balance(u1)).reserved_tokens, 80000);
+await charge(u1, tickets[0], 2600, false);
+assert.equal((await balance(u1)).used_tokens, 2600);
+await assert.rejects(charge(u2, tickets[0], 500));
+const otherTicket = id();
+assert.equal((await reserve(u2, otherTicket)).rows[0].allocated_tokens, 20000);
+assert.equal((await balance(u2)).used_tokens, 0);
+// Exact provider usage, including input/output/embedding, persists independently of messages.
+for (const request of tickets.slice(2, 6)) {
+  await charge(u1, request, 20000);
+  await finish(u1, request);
+}
+const tail = id();
+assert.equal((await reserve(u1, tail)).rows[0].allocated_tokens, 20000);
+await charge(u1, tail, 20000);
+await finish(u1, tail);
+const last = id();
+assert.equal((await reserve(u1, last)).rows[0].allocated_tokens, 17400);
+await charge(u1, last, 17400);
+await finish(u1, last);
+assert.equal((await balance(u1)).used_tokens, 120000);
+assert.equal((await reserve(u1, id())).rows.length, 0);
+// Expired reservations cannot permanently block a restarted backend.
 await query(
-  "update ai_daily_usage set usage_date=usage_date-1 where user_id=$1",
+  "update ai_token_requests set created_at=now()-interval '6 minutes' where request_id=$1",
+  [otherTicket],
+);
+assert.equal((await reserve(u2, id())).rows[0].reserved_tokens, 20000);
+// Requests begun yesterday charge yesterday's ledger, preserving the Korean reset.
+await db.exec("begin");
+await query("delete from ai_token_requests where user_id=$1", [u1]);
+await query(
+  "update ai_daily_token_usage set usage_date=usage_date-1 where user_id=$1",
   [u1],
 );
-assert.equal((await query(quotaSql, [u1])).rows[0].used, 1);
+assert.equal((await reserve(u1, id())).rows[0].used_tokens, 0);
+await db.exec("rollback");
 await db.exec("set role authenticated");
-await assert.rejects(query("select * from ai_daily_usage"));
-await assert.rejects(query(quotaSql, [u1]));
+await assert.rejects(query("select * from ai_daily_token_usage"));
+await assert.rejects(query("select * from ai_token_requests"));
+await assert.rejects(reserve(u1, id()));
+await assert.rejects(charge(u1, tickets[0], 0));
 await db.exec("reset role");
 console.log(
-  "PASS: daily AI quota 30/31 boundary, queued requests, user/date isolation and client denial",
+  "PASS: token budget reservations, variable usage, duplicate/late settlement, failure refunds, expired leases, user/date isolation and client denial",
 );
 
 await db.exec(

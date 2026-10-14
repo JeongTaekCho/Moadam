@@ -4,7 +4,7 @@ function inline(text: string): ReactNode {
     .split(/(\*\*[^*]+\*\*|`[^`]+`)/g)
     .map((part, i) =>
       /^\*\*[^*]+\*\*$/.test(part) ? (
-        <strong key={i}>{part.slice(2, -2)}</strong>
+        <strong key={i}>{inline(part.slice(2, -2))}</strong>
       ) : /^`[^`]+`$/.test(part) ? (
         <code key={i}>{part.slice(1, -1)}</code>
       ) : (

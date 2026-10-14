@@ -760,12 +760,16 @@ export interface components {
         };
         Citation: {
             /** Format: uuid */
-            document_id: string;
+            document_id: string | null;
             title: string;
             /** Format: int32 */
             page: number | null;
             /** Format: uuid */
             chunk_id: string;
+            /** @enum {string} */
+            source_type?: "document" | "event" | "notice";
+            /** Format: uuid */
+            source_id?: string;
         };
         StreamingResponseBody: unknown;
         ProfileInput: {
@@ -779,12 +783,20 @@ export interface components {
             text?: string;
         };
         AiUsageResponse: {
-            /** Format: int32 */
-            limit: number;
-            /** Format: int32 */
-            used: number;
-            /** Format: int32 */
-            remaining: number;
+            /** Format: int64 */
+            limit_tokens: number;
+            /** Format: int64 */
+            used_tokens: number;
+            /** Format: int64 */
+            reserved_tokens: number;
+            /** Format: int64 */
+            remaining_tokens: number;
+            /** Format: int64 */
+            available_tokens: number;
+            /** Format: double */
+            used_percent: number;
+            /** Format: double */
+            remaining_percent: number;
             /** Format: date-time */
             resets_at: string;
         };

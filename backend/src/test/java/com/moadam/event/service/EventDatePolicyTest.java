@@ -52,11 +52,14 @@ class EventDatePolicyTest {
     when(resources.one("events", group, id)).thenReturn(Map.of("starts_at", Timestamp.from(today)));
     service.attend(jwt, group, id, new AttendanceRequest("going"));
     verify(repository).upsertAttendance(group, id, user, "going");
-    assertThrows(
-        IllegalArgumentException.class,
-        () ->
-            service.validateEvent(
-                new EventCreateRequest("fixture", "", "", today.minusSeconds(86400), today)));
+    var dateError =
+        assertThrows(
+            ResponseStatusException.class,
+            () ->
+                service.validateEvent(
+                    new EventCreateRequest("fixture", "", "", today.minusSeconds(86400), today)));
+    assertEquals(400, dateError.getStatusCode().value());
+    assertEquals("시작일이 오늘보다 전입니다. 시작일을 오늘 또는 이후 날짜로 수정해 주세요.", dateError.getReason());
     assertDoesNotThrow(
         () ->
             service.validateEvent(
