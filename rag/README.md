@@ -2,6 +2,8 @@
 
 Python 3.12 환경에서 `pip install -r requirements.lock`. `.env.example`을 `.env`로 복사해 DB·Supabase 서버 키·32자 이상 내부 토큰을 설정하고 `uvicorn app:app --host 127.0.0.1 --port 8000 --no-access-log`.
 
+Vercel에서는 Root Directory를 `rag`, Framework Preset을 FastAPI로 사용합니다. `pyproject.toml`은 Python 3.12와 `app:app` 진입점, 기존 `requirements.lock`과 동일한 고정 의존성을 선언하며 `uv.lock`으로 설치 버전을 고정합니다. `requirements.txt`도 같은 운영 lock을 참조합니다. 의존성 변경 후 `uv lock`을 실행하고 루트의 `make conventions`로 일치 여부를 확인합니다. 검증용으로 새 환경에 설치하려면 `UV_PROJECT_ENVIRONMENT=/tmp/moadam-rag-check uv sync --locked --python 3.12`를 사용할 수 있습니다.
+
 `/health`, `/ready`, `/index`, `/query`는 내부 Bearer 인증이 필요합니다. 입력은 Spring이 검증한 UUID·문서 버전·허용 문서 범위이며 Python은 DB 멤버십·개인 세션을 다시 확인합니다. 문서 내용과 Storage 경로는 DB에서 읽어 클라이언트가 임의 URL/본문을 주입하지 못하게 합니다.
 
 PDF 페이지 단위 1000자 청크/150자 overlap, 1536차원 pgvector, 모임·허용 문서 SQL 필터 후 top-k 검색. 반환은 answer/citations/grounded/confidence/provider/retrieval/request_id입니다. 인용은 document_id/title/page/chunk_id와 source_type/source_id를 포함합니다. 일정·공지 인용의 document_id는 null이며 source_id로 원문을 식별합니다. 동시 처리 4개, 본문 1MB, PDF 20MB·200쪽·전체 100만자, 최대1000청크. OCR 미지원.

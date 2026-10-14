@@ -33,6 +33,7 @@ rag-check:
 conventions:
 	$(RAG_PYTHON) scripts/check-conventions.py
 	$(RAG_PYTHON) scripts/check-migrations.py
+	$(RAG_PYTHON) scripts/check-rag-dependencies.py
 
 test:
 	cd frontend && pnpm test:cache && pnpm test:ai-usage && pnpm test:db && pnpm test:events
