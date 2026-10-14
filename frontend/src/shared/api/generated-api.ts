@@ -592,6 +592,10 @@ export interface components {
             timezone: string;
             /** @enum {string} */
             role: "owner" | "admin" | "member";
+            /** Format: int32 */
+            max_members: number;
+            /** Format: int32 */
+            member_count: number;
             /** Format: date-time */
             created_at: string;
             /** Format: date-time */
@@ -600,6 +604,11 @@ export interface components {
         GroupInput: {
             name: string;
             timezone: string;
+            /**
+             * Format: int32
+             * @description 소유자를 포함한 최대 인원 (1~30명). 생성 시 생략하면 30명, 수정 시 생략하면 기존 값 유지
+             */
+            max_members?: number;
         };
         PostInput: {
             title: string;

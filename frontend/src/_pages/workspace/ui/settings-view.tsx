@@ -1,4 +1,5 @@
 "use client";
+import { GroupCapacityField } from "@/entities/group/group-capacity-field";
 import { api } from "@/shared/api";
 import { values } from "@/shared/lib/form";
 import { Button, Card, TextField } from "@/shared/ui";
@@ -30,6 +31,7 @@ export function SettingsView({ model }: { model: WorkspaceModel }) {
                   await api(base, "PATCH", {
                     name: b.name,
                     timezone: "Asia/Seoul",
+                    max_members: Number(b.max_members),
                   });
                   await loadGroups();
                   notify("설정을 저장했습니다");
@@ -42,6 +44,12 @@ export function SettingsView({ model }: { model: WorkspaceModel }) {
                 defaultValue={group?.name}
                 maxLength={100}
                 required
+              />
+              <GroupCapacityField
+                key={`${groupId}:${group?.max_members}:${group?.member_count}`}
+                defaultValue={group?.max_members ?? 30}
+                memberCount={group?.member_count ?? 1}
+                disabled={busy}
               />
               <p className="form-hint">
                 모임 일정은 한국 표준시(KST, UTC+9) 기준으로 표시됩니다.

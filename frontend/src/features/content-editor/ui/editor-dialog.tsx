@@ -3,6 +3,7 @@ import type { Document } from "@/entities/document";
 import type { Event } from "@/entities/event";
 import type { Post } from "@/entities/post";
 
+import { GroupCapacityField } from "@/entities/group/group-capacity-field";
 import { EventFields } from "./event-fields";
 import {
   Button,
@@ -57,6 +58,7 @@ export function EditorDialog({
                   maxLength={100}
                   required
                 />
+                <GroupCapacityField disabled={busy} />
                 <p className="form-hint">
                   모임 일정은 한국 표준시(KST, UTC+9) 기준입니다.
                 </p>

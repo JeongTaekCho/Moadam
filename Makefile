@@ -41,7 +41,7 @@ test:
 	cd rag && $(RAG_PYTHON) -m unittest discover -s tests -v
 
 qa:
-	cd frontend && pnpm build && pnpm test:oauth && pnpm test:chat-stream && pnpm test:ai-errors && pnpm test:performance && pnpm test:events-ui && pnpm test:discussion-ui && pnpm test:documents-ui
+	cd frontend && pnpm build && pnpm test:oauth && pnpm test:chat-stream && pnpm test:ai-errors && pnpm test:performance && pnpm test:events-ui && pnpm test:discussion-ui && pnpm test:documents-ui && pnpm test:groups-ui
 
 api-types:
 	cd backend && $(MVN) -Dtest=ContractTest -DexportOpenApi=true test

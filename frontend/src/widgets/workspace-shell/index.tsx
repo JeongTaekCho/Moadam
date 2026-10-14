@@ -155,11 +155,23 @@ export function WorkspaceShell(p: Props) {
           <p className="muted">내 모임을 만들어 보세요</p>
         )}
         <div className="workspace-actions">
-          <button onClick={p.onCreate}>
+          <button
+            onClick={() => {
+              setMobileOpen(false);
+              p.onCreate();
+            }}
+          >
             <Icon name="plus" size={15} />
             모임 만들기
           </button>
-          <button onClick={p.onJoin}>초대 참여</button>
+          <button
+            onClick={() => {
+              setMobileOpen(false);
+              p.onJoin();
+            }}
+          >
+            초대 참여
+          </button>
         </div>
       </div>
       <p className="nav-label">워크스페이스</p>

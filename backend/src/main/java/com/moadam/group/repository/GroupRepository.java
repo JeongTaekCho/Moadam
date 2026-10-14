@@ -21,6 +21,16 @@ public class GroupRepository {
         "select pg_advisory_xact_lock(hashtextextended('moadam:group-limit:'||?::text,0))", user);
   }
 
+  public int lockGroupCapacity(UUID group) {
+    return db.queryForObject(
+        "select max_members from groups where id=? for update", Integer.class, group);
+  }
+
+  public int countMembers(UUID group) {
+    return db.queryForObject(
+        "select count(*) from group_members where group_id=?", Integer.class, group);
+  }
+
   public boolean hasMembership(UUID group, UUID user) {
     return Boolean.TRUE.equals(
         db.queryForObject(
@@ -86,16 +96,28 @@ public class GroupRepository {
     return db.update("delete from groups where id=?", group);
   }
 
-  public int updateGroup(String name, String timezone, UUID id) {
-    return db.update("update groups set name=?,timezone=? where id=?", name, timezone, id);
+  public int updateGroup(String name, String timezone, int maxMembers, UUID id) {
+    return db.update(
+        "update groups set name=?,timezone=?,max_members=? where id=?",
+        name,
+        timezone,
+        maxMembers,
+        id);
   }
 
   public Map<String, Object> findGroup(UUID id) {
-    return db.queryForMap("select * from groups where id=?", id);
+    return db.queryForMap(
+        "select g.*,(select count(*) from group_members m where m.group_id=g.id) as member_count from groups g where id=?",
+        id);
   }
 
-  public int insertGroup(UUID id, String name, String timezone) {
-    return db.update("insert into groups(id,name,timezone) values(?,?,?)", id, name, timezone);
+  public int insertGroup(UUID id, String name, String timezone, int maxMembers) {
+    return db.update(
+        "insert into groups(id,name,timezone,max_members) values(?,?,?,?)",
+        id,
+        name,
+        timezone,
+        maxMembers);
   }
 
   public int insertOwner(UUID group, UUID user) {
@@ -104,7 +126,7 @@ public class GroupRepository {
 
   public List<Map<String, Object>> findMembershipGroups(UUID user, int size, long offset) {
     return db.queryForList(
-        "select g.*,m.role from groups g join group_members m on m.group_id=g.id where"
+        "select g.*,m.role,(select count(*) from group_members members where members.group_id=g.id) as member_count from groups g join group_members m on m.group_id=g.id where"
             + " m.user_id=? order by g.created_at limit ? offset ?",
         user,
         size,

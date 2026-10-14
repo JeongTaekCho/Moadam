@@ -9,6 +9,7 @@
     "typecheck": "tsc --noEmit",
     "api:types": "openapi-typescript ../docs/openapi.json -o src/shared/api/generated-api.ts",
     "api:types:live": "openapi-typescript http://localhost:8080/v3/api-docs -o src/shared/api/generated-api.ts",
+    "test:groups-ui": "node scripts/group-capacity-ui-smoke.mjs",
     "test:db": "node scripts/db-test.mjs",
     "format": "prettier --write .prettierrc.json app src scripts *.ts *.mjs *.json *.md *.yaml",
     "test:oauth": "node scripts/oauth-smoke.mjs",

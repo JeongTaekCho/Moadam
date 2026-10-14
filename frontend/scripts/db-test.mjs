@@ -567,4 +567,32 @@ assert.equal(
 console.log(
   "PASS: six reported foreign keys covered, repeatable index migration and unchanged client denial",
 );
+const capacityMigration = await readFile(
+  new URL(
+    "../../backend/src/main/resources/db/migration/V7__group_capacity.sql",
+    import.meta.url,
+  ),
+  "utf8",
+);
+await db.exec(capacityMigration);
+await db.exec(capacityMigration);
+assert.equal(
+  (await query("select max_members from groups where id=$1", [g1])).rows[0]
+    .max_members,
+  30,
+);
+for (const capacity of [0, -1, 31]) {
+  await assert.rejects(
+    query("update groups set max_members=$1 where id=$2", [capacity, g1]),
+  );
+}
+for (const capacity of [1, 30]) {
+  await query("update groups set max_members=$1 where id=$2", [capacity, g1]);
+}
+await assert.rejects(
+  query("update groups set max_members=null where id=$1", [g1]),
+);
+console.log(
+  "Group capacity: existing default, repeatable migration, 1/30 boundaries, invalid/null rejection passed.",
+);
 await db.close();

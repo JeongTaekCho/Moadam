@@ -28,4 +28,10 @@ assert (
 ).read_text() == next(
     (root / "supabase/migrations").glob("*_foreign_key_indexes.sql")
 ).read_text(), "Foreign key index migration copies differ"
+assert (
+    root / "backend/src/main/resources/db/migration/V7__group_capacity.sql"
+).read_text() == next((root / "supabase/migrations").glob("*_group_capacity.sql")).read_text(), (
+    "Group capacity migration copies differ"
+)
+
 print("Migration copies and embedding dimensions match")

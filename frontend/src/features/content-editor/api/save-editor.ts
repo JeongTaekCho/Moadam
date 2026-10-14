@@ -37,6 +37,7 @@ export async function saveEditor({
         group: await api<Group>("groups", "POST", {
           name: b.name,
           timezone: "Asia/Seoul",
+          max_members: Number(b.max_members),
         }),
       };
     case "join":

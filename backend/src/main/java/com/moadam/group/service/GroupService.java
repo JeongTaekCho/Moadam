@@ -63,7 +63,8 @@ public class GroupService extends DomainService {
     repository.lockMembershipChanges(user(j));
     checkGroupLimit(user(j));
     UUID g = UUID.randomUUID();
-    repository.insertGroup(g, b.name(), b.timezone());
+    repository.insertGroup(
+        g, b.name(), b.timezone(), b.max_members() == null ? 30 : b.max_members());
     repository.insertOwner(g, user(j));
     audit(g, user(j), "group.create", g);
     return group(j, g);
@@ -80,11 +81,18 @@ public class GroupService extends DomainService {
     return dto(GroupResponse.class, row);
   }
 
-  @Transactional
+  @Transactional(isolation = org.springframework.transaction.annotation.Isolation.READ_COMMITTED)
   public GroupResponse updateGroup(Jwt j, UUID g, GroupCreateRequest b) {
     policy.owner(g, user(j));
     if (!ZoneId.getAvailableZoneIds().contains(b.timezone())) throw new IllegalArgumentException();
-    repository.updateGroup(b.name(), b.timezone(), g);
+    int currentCapacity = repository.lockGroupCapacity(g);
+    int capacity = b.max_members() == null ? currentCapacity : b.max_members();
+    int members = repository.countMembers(g);
+    if (capacity < members)
+      throw new ResponseStatusException(
+          HttpStatus.CONFLICT,
+          "현재 참여 인원은 " + members + "명입니다. 최대 인원을 " + members + "명 이상으로 설정해 주세요.");
+    repository.updateGroup(b.name(), b.timezone(), capacity, g);
     audit(g, user(j), "group.update", g);
     return group(j, g);
   }
@@ -181,6 +189,10 @@ public class GroupService extends DomainService {
     UUID g = (UUID) rows.getFirst().get("group_id");
     if (repository.hasMembership(g, user(j))) return group(j, g);
     checkGroupLimit(user(j));
+    int capacity = repository.lockGroupCapacity(g);
+    if (repository.countMembers(g) >= capacity)
+      throw new ResponseStatusException(
+          HttpStatus.CONFLICT, "모임 정원(" + capacity + "명)이 가득 찼어요. 모임 소유자에게 최대 인원 변경을 요청해 주세요.");
     repository.insertMember(g, user(j));
     repository.markInviteUsed((UUID) rows.getFirst().get("id"));
     audit(g, user(j), "invite.join", user(j));

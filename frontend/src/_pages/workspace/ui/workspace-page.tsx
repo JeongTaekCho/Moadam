@@ -110,8 +110,14 @@ export function WorkspacePage({
         }
         onAssistant={() => setAssistantOpen(true)}
         busy={m.busy}
-        onCreate={() => m.setModal({ kind: "group" })}
-        onJoin={() => m.setModal({ kind: "join" })}
+        onCreate={() => {
+          m.setError("");
+          m.setModal({ kind: "group" });
+        }}
+        onJoin={() => {
+          m.setError("");
+          m.setModal({ kind: "join" });
+        }}
         onLogout={() =>
           void m.run(async () => {
             await logout();
@@ -141,13 +147,21 @@ export function WorkspacePage({
               description="새 모임을 만들거나 받은 초대 코드로 참여하세요."
             />
             <div className="row">
-              <Button onClick={() => m.setModal({ kind: "group" })}>
+              <Button
+                onClick={() => {
+                  m.setError("");
+                  m.setModal({ kind: "group" });
+                }}
+              >
                 <Icon name="plus" size={17} />
                 모임 만들기
               </Button>
               <Button
                 variant="secondary"
-                onClick={() => m.setModal({ kind: "join" })}
+                onClick={() => {
+                  m.setError("");
+                  m.setModal({ kind: "join" });
+                }}
               >
                 초대 참여
               </Button>
